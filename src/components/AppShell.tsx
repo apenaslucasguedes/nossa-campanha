@@ -1,0 +1,4 @@
+import { NavLink, Outlet } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
+const links = [['/campanha','Campanha'],['/personagem','Ficha'],['/mesa','Mesa'],['/mapa','Mapa'],['/configuracoes','Ajustes']]
+export function AppShell() { const { signOut } = useAuth(); return <div className="app-shell"><aside className="sidebar"><div className="brand"><span>R</span><div><strong>Relicário</strong><small>Mesa compartilhada</small></div></div><nav aria-label="Navegação principal">{links.map(([to,label]) => <NavLink key={to} to={to}>{label}</NavLink>)}</nav><button className="text-button" onClick={() => void signOut()}>Encerrar sessão</button></aside><main className="main-content"><Outlet/></main><nav className="bottom-nav" aria-label="Navegação móvel">{links.slice(0,4).map(([to,label]) => <NavLink key={to} to={to}>{label}</NavLink>)}</nav></div> }
