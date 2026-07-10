@@ -16,11 +16,13 @@ No SQL Editor, execute em ordem os arquivos de `supabase/migrations`. A migraç�
 2. Abra `supabase/BOOTSTRAP.sql` no SQL Editor sem modificar o arquivo versionado.
 3. Substitua os marcadores `<UUID_USUARIO_1>`, `<UUID_USUARIO_2>`, nomes e campanha apenas no editor e execute.
 4. O usuário do assento 1 recebe `table_admin`; o assento 2 recebe `player`.
-5. Insira personagens e estados manualmente enquanto a criação completa não faz parte do produto. Use `class_1` a `class_6` como chaves provisórias.
+5. Não insira personagens por SQL. Após aplicar a migração do Marco 3, cada jogador cria a própria ficha em `/criar-personagem`.
 
 ## 4. Realtime e validação
 
 A migração adiciona `character_states` e `character_conditions` à publicação `supabase_realtime`. Entre em dois navegadores, altere dano/condição como `table_admin` e confirme atualização no outro. Confirme também que o jogador comum não consegue alterar o personagem alheio nem membros/campanha.
+
+Valide também que cada usuário cria somente o próprio personagem, que uma segunda criação falha e que personagem, estado e três especialidades aparecem juntos. Aplique `202607100002_character_creation.sql` manualmente depois da migração inicial; o repositório não executa migrações remotas.
 
 ## 5. GitHub Pages
 

@@ -2,6 +2,8 @@
 
 Interface responsiva de ficha, painel e controles mecânicos para uma campanha de RPG com dois jogadores. Não gera narrativa e não substitui o GPT Mestre.
 
+O Marco 3 inclui criação guiada de personagem de nível 1, persistência atômica no Supabase e ficha narrativa/mecânica editável. Veja [docs/CHARACTER_CREATION.md](docs/CHARACTER_CREATION.md).
+
 ## Instalação e desenvolvimento
 
 Requer Node.js 22+ e npm.
