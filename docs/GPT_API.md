@@ -1,5 +1,9 @@
 # API segura para o GPT Mestre (etapa 8A)
 
+## Materiais de GPT Actions (etapa 8B)
+
+A configuração manual está preparada em [`gpt-actions/openapi.yaml`](gpt-actions/openapi.yaml), [`gpt-actions/GPT_MASTER_INSTRUCTIONS.md`](gpt-actions/GPT_MASTER_INSTRUCTIONS.md), [`gpt-actions/EXAMPLES.md`](gpt-actions/EXAMPLES.md) e [`gpt-actions/SETUP.md`](gpt-actions/SETUP.md). A autenticação dinâmica por JWT de usuário continua sendo requisito bloqueante para uso real; estes arquivos não configuram nem publicam o GPT.
+
 Esta camada expõe somente estado mecânico e ações fechadas do Relicário. Ela não configura GPT Actions, não publica OpenAPI externo e não oferece chat.
 
 ## Autenticação e autorização
