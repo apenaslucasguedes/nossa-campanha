@@ -10,7 +10,7 @@ Inventário conferido:
 - 6 de 6 personagens encontrados;
 - 9 de 9 imagens de regiões encontradas e convertidas de PNG para WebP;
 - logo e favicon encontrados;
-- nenhum mapa foi fornecido em `assets/`; `public/assets/maps/` está reservado por meio de `.gitkeep`.
+- dois mapas de Auren foram fornecidos e copiados para `public/assets/maps/`, mantendo os originais em `assets/mapa/`.
 
 Os SVGs copiados mantêm o conteúdo original. Somente os nomes e diretórios de destino foram normalizados. Os nomes consumidos pelo código usam kebab-case, sem acentos.
 
@@ -205,8 +205,17 @@ O prefixo numérico do arquivo original foi removido no destino.
 | `71-mestre.svg` | `mestre.svg` |
 | `72-assento-vazio.svg` | `assento-vazio.svg` |
 
+## Mapeamento do mapa de Auren
+
+| Origem | Destino | Uso |
+| --- | --- | --- |
+| `assets/mapa/mapa-realista.png` | `public/assets/maps/mapa-realista.png` | camada ilustrada |
+| `assets/mapa/mapa-auren.svg` | `public/assets/maps/mapa-auren.svg` | geometria e interação |
+
+Os caminhos e o `viewBox` são centralizados em `src/assets/mapRegistry.ts`. O SVG original não foi alterado.
+
 ## Pendências reais
 
-- Não há arquivos de mapa entre os originais recebidos. A pasta `public/assets/maps/` está pronta, mas vazia.
-- A integração dos registries em páginas e componentes pertence à próxima etapa e não foi iniciada nesta etapa.
+- Ainda não existem dados reais de locais revelados para alimentar marcadores no mapa.
+- Ormara, Ilhas Cinzentas e Arquipélago de Vesper ainda não possuem imagens regionais registradas.
 - Os originais em `assets/` só devem ser removidos depois da validação visual e funcional final.
