@@ -1,4 +1,50 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-const links = [['/campanha','Campanha'],['/personagem','Ficha'],['/mesa','Mesa'],['/mapa','Mapa'],['/configuracoes','Ajustes']]
-export function AppShell() { const { signOut } = useAuth(); return <div className="app-shell"><aside className="sidebar"><div className="brand"><span>R</span><div><strong>Relicário</strong><small>Mesa compartilhada</small></div></div><nav aria-label="Navegação principal">{links.map(([to,label]) => <NavLink key={to} to={to}>{label}</NavLink>)}</nav><button className="text-button" onClick={() => void signOut()}>Encerrar sessão</button></aside><main className="main-content"><Outlet/></main><nav className="bottom-nav" aria-label="Navegação móvel">{links.slice(0,4).map(([to,label]) => <NavLink key={to} to={to}>{label}</NavLink>)}</nav></div> }
+import type { IconName } from '../assets/iconRegistry'
+import { BrandLogo } from './BrandLogo'
+import { Icon } from './Icon'
+
+const links: ReadonlyArray<{ to: string; label: string; icon: IconName }> = [
+  { to: '/campanha', label: 'Campanha', icon: 'campanhas' },
+  { to: '/personagem', label: 'Ficha', icon: 'personagens' },
+  { to: '/mesa', label: 'Mesa', icon: 'mesa' },
+  { to: '/mapa', label: 'Mapa', icon: 'mapa' },
+  { to: '/configuracoes', label: 'Ajustes', icon: 'configuracoes' },
+]
+
+function NavigationLink({ to, label, icon }: (typeof links)[number]) {
+  return (
+    <NavLink to={to} className="navigation-link">
+      <Icon name={icon} size={22} decorative />
+      <span>{label}</span>
+    </NavLink>
+  )
+}
+
+export function AppShell() {
+  const { signOut } = useAuth()
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="brand">
+          <BrandLogo className="brand__full" />
+          <BrandLogo compact className="brand__compact" />
+          <small>Mesa compartilhada</small>
+        </div>
+        <nav aria-label="Navegação principal">
+          {links.map((link) => <NavigationLink key={link.to} {...link} />)}
+        </nav>
+        <button className="text-button" onClick={() => void signOut()}>
+          Encerrar sessão
+        </button>
+      </aside>
+      <main className="main-content">
+        <Outlet />
+      </main>
+      <nav className="bottom-nav" aria-label="Navegação móvel">
+        {links.slice(0, 4).map((link) => <NavigationLink key={link.to} {...link} />)}
+      </nav>
+    </div>
+  )
+}
