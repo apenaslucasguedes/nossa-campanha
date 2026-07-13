@@ -77,8 +77,9 @@ begin
   elsif kind in ('spend_resource','restore_resource') then
     target:=(action->>'character_id')::uuid; amount:=(action->>'amount')::integer;
     if amount is null or amount <= 0 or amount > 100000 then raise exception 'LIMIT_EXCEEDED' using errcode='22003'; end if;
-    select cs,c.class_key into state,character_class from public.character_states cs join public.characters c on c.id=cs.character_id where cs.character_id=target and c.campaign_id=campaign for update of cs;
+    select cs.* into state from public.character_states cs join public.characters c on c.id=cs.character_id where cs.character_id=target and c.campaign_id=campaign for update of cs;
     if not found then raise exception 'INVALID_TARGET' using errcode='P0002'; end if;
+    select c.class_key into character_class from public.characters c where c.id=target and c.campaign_id=campaign;
     expected_resource:=case character_class when 'warrior' then 'Vigor' when 'arcanist' then 'Foco' when 'shadow_blade' then 'Ímpeto' when 'necromancer' then 'Essência' when 'bard' then 'Inspiração' when 'druid' then 'Seiva' end;
     if action->>'resource' is distinct from expected_resource then raise exception 'INVALID_ACTION' using errcode='22023'; end if;
     before_value:=state.resource_current;
