@@ -1,0 +1,212 @@
+# Arquitetura de assets
+
+## Estado desta etapa
+
+Os assets destinados ao frontend ficam em `public/assets/`. Os originais permanecem preservados em `assets/` até a validação final da integração.
+
+Inventário conferido:
+
+- 72 de 72 ícones encontrados e organizados;
+- 6 de 6 personagens encontrados;
+- 9 de 9 imagens de regiões encontradas e convertidas de PNG para WebP;
+- logo e favicon encontrados;
+- nenhum mapa foi fornecido em `assets/`; `public/assets/maps/` está reservado por meio de `.gitkeep`.
+
+Os SVGs copiados mantêm o conteúdo original. Somente os nomes e diretórios de destino foram normalizados. Os nomes consumidos pelo código usam kebab-case, sem acentos.
+
+## Estrutura final
+
+```text
+public/assets/
+├── brand/
+├── icons/
+│   ├── classes/
+│   ├── attributes/
+│   ├── settlements/
+│   ├── locations/
+│   ├── exploration/
+│   ├── threats/
+│   ├── mechanics/
+│   ├── conditions/
+│   ├── character-sheet/
+│   └── navigation/
+├── characters/
+├── regions/
+└── maps/
+```
+
+## Registries
+
+| Arquivo | Responsabilidade | Tipo de chave exportado |
+| --- | --- | --- |
+| `src/assets/iconRegistry.ts` | 72 ícones, rótulos e categorias | `IconName` |
+| `src/assets/characterRegistry.ts` | seis artes de classe | `CharacterClassKey` |
+| `src/assets/regionRegistry.ts` | nove regiões e aliases normalizados | `RegionKey` |
+| `src/assets/brandRegistry.ts` | logo, símbolo e favicon | `BrandAssetName` |
+
+Todos os caminhos passam por `publicAssetUrl`, respeitando o `BASE_URL` usado no GitHub Pages.
+
+## Mapeamento de brand
+
+| Origem | Destino | Operação |
+| --- | --- | --- |
+| `assets/logo relicario.svg` | `public/assets/brand/logo-relicario.svg` | cópia e renomeação |
+| `assets/favicon.svg` | `public/assets/brand/favicon.svg` | cópia |
+| — | `public/assets/brand/simbolo-relicario.svg` | símbolo já preparado na execução anterior |
+
+## Mapeamento de personagens
+
+| Origem | Destino |
+| --- | --- |
+| `assets/personagens/arcanista.svg` | `public/assets/characters/arcanista.svg` |
+| `assets/personagens/bardo.svg` | `public/assets/characters/bardo.svg` |
+| `assets/personagens/druida.svg` | `public/assets/characters/druida.svg` |
+| `assets/personagens/guerreiro.svg` | `public/assets/characters/guerreiro.svg` |
+| `assets/personagens/lamina-sombria.svg` | `public/assets/characters/lamina-sombria.svg` |
+| `assets/personagens/necromante.svg` | `public/assets/characters/necromante.svg` |
+
+## Mapeamento de regiões
+
+| Origem PNG | Destino WebP |
+| --- | --- |
+| `assets/bg-regioes/Cordilheira de Ferro.png` | `public/assets/regions/cordilheira-de-ferro.webp` |
+| `assets/bg-regioes/Costa Quebrada.png` | `public/assets/regions/costa-quebrada.webp` |
+| `assets/bg-regioes/Deserto Branco.png` | `public/assets/regions/deserto-branco.webp` |
+| `assets/bg-regioes/Estepes do Norte.png` | `public/assets/regions/estepes-do-norte.webp` |
+| `assets/bg-regioes/Pantanos Negros.png` | `public/assets/regions/pantanos-negros.webp` |
+| `assets/bg-regioes/Peninsula dos Mosteiros.png` | `public/assets/regions/peninsula-dos-mosteiros.webp` |
+| `assets/bg-regioes/Terras Cinzentas.png` | `public/assets/regions/terras-cinzentas.webp` |
+| `assets/bg-regioes/Vale de Ardan - Floresta Antiga.png` | `public/assets/regions/vale-de-ardan-floresta-antiga.webp` |
+| `assets/bg-regioes/Vale de Ardan.png` | `public/assets/regions/vale-de-ardan.webp` |
+
+## Mapeamento dos ícones
+
+O prefixo numérico do arquivo original foi removido no destino.
+
+### `icons/classes` (6)
+
+| Origem | Destino |
+| --- | --- |
+| `01-guerreiro.svg` | `guerreiro.svg` |
+| `02-arcanista.svg` | `arcanista.svg` |
+| `03-lamina-sombria.svg` | `lamina-sombria.svg` |
+| `04-necromante.svg` | `necromante.svg` |
+| `05-bardo.svg` | `bardo.svg` |
+| `06-druida.svg` | `druida.svg` |
+
+### `icons/attributes` (5)
+
+| Origem | Destino |
+| --- | --- |
+| `07-forca.svg` | `forca.svg` |
+| `08-agilidade.svg` | `agilidade.svg` |
+| `09-intelecto.svg` | `intelecto.svg` |
+| `10-presenca.svg` | `presenca.svg` |
+| `11-instinto.svg` | `instinto.svg` |
+
+### `icons/settlements` (8)
+
+| Origem | Destino |
+| --- | --- |
+| `13-metropole.svg` | `metropole.svg` |
+| `14-cidade.svg` | `cidade.svg` |
+| `15-vila.svg` | `vila.svg` |
+| `16-fortaleza.svg` | `fortaleza.svg` |
+| `17-castelo.svg` | `castelo.svg` |
+| `18-acampamento.svg` | `acampamento.svg` |
+| `19-mosteiro.svg` | `mosteiro.svg` |
+| `20-observatorio.svg` | `observatorio.svg` |
+
+### `icons/locations` (6)
+
+| Origem | Destino |
+| --- | --- |
+| `21-ruinas.svg` | `ruinas.svg` |
+| `22-caverna.svg` | `caverna.svg` |
+| `23-mina.svg` | `mina.svg` |
+| `24-porto.svg` | `porto.svg` |
+| `25-ponte-passagem.svg` | `ponte-passagem.svg` |
+| `26-estrada.svg` | `estrada.svg` |
+
+### `icons/exploration` (4)
+
+| Origem | Destino |
+| --- | --- |
+| `27-local-revelado.svg` | `local-revelado.svg` |
+| `28-local-oculto.svg` | `local-oculto.svg` |
+| `29-missao.svg` | `missao.svg` |
+| `30-rumor.svg` | `rumor.svg` |
+
+### `icons/threats` (6)
+
+| Origem | Destino |
+| --- | --- |
+| `31-monstro.svg` | `monstro.svg` |
+| `32-chefe.svg` | `chefe.svg` |
+| `33-covil.svg` | `covil.svg` |
+| `34-corrupcao.svg` | `corrupcao.svg` |
+| `35-armadilha.svg` | `armadilha.svg` |
+| `36-rota-bloqueada.svg` | `rota-bloqueada.svg` |
+
+### `icons/mechanics` (6)
+
+| Origem | Destino |
+| --- | --- |
+| `12-teste-d20.svg` | `teste-d20.svg` |
+| `37-vitalidade.svg` | `vitalidade.svg` |
+| `38-recurso-de-classe.svg` | `recurso-de-classe.svg` |
+| `39-defesa.svg` | `defesa.svg` |
+| `40-dano.svg` | `dano.svg` |
+| `41-cura.svg` | `cura.svg` |
+
+### `icons/conditions` (7)
+
+| Origem | Destino |
+| --- | --- |
+| `42-condicao-generica.svg` | `condicao-generica.svg` |
+| `43-ferido.svg` | `ferido.svg` |
+| `44-exausto.svg` | `exausto.svg` |
+| `45-amedrontado.svg` | `amedrontado.svg` |
+| `46-envenenado.svg` | `envenenado.svg` |
+| `47-imobilizado.svg` | `imobilizado.svg` |
+| `48-desorientado.svg` | `desorientado.svg` |
+
+### `icons/character-sheet` (12)
+
+| Origem | Destino |
+| --- | --- |
+| `49-inventario.svg` | `inventario.svg` |
+| `50-equipamento.svg` | `equipamento.svg` |
+| `51-habilidades.svg` | `habilidades.svg` |
+| `52-nivel.svg` | `nivel.svg` |
+| `53-ouro.svg` | `ouro.svg` |
+| `54-diario.svg` | `diario.svg` |
+| `55-capacete.svg` | `capacete.svg` |
+| `56-armadura.svg` | `armadura.svg` |
+| `57-luvas.svg` | `luvas.svg` |
+| `58-botas.svg` | `botas.svg` |
+| `59-anel.svg` | `anel.svg` |
+| `60-amuleto.svg` | `amuleto.svg` |
+
+### `icons/navigation` (12)
+
+| Origem | Destino |
+| --- | --- |
+| `61-campanhas.svg` | `campanhas.svg` |
+| `62-personagens.svg` | `personagens.svg` |
+| `63-mapa.svg` | `mapa.svg` |
+| `64-mesa.svg` | `mesa.svg` |
+| `65-compendio.svg` | `compendio.svg` |
+| `66-configuracoes.svg` | `configuracoes.svg` |
+| `67-nova-campanha.svg` | `nova-campanha.svg` |
+| `68-exportar-para-gpt.svg` | `exportar-para-gpt.svg` |
+| `69-missao-de-campanha.svg` | `missao-de-campanha.svg` |
+| `70-npc.svg` | `npc.svg` |
+| `71-mestre.svg` | `mestre.svg` |
+| `72-assento-vazio.svg` | `assento-vazio.svg` |
+
+## Pendências reais
+
+- Não há arquivos de mapa entre os originais recebidos. A pasta `public/assets/maps/` está pronta, mas vazia.
+- A integração dos registries em páginas e componentes pertence à próxima etapa e não foi iniciada nesta etapa.
+- Os originais em `assets/` só devem ser removidos depois da validação visual e funcional final.
