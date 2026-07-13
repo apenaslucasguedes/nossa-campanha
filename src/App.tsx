@@ -8,6 +8,7 @@ import { LoginPage } from './pages/LoginPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { CreateCharacterPage } from './pages/CreateCharacterPage'
 import { TablePage } from './pages/TablePage'
+import { CompendiumPage } from './pages/CompendiumPage'
 
 function Protected(){const {session,loading}=useAuth();const location=useLocation();if(loading)return <LoadingState/>;return session?<AppShell/>:<Navigate to="/login" state={{from:location.pathname}} replace/>}
-export function App(){return <HashRouter><AuthProvider><Routes><Route path="/login" element={<LoginPage/>}/><Route element={<Protected/>}><Route path="/campanha" element={<CampaignPage/>}/><Route path="/criar-personagem" element={<CreateCharacterPage/>}/><Route path="/personagem" element={<CharacterPage/>}/><Route path="/mapa" element={<PlaceholderPage kind="mapa"/>}/><Route path="/mesa" element={<TablePage/>}/><Route path="/configuracoes" element={<PlaceholderPage kind="configuracoes"/>}/></Route><Route path="*" element={<Navigate to="/campanha" replace/>}/></Routes></AuthProvider></HashRouter>}
+export function App(){return <HashRouter><AuthProvider><Routes><Route path="/login" element={<LoginPage/>}/><Route element={<Protected/>}><Route path="/campanha" element={<CampaignPage/>}/><Route path="/criar-personagem" element={<CreateCharacterPage/>}/><Route path="/personagem" element={<CharacterPage/>}/><Route path="/mapa" element={<PlaceholderPage kind="mapa"/>}/><Route path="/mesa" element={<TablePage/>}/><Route path="/compendio" element={<CompendiumPage/>}/><Route path="/configuracoes" element={<PlaceholderPage kind="configuracoes"/>}/></Route><Route path="*" element={<Navigate to="/campanha" replace/>}/></Routes></AuthProvider></HashRouter>}

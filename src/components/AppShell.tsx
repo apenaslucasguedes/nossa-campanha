@@ -9,6 +9,7 @@ const links: ReadonlyArray<{ to: string; label: string; icon: IconName }> = [
   { to: '/personagem', label: 'Ficha', icon: 'personagens' },
   { to: '/mesa', label: 'Mesa', icon: 'mesa' },
   { to: '/mapa', label: 'Mapa', icon: 'mapa' },
+  { to: '/compendio', label: 'Compêndio', icon: 'compendio' },
   { to: '/configuracoes', label: 'Ajustes', icon: 'configuracoes' },
 ]
 
@@ -43,7 +44,7 @@ export function AppShell() {
         <Outlet />
       </main>
       <nav className="bottom-nav" aria-label="Navegação móvel">
-        {links.slice(0, 4).map((link) => <NavigationLink key={link.to} {...link} />)}
+        {links.slice(0, 5).map((link) => <NavigationLink key={link.to} {...link} />)}
       </nav>
     </div>
   )
