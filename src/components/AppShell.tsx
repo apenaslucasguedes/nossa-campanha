@@ -31,7 +31,6 @@ export function AppShell() {
         <div className="brand">
           <BrandLogo className="brand__full" />
           <BrandLogo compact className="brand__compact" />
-          <small>Mesa compartilhada</small>
         </div>
         <nav aria-label="Navegação principal">
           {links.map((link) => <NavigationLink key={link.to} {...link} />)}

@@ -15,6 +15,14 @@ import type { Attributes, AvatarOptions, ClassKey, Specialty } from '../types/da
 const STEPS = ['Classe', 'Atributos', 'Identidade', 'Vínculo', 'Especialidades', 'Visual', 'Revisão']
 const BONDS = ['Amigos', 'Irmãos', 'Casal', 'Desconhecidos', 'Antigos rivais', 'Membros da mesma ordem', 'Dívida compartilhada', 'Um salvou o outro', 'Personalizado']
 const defaultAvatar: AvatarOptions = { presentation: 'andrógina', skinTone: '#b97850', hair: '#34251e', primaryColor: '#7f3f36', secondaryColor: '#4f624c', accessory: 'broche' }
+const classAvatarPalette: Record<ClassKey, Pick<AvatarOptions, 'primaryColor' | 'secondaryColor'>> = {
+  warrior: { primaryColor: '#874c3b', secondaryColor: '#4f4037' },
+  arcanist: { primaryColor: '#536b8f', secondaryColor: '#343b58' },
+  shadow_blade: { primaryColor: '#5f5277', secondaryColor: '#292633' },
+  necromancer: { primaryColor: '#53634d', secondaryColor: '#3f3348' },
+  bard: { primaryColor: '#a06f3f', secondaryColor: '#733f45' },
+  druid: { primaryColor: '#55705a', secondaryColor: '#69513c' },
+}
 
 export function CreateCharacterPage() {
   const { session } = useAuth()
@@ -42,6 +50,7 @@ export function CreateCharacterPage() {
     setClassKey(key)
     setAttributes(getClassDefinition(key).suggested)
     setSpecialties([])
+    setAvatar((current) => ({ ...current, ...classAvatarPalette[key] }))
   }
 
   function setField(name: keyof typeof form, value: string) {
@@ -67,7 +76,7 @@ export function CreateCharacterPage() {
 }
 
 function ClassStep({ selected, choose }: { selected: ClassKey; choose: (key: ClassKey) => void }) {
-  return <><CreationStepHeader step={0} title="Escolha sua classe"><p>Compare função, atributo principal e recursos de nível 1. A seleção define a sugestão inicial de atributos.</p></CreationStepHeader><div className="class-grid">{CLASSES.map((item) => { const preview = calculateDerived(item.key, item.suggested); return <button type="button" className={item.key === selected ? 'class-option selected' : 'class-option'} onClick={() => choose(item.key)} key={item.key} aria-pressed={item.key === selected}><CharacterPortrait classKey={item.key} name={item.name} compact /><span className="class-option__selection">{item.key === selected ? 'Classe selecionada' : 'Selecionar classe'}</span><span className="class-option__role">{item.role}</span><strong className="class-option__name"><Icon name={classIcon(item.key)} size={22} decorative />{item.name}</strong><dl><div><dt>Atributo principal</dt><dd><Icon name={attributeIcon(item.primary)} size={16} decorative />{ATTRIBUTE_NAMES[item.primary]}</dd></div><div><dt>Recurso</dt><dd><Icon name="recurso-de-classe" size={16} decorative />{item.resource}</dd></div><div><dt>Vitalidade prevista</dt><dd><Icon name="vitalidade" size={16} decorative />{preview.vitality}</dd></div></dl><div className="class-option__abilities"><p><strong>Básica</strong>{item.basicAbility}</p><p><strong>Inicial</strong>{item.initialAbility}</p></div></button> })}</div></>
+  return <><CreationStepHeader step={0} title="Escolha sua classe"><p>Compare função, atributo principal e recursos de nível 1. A seleção define a sugestão inicial de atributos.</p></CreationStepHeader><div className="class-grid">{CLASSES.map((item) => { const preview = calculateDerived(item.key, item.suggested); return <button type="button" className={item.key === selected ? 'class-option selected' : 'class-option'} data-character-class={item.key} onClick={() => choose(item.key)} key={item.key} aria-pressed={item.key === selected}><CharacterPortrait classKey={item.key} name={item.name} compact /><span className="class-option__selection">{item.key === selected ? 'Classe selecionada' : 'Selecionar classe'}</span><span className="class-option__role">{item.role}</span><strong className="class-option__name"><Icon name={classIcon(item.key)} size={22} decorative />{item.name}</strong><dl><div><dt>Atributo principal</dt><dd><Icon name={attributeIcon(item.primary)} size={16} decorative />{ATTRIBUTE_NAMES[item.primary]}</dd></div><div><dt>Recurso</dt><dd><Icon name="recurso-de-classe" size={16} decorative />{item.resource}</dd></div><div><dt>Vitalidade prevista</dt><dd><Icon name="vitalidade" size={16} decorative />{preview.vitality}</dd></div></dl><div className="class-option__abilities"><p><strong>Básica</strong>{item.basicAbility}</p><p><strong>Inicial</strong>{item.initialAbility}</p></div></button> })}</div></>
 }
 
 function AttributesStep({ value, onChange, derived, resourceLabel }: { value: Attributes; onChange: (value: Attributes) => void; derived: ReturnType<typeof calculateDerived>; resourceLabel: string }) {
