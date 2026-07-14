@@ -42,7 +42,7 @@ export function CreationStepHeader({ step, title, children }: { step: number; ti
 
 export function AttributeItem({ attribute, value, control }: { attribute: keyof Attributes; value: number; control?: ReactNode }) {
   const meta = ATTRIBUTE_META[attribute]
-  return <div className="attribute-item"><div className="attribute-item__heading"><Icon name={meta.icon} size={25} decorative /><span>{ATTRIBUTE_NAMES[attribute]}</span><strong>{value}</strong></div><p>{meta.description}</p>{control ? <div className="attribute-item__control">{control}</div> : null}</div>
+  return <div className="attribute-item"><div className="attribute-item__heading"><Icon name={meta.icon} size={25} decorative /><span>{ATTRIBUTE_NAMES[attribute]}</span><strong>{value}</strong></div>{control ? <div className="attribute-item__control">{control}</div> : null}<p>{meta.description}</p></div>
 }
 
 export function AbilityCard({ label, ability }: { label: string; ability: string }) {
@@ -51,7 +51,7 @@ export function AbilityCard({ label, ability }: { label: string; ability: string
 }
 
 export function SpecialtyCard({ name, suggested = false, level, selected, control }: { name: Specialty; suggested?: boolean; level?: string; selected?: boolean; control?: ReactNode }) {
-  return <article className={`specialty-card ${suggested ? 'is-suggested' : ''} ${selected ? 'is-selected' : ''}`.trim()}><div className="specialty-card__heading"><Icon name="habilidades" size={18} decorative /><strong>{name}</strong>{suggested ? <small>Sugestão da classe</small> : null}{level ? <small>{level}</small> : null}</div><p>{SPECIALTY_DESCRIPTIONS[name]}</p>{control}</article>
+  return <article className={`specialty-card ${suggested ? 'is-suggested' : ''} ${selected ? 'is-selected' : ''}`.trim()}><div className="specialty-card__heading"><strong>{name}</strong>{suggested ? <small>Sugestão da classe</small> : null}{level ? <small>{level}</small> : null}</div><p>{SPECIALTY_DESCRIPTIONS[name]}</p>{control}</article>
 }
 
 export function CharacterHeader({ classKey, name, level, playerName, presentation, origin, currentBond, edit }: { classKey: ClassKey; name: string; level: number; playerName?: string; presentation: string; origin: string; currentBond?: string; edit?: () => void }) {

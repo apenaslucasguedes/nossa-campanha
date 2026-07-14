@@ -1,5 +1,5 @@
 import type { IconName } from '../assets/iconRegistry'
-import type { ClassKey } from '../types/database'
+import type { AvatarOptions, ClassKey } from '../types/database'
 import { CharacterArtwork } from './CharacterArtwork'
 import { Icon } from './Icon'
 
@@ -12,10 +12,10 @@ const classIcons: Record<ClassKey, IconName> = {
   druid: 'druida',
 }
 
-export function CharacterPortrait({ classKey, name, compact = false }: { classKey: ClassKey; name?: string; compact?: boolean }) {
+export function CharacterPortrait({ classKey, name, compact = false, avatar }: { classKey: ClassKey; name?: string; compact?: boolean; avatar?: AvatarOptions }) {
   return (
     <div className={`character-portrait ${compact ? 'character-portrait--compact' : ''}`} data-character-class={classKey}>
-      <CharacterArtwork classKey={classKey} name={name} loading={compact ? 'lazy' : 'eager'} />
+      <CharacterArtwork classKey={classKey} name={name} loading={compact ? 'lazy' : 'eager'} avatar={avatar} />
       <span className="character-portrait__class-icon" aria-hidden="true">
         <Icon name={classIcons[classKey]} size={compact ? 20 : 24} decorative />
       </span>
