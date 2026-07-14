@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { AvatarPreview } from '../components/AvatarPreview'
 import { CharacterPortrait } from '../components/CharacterPortrait'
 import { AttributeItem, CharacterReview, CreationStepHeader, SpecialtyCard } from '../components/CharacterSections'
 import { Icon } from '../components/Icon'
@@ -90,11 +89,10 @@ function SpecialtiesStep({ selected, suggestions, onChange }: { selected: Specia
 }
 
 function VisualStep({ avatar, setAvatar, name, classKey }: { avatar: AvatarOptions; setAvatar: (value: AvatarOptions) => void; name: string; classKey: ClassKey }) {
-  const set = (key: keyof AvatarOptions, value: string) => setAvatar({ ...avatar, [key]: value })
-  return <><CreationStepHeader step={5} title="Defina a apresentação visual"><p>A arte é exclusiva da classe. Os controles abaixo ajustam apenas as opções visuais já suportadas pela ficha.</p></CreationStepHeader><div className="visual-builder"><div className="creation-preview-stack"><CharacterPortrait classKey={classKey} name={name || getClassDefinition(classKey).name} /><AvatarPreview avatar={avatar} name={name} /></div><div className="visual-controls"><label>Apresentação do avatar<select value={avatar.presentation} onChange={(event) => set('presentation', event.target.value)}><option>feminina</option><option>masculina</option><option>andrógina</option></select></label><Color label="Tom de pele" value={avatar.skinTone} change={(value) => set('skinTone', value)} /><Color label="Cabelo" value={avatar.hair} change={(value) => set('hair', value)} /><Color label="Roupa principal" value={avatar.primaryColor} change={(value) => set('primaryColor', value)} /><Color label="Roupa secundária" value={avatar.secondaryColor} change={(value) => set('secondaryColor', value)} /><label>Acessório<select value={avatar.accessory} onChange={(event) => set('accessory', event.target.value)}><option value="broche">Broche</option><option value="capa">Capa</option><option value="brinco">Brinco</option><option value="nenhum">Nenhum</option></select></label></div></div></>
+  void avatar
+  void setAvatar
+  return <><CreationStepHeader step={5} title="Confira a arte da classe"><p>A ficha usa exclusivamente a arte real da classe escolhida.</p></CreationStepHeader><div className="visual-builder visual-builder--fixed"><div className="creation-preview-stack"><CharacterPortrait classKey={classKey} name={name || getClassDefinition(classKey).name} /></div><aside className="visual-limitation" aria-label="Limitação da personalização visual"><Icon name="personagens" size={22} decorative /><div><strong>Arte fixa nesta versão</strong><p>Cor, aparência e acessórios não alteram o SVG da classe. Esses controles foram removidos para não simular uma personalização inexistente.</p></div></aside></div></>
 }
-
-function Color({ label, value, change }: { label: string; value: string; change: (value: string) => void }) { return <label>{label}<input type="color" value={value} onChange={(event) => change(event.target.value)} /></label> }
 
 function Derived({ derived, resourceLabel }: { derived: ReturnType<typeof calculateDerived>; resourceLabel: string }) {
   return <dl className="derived-strip" aria-label="Valores calculados em tempo real"><div><dt><Icon name="vitalidade" size={18} decorative />Vitalidade</dt><dd>{derived.vitality}</dd></div><div><dt><Icon name="defesa" size={18} decorative />Defesa</dt><dd>{derived.defense}</dd></div><div><dt><Icon name="inventario" size={18} decorative />Inventário</dt><dd>{derived.inventoryCapacity}</dd></div><div><dt><Icon name="recurso-de-classe" size={18} decorative />{resourceLabel}</dt><dd>{derived.resource}</dd></div></dl>
