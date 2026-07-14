@@ -303,6 +303,8 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
 .character-header__facts dt{color:#8f887a;font-size:.65rem;text-transform:uppercase;letter-spacing:.09em}
 .character-header__facts dd{margin:4px 0 0;color:#d6cdbc;font-size:.85rem}
 .character-header__edit{align-self:flex-start;margin-top:26px;min-height:44px}
+.character-header__actions{display:flex;flex-wrap:wrap;gap:10px}
+.character-header__delete{align-self:flex-start;margin-top:26px;min-height:44px;background:transparent}
 .sheet-tabs{display:flex;overflow-x:auto;border:1px solid #4b4335;border-top:0;background:#11100e}
 .sheet-tabs button{display:flex;flex:1;min-width:145px;align-items:center;justify-content:center;gap:8px;padding:13px;border:0;border-bottom:2px solid transparent;background:transparent;color:#9f9788;cursor:pointer}
 .sheet-tabs button[aria-selected="true"]{border-bottom-color:#b79a5c;background:#1b1813;color:#eee6d4}
