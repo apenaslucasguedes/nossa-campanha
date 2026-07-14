@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { CharacterPortrait } from '../components/CharacterPortrait'
 import { AttributeItem, CharacterReview, CreationStepHeader, SpecialtyCard } from '../components/CharacterSections'
+import { EditableCharacterArtwork } from '../components/EditableCharacterArtwork'
 import { Icon } from '../components/Icon'
 import { ErrorBanner, LoadingState, PageHeader } from '../components/States'
 import { createMyCharacter, type CreateCharacterInput } from '../data/campaigns'
+import { characterColorSchemas, type ColorLayer } from '../game-data/characterColorSchemas'
 import { ATTRIBUTE_KEYS, ATTRIBUTE_NAMES, CLASSES, getClassDefinition, SPECIALTIES } from '../game-data/classes'
 import { calculateDerived, isValidAttributeDistribution, isValidSpecialties } from '../game-data/rules'
 import { useCampaign } from '../hooks/useCampaign'
@@ -13,14 +15,36 @@ import type { Attributes, AvatarOptions, ClassKey, Specialty } from '../types/da
 
 const STEPS = ['Classe', 'Atributos', 'Identidade', 'Vínculo', 'Especialidades', 'Visual', 'Revisão']
 const BONDS = ['Amigos', 'Irmãos', 'Casal', 'Desconhecidos', 'Antigos rivais', 'Membros da mesma ordem', 'Dívida compartilhada', 'Um salvou o outro', 'Personalizado']
-const defaultAvatar: AvatarOptions = { presentation: 'andrógina', skinTone: '#b97850', hair: '#34251e', primaryColor: '#7f3f36', secondaryColor: '#4f624c', accessory: 'broche' }
-const classAvatarPalette: Record<ClassKey, Pick<AvatarOptions, 'primaryColor' | 'secondaryColor'>> = {
-  warrior: { primaryColor: '#874c3b', secondaryColor: '#4f4037' },
-  arcanist: { primaryColor: '#536b8f', secondaryColor: '#343b58' },
-  shadow_blade: { primaryColor: '#5f5277', secondaryColor: '#292633' },
-  necromancer: { primaryColor: '#53634d', secondaryColor: '#3f3348' },
-  bard: { primaryColor: '#a06f3f', secondaryColor: '#733f45' },
-  druid: { primaryColor: '#55705a', secondaryColor: '#69513c' },
+const DRAFT_KEY = 'relicario:create-character-draft'
+
+type ColorsByClass = Partial<Record<ClassKey, Record<string, string>>>
+
+type Draft = {
+  step: number
+  classKey: ClassKey
+  attributes: Attributes
+  form: IdentityForm
+  specialties: Specialty[]
+  presentation: string
+  accessory: string
+  colorsByClass: ColorsByClass
+}
+
+function loadDraft(): Draft | null {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY)
+    return raw ? (JSON.parse(raw) as Draft) : null
+  } catch {
+    return null
+  }
+}
+
+function clearDraft() {
+  try {
+    sessionStorage.removeItem(DRAFT_KEY)
+  } catch {
+    // ignore storage failures
+  }
 }
 
 type IdentityForm = {
@@ -39,16 +63,52 @@ export function CreateCharacterPage() {
   const { session } = useAuth()
   const { data, loading } = useCampaign(session?.user.id)
   const navigate = useNavigate()
-  const [step, setStep] = useState(0)
-  const [classKey, setClassKey] = useState<ClassKey>('warrior')
+  const draft = useMemo(() => loadDraft(), [])
+  const [step, setStep] = useState(draft?.step ?? 0)
+  const [classKey, setClassKey] = useState<ClassKey>(draft?.classKey ?? 'warrior')
   const role = getClassDefinition(classKey)
-  const [attributes, setAttributes] = useState<Attributes>(role.suggested)
-  const [form, setForm] = useState<IdentityForm>({ name: '', presentation: '', origin: '', appearance: '', personality: '', objective: '', fear: '', bond: 'Amigos', customBond: '' })
-  const [specialties, setSpecialties] = useState<Specialty[]>([])
-  const [avatar, setAvatar] = useState(defaultAvatar)
+  const [attributes, setAttributes] = useState<Attributes>(draft?.attributes ?? role.suggested)
+  const [form, setForm] = useState<IdentityForm>(draft?.form ?? { name: '', presentation: '', origin: '', appearance: '', personality: '', objective: '', fear: '', bond: 'Amigos', customBond: '' })
+  const [specialties, setSpecialties] = useState<Specialty[]>(draft?.specialties ?? [])
+  const [presentation, setPresentation] = useState(draft?.presentation ?? 'andrógina')
+  const [accessory, setAccessory] = useState(draft?.accessory ?? 'broche')
+  const [colorsByClass, setColorsByClass] = useState<ColorsByClass>(draft?.colorsByClass ?? {})
+  const [defaultsByClass, setDefaultsByClass] = useState<ColorsByClass>({})
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const derived = useMemo(() => calculateDerived(classKey, attributes), [classKey, attributes])
+  const colors = colorsByClass[classKey] ?? {}
+  const defaults = defaultsByClass[classKey] ?? {}
+
+  useEffect(() => {
+    if (saving) return
+    const nextDraft: Draft = { step, classKey, attributes, form, specialties, presentation, accessory, colorsByClass }
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(nextDraft))
+    } catch {
+      // ignore storage failures
+    }
+  }, [step, classKey, attributes, form, specialties, presentation, accessory, colorsByClass, saving])
+
+  function setLayerColor(key: string, value: string) {
+    setColorsByClass((current) => ({ ...current, [classKey]: { ...current[classKey], [key]: value } }))
+  }
+
+  function resetLayerColor(key: string) {
+    setColorsByClass((current) => {
+      const rest = { ...current[classKey] }
+      delete rest[key]
+      return { ...current, [classKey]: rest }
+    })
+  }
+
+  function resetAllColors() {
+    setColorsByClass((current) => ({ ...current, [classKey]: {} }))
+  }
+
+  function recordDefaults(classForDefaults: ClassKey, values: Record<string, string>) {
+    setDefaultsByClass((current) => ({ ...current, [classForDefaults]: values }))
+  }
 
   if (loading) return <LoadingState />
   if (data?.characters.some((character) => character.owner_id === session?.user.id)) return <Navigate to="/personagem" replace />
@@ -69,7 +129,6 @@ export function CreateCharacterPage() {
     setClassKey(key)
     setAttributes(getClassDefinition(key).suggested)
     setSpecialties([])
-    setAvatar((current) => ({ ...current, ...classAvatarPalette[key] }))
   }
 
   function setField(name: keyof IdentityForm, value: string) {
@@ -80,6 +139,15 @@ export function CreateCharacterPage() {
     if (!session || !isValidAttributeDistribution(attributes) || !isValidSpecialties(specialties, role.specialties)) return
     setSaving(true)
     setError('')
+    const avatar: AvatarOptions = {
+      presentation,
+      accessory,
+      skinTone: colors.skin ?? defaults.skin ?? '#b97850',
+      hair: colors.hair ?? defaults.hair ?? colors.skin ?? defaults.skin ?? '#34251e',
+      primaryColor: colors.outfit ?? colors.armor ?? defaults.outfit ?? defaults.armor ?? '#7f3f36',
+      secondaryColor: colors.accessory ?? colors.cape ?? defaults.accessory ?? defaults.cape ?? '#4f624c',
+      layerColors: colors,
+    }
     const payload: CreateCharacterInput = {
       name: form.name.trim(),
       class_key: classKey,
@@ -97,6 +165,7 @@ export function CreateCharacterPage() {
 
     try {
       await createMyCharacter(payload)
+      clearDraft()
       navigate('/personagem', { replace: true })
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Não foi possível criar a ficha.')
@@ -124,8 +193,22 @@ export function CreateCharacterPage() {
         {step === 2 ? <IdentityStep form={form} setField={setField} /> : null}
         {step === 3 ? <BondStep form={form} setField={setField} /> : null}
         {step === 4 ? <SpecialtiesStep selected={specialties} suggestions={role.specialties} onChange={setSpecialties} /> : null}
-        {step === 5 ? <VisualStep avatar={avatar} setAvatar={setAvatar} name={form.name} classKey={classKey} /> : null}
-        {step === 6 ? <Review input={{ ...form, bond, classKey, attributes, specialties, avatar }} derived={derived} /> : null}
+        {step === 5 ? (
+          <VisualStep
+            classKey={classKey}
+            colors={colors}
+            defaults={defaults}
+            setColor={setLayerColor}
+            resetColor={resetLayerColor}
+            resetAll={resetAllColors}
+            presentation={presentation}
+            setPresentation={setPresentation}
+            accessory={accessory}
+            setAccessory={setAccessory}
+            onDefaultsLoaded={(values) => recordDefaults(classKey, values)}
+          />
+        ) : null}
+        {step === 6 ? <Review input={{ ...form, bond, classKey, attributes, specialties }} colors={colors} derived={derived} /> : null}
       </section>
       {error ? <ErrorBanner>{error}</ErrorBanner> : null}
       <div className="wizard-actions">
@@ -180,21 +263,107 @@ function SpecialtiesStep({ selected, suggestions, onChange }: { selected: Specia
   return <><CreationStepHeader step={4} title="Escolha três especialidades"><p>Duas devem vir das sugestões da classe; a terceira pode ser qualquer especialidade.</p></CreationStepHeader><div className="specialty-status" aria-live="polite"><strong>{selected.length} de 3</strong> escolhidas</div><div className="specialty-grid">{SPECIALTIES.map((item) => <label key={item}><SpecialtyCard name={item} suggested={suggestions.includes(item)} selected={selected.includes(item)} control={<input type="checkbox" checked={selected.includes(item)} disabled={!selected.includes(item) && selected.length === 3} onChange={() => toggle(item)} aria-label={`Selecionar ${item}`} />} /></label>)}</div>{selected.length === 3 && !isValidSpecialties(selected, suggestions) ? <ErrorBanner>Escolha pelo menos duas sugestões da classe.</ErrorBanner> : null}</>
 }
 
-function VisualStep({ avatar, setAvatar, name, classKey }: { avatar: AvatarOptions; setAvatar: (value: AvatarOptions) => void; name: string; classKey: ClassKey }) {
-  const set = (key: keyof AvatarOptions, value: string) => setAvatar({ ...avatar, [key]: value })
-  return <><CreationStepHeader step={5} title="Defina a apresentação visual"><p>A arte da classe recebe as cores escolhidas aqui. Algumas classes não exibem todas as camadas, como cabelo.</p></CreationStepHeader><div className="visual-builder"><div className="creation-preview-stack"><CharacterPortrait classKey={classKey} name={name || getClassDefinition(classKey).name} avatar={avatar} /></div><div className="visual-controls"><label>Apresentação<select value={avatar.presentation} onChange={(event) => set('presentation', event.target.value)}><option>feminina</option><option>masculina</option><option>andrógina</option></select></label><Color label="Tom de pele" value={avatar.skinTone} change={(value) => set('skinTone', value)} /><Color label="Cabelo" value={avatar.hair} change={(value) => set('hair', value)} /><Color label="Roupa / armadura principal" value={avatar.primaryColor} change={(value) => set('primaryColor', value)} /><Color label="Roupa / armadura secundária" value={avatar.secondaryColor} change={(value) => set('secondaryColor', value)} /><label>Acessório<select value={avatar.accessory} onChange={(event) => set('accessory', event.target.value)}><option value="broche">Broche</option><option value="capa">Capa</option><option value="brinco">Brinco</option><option value="nenhum">Nenhum</option></select></label></div></div></>
+function VisualStep({
+  classKey,
+  colors,
+  defaults,
+  setColor,
+  resetColor,
+  resetAll,
+  presentation,
+  setPresentation,
+  accessory,
+  setAccessory,
+  onDefaultsLoaded,
+}: {
+  classKey: ClassKey
+  colors: Record<string, string>
+  defaults: Record<string, string>
+  setColor: (key: string, value: string) => void
+  resetColor: (key: string) => void
+  resetAll: () => void
+  presentation: string
+  setPresentation: (value: string) => void
+  accessory: string
+  setAccessory: (value: string) => void
+  onDefaultsLoaded: (defaults: Record<string, string>) => void
+}) {
+  const schema = characterColorSchemas[classKey]
+  return (
+    <>
+      <CreationStepHeader step={5} title="Defina a apresentação visual"><p>A arte da classe recebe as cores escolhidas aqui, camada por camada. Sombras são calculadas automaticamente a partir da cor principal.</p></CreationStepHeader>
+      <div className="visual-builder">
+        <div className="visual-builder__preview creation-preview-stack">
+          <EditableCharacterArtwork classKey={classKey} colors={colors} onDefaultsLoaded={onDefaultsLoaded} />
+        </div>
+        <div className="visual-controls">
+          <div className="visual-controls__options">
+            <label>Apresentação<select value={presentation} onChange={(event) => setPresentation(event.target.value)}><option>feminina</option><option>masculina</option><option>andrógina</option></select></label>
+            <label>Acessório visível<select value={accessory} onChange={(event) => setAccessory(event.target.value)}><option value="broche">Broche</option><option value="capa">Capa</option><option value="brinco">Brinco</option><option value="nenhum">Nenhum</option></select></label>
+          </div>
+          <button type="button" className="visual-controls__reset-all" onClick={resetAll}>Restaurar todas as cores padrão</button>
+          <div className="color-layer-grid">
+            {schema.map((layer) => (
+              <ColorLayerControl
+                key={layer.key}
+                layer={layer}
+                value={colors[layer.key] ?? defaults[layer.key] ?? '#808080'}
+                isCustom={layer.key in colors}
+                onChange={(value) => setColor(layer.key, value)}
+                onReset={() => resetColor(layer.key)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  )
 }
 
-function Color({ label, value, change }: { label: string; value: string; change: (value: string) => void }) {
-  return <label>{label}<input type="color" value={value} onChange={(event) => change(event.target.value)} /></label>
+function ColorLayerControl({ layer, value, isCustom, onChange, onReset }: { layer: ColorLayer; value: string; isCustom: boolean; onChange: (value: string) => void; onReset: () => void }) {
+  return (
+    <div className="color-layer-control">
+      <span className="color-layer-control__label">{layer.label}</span>
+      <span className="color-layer-control__swatch" style={{ backgroundColor: value }} aria-hidden="true" />
+      <input type="color" value={value} onChange={(event) => onChange(event.target.value)} aria-label={`Cor de ${layer.label}`} />
+      <input
+        type="text"
+        className="color-layer-control__hex"
+        key={value}
+        defaultValue={value}
+        maxLength={7}
+        aria-label={`Valor hexadecimal de ${layer.label}`}
+        onBlur={(event) => {
+          const next = event.target.value
+          if (/^#[0-9a-fA-F]{6}$/.test(next)) onChange(next)
+          else event.target.value = value
+        }}
+      />
+      <button type="button" className="color-layer-control__reset" onClick={onReset} disabled={!isCustom}>Restaurar padrão</button>
+    </div>
+  )
 }
 
 function Derived({ derived, resourceLabel }: { derived: ReturnType<typeof calculateDerived>; resourceLabel: string }) {
   return <dl className="derived-strip" aria-label="Valores calculados em tempo real"><div><dt><Icon name="vitalidade" size={18} decorative />Vitalidade</dt><dd>{derived.vitality}</dd></div><div><dt><Icon name="defesa" size={18} decorative />Defesa</dt><dd>{derived.defense}</dd></div><div><dt><Icon name="inventario" size={18} decorative />Inventário</dt><dd>{derived.inventoryCapacity}</dd></div><div><dt><Icon name="recurso-de-classe" size={18} decorative />{resourceLabel}</dt><dd>{derived.resource}</dd></div></dl>
 }
 
-function Review({ input, derived }: { input: IdentityForm & { bond: string; classKey: ClassKey; attributes: Attributes; specialties: Specialty[]; avatar: AvatarOptions }; derived: ReturnType<typeof calculateDerived> }) {
-  return <><CreationStepHeader step={6} title="Revise antes de criar"><p>Confira identidade, escolhas mecânicas e visual. Nenhum dado foi gravado ainda.</p></CreationStepHeader><CharacterReview input={input} derived={derived} /></>
+function Review({ input, colors, derived }: { input: IdentityForm & { bond: string; classKey: ClassKey; attributes: Attributes; specialties: Specialty[] }; colors: Record<string, string>; derived: ReturnType<typeof calculateDerived> }) {
+  const schema = characterColorSchemas[input.classKey]
+  return (
+    <>
+      <CreationStepHeader step={6} title="Revise antes de criar"><p>Confira identidade, escolhas mecânicas e visual. Nenhum dado foi gravado ainda.</p></CreationStepHeader>
+      <CharacterReview input={input} colors={colors} derived={derived} />
+      <ul className="visual-summary" aria-label="Resumo das cores escolhidas">
+        {schema.map((layer) => (
+          <li key={layer.key}>
+            <span className="visual-summary__swatch" style={{ backgroundColor: colors[layer.key] ?? '#808080' }} aria-hidden="true" />
+            {layer.label}
+          </li>
+        ))}
+      </ul>
+    </>
+  )
 }
 
 function attributeIcon(attribute: keyof Attributes) {
