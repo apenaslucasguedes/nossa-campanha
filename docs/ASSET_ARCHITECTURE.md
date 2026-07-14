@@ -220,7 +220,7 @@ Os caminhos, dimensões e o `viewBox` são centralizados em `src/assets/mapRegis
 
 ### Arquitetura de camadas do mapa
 
-1. `.auren-map__water` é uma única camada ampliada dentro de `.auren-map__stage` e recebe `agua.jpg` diretamente em `background-image`. A imagem usa `repeat`; como pertence ao mesmo plano transformável, acompanha zoom e pan junto com o continente, sem elementos duplicados nem aparência de fundo estático.
+1. `.auren-map__water` é uma única camada ampliada dentro de `.auren-map__stage` e recebe `agua.jpg` diretamente em `background-image`. A imagem usa `repeat` em escala compacta e `multiply` com um azul profundo; como pertence ao mesmo plano transformável, acompanha zoom e pan junto com o continente, sem elementos duplicados nem aparência de fundo estático.
 2. `.auren-map__stage` é o único plano sujeito a fit, zoom e pan. Seu tamanho lógico é 1591,7 × 916,3 e ele permanece centralizado no viewport.
 3. `mapa-realista-cortado.png` ocupa toda a caixa lógica como camada artística (`z-index: 1`).
 4. `mapa-auren.svg` ocupa a mesma caixa e o mesmo plano de transformação como camada interativa (`z-index: 2`). Seus IDs reais são associados em `aurenRegions`, sem alteração da geometria.
