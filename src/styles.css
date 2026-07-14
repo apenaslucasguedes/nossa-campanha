@@ -406,6 +406,8 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
 .icon:not(.icon--fallback){filter:invert(84%) sepia(20%) saturate(625%) hue-rotate(359deg) brightness(94%) contrast(88%)}
 .brand{display:block;min-height:112px;padding:0 4px 28px}
 .brand__full{width:208px;max-height:76px}
+.brand{text-decoration:none;cursor:pointer}
+.brand:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
 .character-portrait[data-character-class="warrior"],.class-option[data-character-class="warrior"],.class-compendium-card[data-class="warrior"]{--class-accent:#9b6047}
 .character-portrait[data-character-class="arcanist"],.class-option[data-character-class="arcanist"],.class-compendium-card[data-class="arcanist"]{--class-accent:#667ca8}
 .character-portrait[data-character-class="shadow_blade"],.class-option[data-character-class="shadow_blade"],.class-compendium-card[data-class="shadow_blade"]{--class-accent:#75648e}
@@ -767,4 +769,28 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
 @media(max-width:370px){
   .class-option{grid-template-columns:82px minmax(0,1fr)}
   .color-layer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* Mesa: controles agrupados, confirmação local e movimento direto do dado. */
+.resource-control{grid-template-columns:90px minmax(0,1fr)}
+.resource-actions{display:grid;gap:7px}
+.resource-actions__group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.resource-control button{min-height:44px}
+.resource-action--damage{border-color:#75483d!important;color:#efb7a8!important}
+.resource-action--heal{border-color:#526046!important;color:#c8d6b8!important}
+.resource-action{display:flex;align-items:center;justify-content:center;gap:7px}
+.resource-action .icon{flex:0 0 auto}
+.resource-confirm{grid-column:1/-1;display:flex!important;grid-template-columns:none!important;align-items:center;gap:8px;padding:9px 10px;border:1px solid #6d5a39;background:#211c13;color:#d8cdb9;font-size:.78rem}
+.resource-confirm span{margin-right:auto}
+.resource-confirm button{min-height:36px;padding:6px 10px}
+.resource-confirm__submit{border-color:#b79a5c!important;background:#b79a5c!important;color:#17130d!important;font-weight:700}
+.dice-tray.is-rolling .die-token{animation:die-toss .48s cubic-bezier(.22,1,.36,1) both;animation-delay:0s}
+@keyframes die-toss{0%{transform:translateY(0)}42%{transform:translateY(-24px)}100%{transform:translateY(0)}}
+
+@media(max-width:620px){
+  .resource-control{grid-template-columns:1fr}
+  .resource-confirm{flex-wrap:wrap}
+  .resource-confirm span{flex-basis:100%;margin-right:0}
+  .resource-confirm button{flex:1}
+  .class-option__selection{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
 }

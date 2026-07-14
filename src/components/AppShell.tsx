@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import type { IconName } from '../assets/iconRegistry'
 import { BrandLogo } from './BrandLogo'
@@ -26,9 +26,9 @@ export function AppShell() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand">
+        <Link className="brand" to="/campanha" aria-label="Voltar para a página inicial">
           <BrandLogo className="brand__full" />
-        </div>
+        </Link>
         <nav aria-label="Navegação principal">
           {links.map((link) => <NavigationLink key={link.to} {...link} />)}
         </nav>
