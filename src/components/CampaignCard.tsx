@@ -26,7 +26,11 @@ export function EmptySeat({ seat, playerName, canCreate = false }: { seat: numbe
         <h2 id={`seat-${seat}-title`}>Personagem ainda não criado</h2>
         <p>{playerName ? `${playerName} ocupa este assento, mas ainda não possui ficha.` : 'Este assento ainda não possui personagem.'}</p>
       </div>
-      {canCreate ? <Link className="card-action" to="/criar-personagem">Criar personagem</Link> : null}
+      {canCreate ? (
+        <Link className="card-action" to="/criar-personagem">Criar personagem</Link>
+      ) : (
+        <small className="empty-seat__note">Aguardando o outro jogador criar a ficha.</small>
+      )}
     </div>
   )
 }
