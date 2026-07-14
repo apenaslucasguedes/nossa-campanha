@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { CharacterReview } from '../components/CharacterSections'
 import { createMyCharacter } from '../data/campaigns'
+import { characterNames } from '../game-data/characterNames'
 import { CreateCharacterPage } from './CreateCharacterPage'
 
 vi.mock('../auth/AuthContext', () => ({ useAuth: () => ({ session: { user: { id: 'current-user' } } }) }))
@@ -37,7 +38,7 @@ afterEach(() => {
 
 function fillIdentityStep() {
   fireEvent.change(screen.getByLabelText(/^Nome/), { target: { value: 'Aster' } })
-  fireEvent.change(screen.getByLabelText(/^Apresentação/), { target: { value: 'elu/delu' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Selecionar gênero masculino' }))
   fireEvent.change(screen.getByLabelText(/^Origem/), { target: { value: 'Vale de Ardan' } })
   fireEvent.change(screen.getByLabelText(/^Aparência/), { target: { value: 'Olhos atentos.' } })
   fireEvent.change(screen.getByLabelText(/^Personalidade/), { target: { value: 'Paciente.' } })
@@ -54,6 +55,11 @@ function advanceToVisualStep(className?: string, specialties = ['Atletismo', 'In
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' })) // vínculo -> especialidades
   for (const specialty of specialties) fireEvent.click(screen.getByRole('checkbox', { name: `Selecionar ${specialty}` }))
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' })) // especialidades -> visual
+}
+
+function advanceToIdentityStep() {
+  fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
 }
 
 describe('criação visual de personagem', () => {
@@ -74,6 +80,68 @@ describe('criação visual de personagem', () => {
     expect(within(strength).getAllByRole('button')).toHaveLength(3)
     fireEvent.click(within(strength).getByRole('button', { name: 'Zerar Força' }))
     expect(screen.getByRole('group', { name: 'Valor de Força: 0' })).toBeInTheDocument()
+  })
+
+  it('desabilita o sorteio enquanto nenhum gênero foi informado', () => {
+    render(<MemoryRouter><CreateCharacterPage /></MemoryRouter>)
+    advanceToIdentityStep()
+    expect(screen.getByRole('button', { name: 'Sortear nome — escolha o gênero' })).toBeDisabled()
+    expect(screen.getByText('Escolha o gênero para sortear um nome.')).toBeInTheDocument()
+  })
+
+  it.each([
+    ['Masculino', 'masculino', characterNames.masculine],
+    ['Feminino', 'feminino', characterNames.feminine],
+  ] as const)('sorteia um nome %s e permite edição manual', (_presentation, label, names) => {
+    vi.stubGlobal('crypto', { getRandomValues: (values: Uint32Array) => { values[0] = 0; return values } })
+    render(<MemoryRouter><CreateCharacterPage /></MemoryRouter>)
+    advanceToIdentityStep()
+    fireEvent.click(screen.getByRole('button', { name: `Selecionar gênero ${label}` }))
+    fireEvent.click(screen.getByRole('button', { name: `Sortear nome ${label}` }))
+    expect(screen.getByLabelText(/^Nome/)).toHaveValue(names[0])
+    fireEvent.change(screen.getByLabelText(/^Nome/), { target: { value: 'Nome editado' } })
+    expect(screen.getByLabelText(/^Nome/)).toHaveValue('Nome editado')
+  })
+
+  it('mantém o nome ao trocar o gênero e usa a nova lista no próximo sorteio', () => {
+    vi.stubGlobal('crypto', { getRandomValues: (values: Uint32Array) => { values[0] = 0; return values } })
+    render(<MemoryRouter><CreateCharacterPage /></MemoryRouter>)
+    advanceToIdentityStep()
+    fireEvent.click(screen.getByRole('button', { name: 'Selecionar gênero masculino' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Sortear nome masculino' }))
+    expect(screen.getByLabelText(/^Nome/)).toHaveValue(characterNames.masculine[0])
+
+    fireEvent.click(screen.getByRole('button', { name: 'Selecionar gênero feminino' }))
+    expect(screen.getByLabelText(/^Nome/)).toHaveValue(characterNames.masculine[0])
+    expect(screen.getByRole('button', { name: 'Selecionar gênero feminino' })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('button', { name: 'Sortear nome feminino' }))
+    expect(screen.getByLabelText(/^Nome/)).toHaveValue(characterNames.feminine[0])
+  })
+
+  it('preserva o nome sorteado ao avançar, voltar, revisar e salvar o rascunho', async () => {
+    vi.stubGlobal('crypto', { getRandomValues: (values: Uint32Array) => { values[0] = 0; return values } })
+    render(<MemoryRouter><CreateCharacterPage /></MemoryRouter>)
+    advanceToIdentityStep()
+    fireEvent.click(screen.getByRole('button', { name: 'Selecionar gênero masculino' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Sortear nome masculino' }))
+    const generatedName = characterNames.masculine[0]
+    fireEvent.change(screen.getByLabelText(/^Origem/), { target: { value: 'Vale de Ardan' } })
+    fireEvent.change(screen.getByLabelText(/^Aparência/), { target: { value: 'Olhos atentos.' } })
+    fireEvent.change(screen.getByLabelText(/^Personalidade/), { target: { value: 'Paciente.' } })
+    fireEvent.change(screen.getByLabelText(/^Objetivo/), { target: { value: 'Encontrar o relicário.' } })
+    fireEvent.change(screen.getByLabelText(/^Medo/), { target: { value: 'Falhar.' } })
+    await waitFor(() => expect(sessionStorage.getItem('relicario:create-character-draft')).toContain(generatedName))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar' }))
+    expect(screen.getByLabelText(/^Nome/)).toHaveValue(generatedName)
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+    for (const specialty of ['Atletismo', 'Intimidação', 'Sobrevivência']) fireEvent.click(screen.getByRole('checkbox', { name: `Selecionar ${specialty}` }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+    await waitFor(() => expect(screen.getByLabelText('Cor de Armadura')).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+    expect(screen.getByRole('heading', { name: generatedName })).toBeInTheDocument()
   })
 
   it('apresenta a revisão completa antes da criação real', () => {
