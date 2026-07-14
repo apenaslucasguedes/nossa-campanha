@@ -317,7 +317,7 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
 .mechanic-readout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;margin:0;background:#403a30}
 .mechanic-readout>div{min-width:0;padding:16px;background:#1c1915}
 .mechanic-readout dt{color:#9f9788;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}
-.mechanic-readout dd{margin:6px 0 0;color:#eee6d4;font-family:"Cormorant Garamond",Georgia,serif;font-size:1.8rem}
+.mechanic-readout dd{margin:6px 0 0;color:#eee6d4;font-size:1.8rem;font-variant-numeric:lining-nums tabular-nums}
 .active-conditions{margin-top:24px;padding-top:18px;border-top:1px solid #39342b}
 .active-conditions>span{display:flex;align-items:center;gap:7px;color:#a39b8b;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}
 .active-conditions ul{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;padding:0;list-style:none}
