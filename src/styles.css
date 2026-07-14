@@ -1010,6 +1010,27 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
   .quick-roll__grid{grid-template-columns:1fr}
 }
 
+/* Mesa: seletor direto, sem controles redundantes. */
+.dice-picker{display:grid;grid-template-columns:repeat(7,minmax(36px,1fr));gap:6px;margin:14px 0 0;padding:0;overflow:visible}
+.dice-picker .dice-choice__add{width:40px;height:40px;justify-self:center;font-size:.72rem}
+.dice-picker .dice-choice__add b{top:-2px;right:-2px;width:15px;height:15px;font-size:.58rem}
+.dice-picker .dice-choice__add.is-selected{filter:drop-shadow(0 0 4px rgba(238,218,170,.3))}
+.dice-tray__surface .die-token:is(button){border:0;cursor:pointer}
+.dice-tray__surface .die-token:is(button):hover{filter:brightness(1.12) drop-shadow(0 4px 3px rgba(0,0,0,.38))}
+.quick-roll__character{display:grid;gap:5px}
+.quick-roll__character>span{color:#c6bca9;font-size:.78rem}
+.quick-roll__character>strong{display:flex;min-height:44px;align-items:center;padding:9px 10px;border:1px solid #4a4337;background:#11110e;color:#eee6d4;font-family:Inter,system-ui,sans-serif;font-size:.9rem}
+.condition-editor__heading>span{display:flex;align-items:center;gap:7px}
+.condition-add{grid-template-columns:minmax(0,1fr) auto}
+.condition-add button{grid-column:auto;min-width:112px}
+
+@media(max-width:420px){
+  .dice-picker{grid-template-columns:repeat(7,minmax(32px,1fr));gap:3px}
+  .dice-picker .dice-choice__add{width:36px;height:36px}
+  .condition-add{grid-template-columns:1fr}
+  .condition-add button{grid-column:auto}
+}
+
 /* Ficha: retrato inteiro e leitura compacta lado a lado. */
 .characters-page .protagonist-grid{
   grid-template-columns:1fr;

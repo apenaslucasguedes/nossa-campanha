@@ -27,8 +27,9 @@ describe('rolador de dados',()=>{
     fireEvent.click(screen.getByRole('button',{name:'Adicionar d8'}))
     expect(screen.getByRole('button',{name:'Rolar 4 dados'})).toBeInTheDocument()
     expect(screen.queryByLabelText('Modificador')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button',{name:'Remover d20'}))
+    fireEvent.click(screen.getByRole('button',{name:'Remover um d20 da bandeja'}))
     expect(screen.getByRole('button',{name:'Rolar 3 dados'})).toBeInTheDocument()
+    expect(screen.queryByLabelText('Motivo opcional')).not.toBeInTheDocument()
   })
 })
 
