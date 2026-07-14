@@ -261,7 +261,10 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
 .gender-selector{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .gender-selector button{display:flex;min-width:0;min-height:52px;align-items:center;justify-content:center;gap:9px;padding:8px 12px;border:1px solid #494236;border-radius:4px;background:#11100e;color:#aaa294;cursor:pointer}
 .gender-selector button:hover{border-color:#8d7750;background:#191711;color:#e0d5bf}
-.gender-selector button.is-selected{border-color:#c4a15e;background:#282116;box-shadow:inset 0 3px 0 #d4b46f;color:#f1e4c8}
+.gender-selector button[data-gender="masculine"].is-selected{border-color:#66849b;background:#172027;color:#b9d0df}
+.gender-selector button[data-gender="feminine"].is-selected{border-color:#966b76;background:#251a1e;color:#e2b7c0}
+.gender-selector button[data-gender="masculine"].is-selected .icon{filter:invert(80%) sepia(15%) saturate(547%) hue-rotate(163deg) brightness(90%) contrast(88%)}
+.gender-selector button[data-gender="feminine"].is-selected .icon{filter:invert(80%) sepia(17%) saturate(651%) hue-rotate(296deg) brightness(91%) contrast(86%)}
 .gender-selector button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .gender-selector button span{overflow:hidden;text-overflow:ellipsis;font-size:.8rem;font-weight:700}
 [aria-invalid="true"]{border-color:#a85f4c!important}
@@ -602,8 +605,10 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
     "name name name gender gender gender"
     "origin origin appearance appearance appearance appearance"
     "personality personality objective objective fear fear";
+  align-items:start;
   gap:12px;
 }
+.form-grid--identity>.identity-field{align-content:start}
 .identity-field--name{grid-area:name}
 .identity-field--gender{grid-area:gender}
 .identity-field--origin{grid-area:origin}
@@ -713,3 +718,53 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
 .visual-summary__swatch{width:14px;height:14px;border:1px solid var(--line);border-radius:3px;display:inline-block}
 @media(min-width:621px){.creation-preview-stack{position:sticky;top:20px}}
 @media(max-width:620px){.color-layer-grid{grid-template-columns:1fr}}
+
+/* Ajustes de densidade e leitura para a criação no celular */
+.color-layer-control__suggestions{grid-area:suggestions;display:flex;gap:6px}
+.color-layer-control__suggestions button{width:28px;height:28px;padding:0;border:1px solid #5a5348;border-radius:3px;cursor:pointer}
+.color-layer-control__suggestions button.is-active{outline:2px solid var(--paper);outline-offset:2px}
+.color-layer-control__custom{grid-area:color;position:relative;display:grid!important;min-width:0;min-height:34px;place-items:center;overflow:hidden;border:1px solid var(--line);color:var(--paper)!important;font-size:.7rem!important;cursor:pointer}
+.color-layer-control__custom span{position:relative;z-index:1;pointer-events:none}
+.color-layer-control__custom input[type=color]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.color-layer-control{grid-template-areas:"label label label" "swatch suggestions suggestions" "color hex hex" "reset reset reset"}
+
+@media(max-width:620px){
+  .bottom-nav .navigation-link{min-height:72px;padding:7px}
+  .bottom-nav .navigation-link .icon{width:36px;height:36px}
+
+  .class-grid{grid-template-columns:1fr;gap:9px}
+  .class-option{display:grid;grid-template-columns:92px minmax(0,1fr);grid-template-areas:"portrait name" "portrait role" "portrait facts" "abilities abilities";column-gap:13px;padding:10px;overflow:hidden}
+  .class-option>.character-portrait{grid-area:portrait;align-self:start;margin:0}
+  .class-option>.character-portrait--compact .character-artwork{aspect-ratio:1}
+  .class-option__selection{top:7px;left:7px;max-width:78px;text-align:center}
+  .class-option>.class-option__name{grid-area:name;align-self:end;margin:4px 0 0;font-size:1.35rem;line-height:1.05}
+  .class-option>.class-option__role{grid-area:role;margin:0;padding:4px 0 9px;min-height:0;font-size:.78rem;line-height:1.35}
+  .class-option>dl{grid-area:facts;grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
+  .class-option>dl>div{padding:7px 5px}
+  .class-option>dl>div+div{border-top:0;border-left:1px solid #342f27}
+  .class-option>dl dd{font-size:.7rem}
+  .class-option__abilities{grid-area:abilities;grid-template-columns:repeat(2,minmax(0,1fr));padding:11px 4px 2px}
+  .class-option.selected{border-color:#d2b46f;background:#252016;box-shadow:inset 4px 0 var(--gold)}
+  .class-option.selected .character-portrait{outline:2px solid var(--gold);outline-offset:-2px}
+
+  .bond-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .bond-grid label{min-height:58px;padding:9px}
+  .bond-grid label:last-child:nth-child(odd){grid-column:1/-1}
+
+  .visual-builder{gap:16px}
+  .creation-preview-stack>.character-portrait .character-artwork{max-height:260px;aspect-ratio:4/3}
+  .color-layer-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .color-layer-control{grid-template-columns:1fr;grid-template-areas:"label" "swatch" "suggestions" "color" "reset";gap:7px;padding:9px}
+  .color-layer-control__label{min-height:2.4em;color:#d2c9b8;font-size:.7rem;line-height:1.2}
+  .color-layer-control__swatch{width:100%;height:34px}
+  .color-layer-control__suggestions{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+  .color-layer-control__suggestions button{width:100%;height:22px}
+  .color-layer-control__custom{min-height:32px}
+  .color-layer-control__hex{display:none}
+  .color-layer-control__reset{min-height:30px;padding:4px;font-size:.62rem;line-height:1.15}
+}
+
+@media(max-width:370px){
+  .class-option{grid-template-columns:82px minmax(0,1fr)}
+  .color-layer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
