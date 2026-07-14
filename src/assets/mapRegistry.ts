@@ -2,13 +2,30 @@ import type { IconName } from './iconRegistry'
 import { publicAssetUrl } from './publicAssetUrl'
 import type { RegionKey } from './regionRegistry'
 
-export const AUREN_VIEW_BOX = '0 0 1591.67 916.28' as const
+export const AUREN_MAP_WIDTH = 1591.7 as const
+export const AUREN_MAP_HEIGHT = 916.3 as const
+export const AUREN_RASTER_WIDTH = 1593 as const
+export const AUREN_RASTER_HEIGHT = 916 as const
+export const AUREN_VIEW_BOX = `0 0 ${AUREN_MAP_WIDTH} ${AUREN_MAP_HEIGHT}` as const
+
+// O PNG fornecido foi recortado em x=40, y=13 a partir do raster 1672x941.
+// Ele é calibrado para o plano lógico do SVG pelo tamanho renderizado, sem
+// offset ou transformação própria: X=1591.7/1593 e Y=916.3/916.
+export const AUREN_RASTER_CALIBRATION = {
+  scaleX:AUREN_MAP_WIDTH/AUREN_RASTER_WIDTH,
+  scaleY:AUREN_MAP_HEIGHT/AUREN_RASTER_HEIGHT,
+} as const
 
 export const mapRegistry = {
   auren: {
-    illustrated: publicAssetUrl('maps/mapa-realista.png'),
+    illustrated: publicAssetUrl('maps/mapa-realista-cortado.png'),
     interactive: publicAssetUrl('maps/mapa-auren.svg'),
     viewBox: AUREN_VIEW_BOX,
+    width: AUREN_MAP_WIDTH,
+    height: AUREN_MAP_HEIGHT,
+    rasterWidth: AUREN_RASTER_WIDTH,
+    rasterHeight: AUREN_RASTER_HEIGHT,
+    rasterCalibration: AUREN_RASTER_CALIBRATION,
   },
 } as const
 
