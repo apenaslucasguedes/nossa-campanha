@@ -469,6 +469,8 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
 }
 .class-option>.class-option__name{
   gap:6px;
+  margin-right:12px;
+  margin-left:12px;
   margin-top:3px;
   margin-bottom:9px;
   font-size:1.18rem;
