@@ -63,9 +63,6 @@ select,textarea{font:inherit;background:#0e0e0c;color:var(--paper);border:1px so
 @media(max-width:390px){.auren-map__region-list ul{grid-template-columns:1fr}.auren-map__toolbar output{width:100%;margin:0}.map-region-panel>div{padding:16px}}
 @media(prefers-reduced-motion:reduce){.auren-map__stage,.auren-map__svg [data-auren-region] path{transition:none!important;scroll-behavior:auto!important}}
 
-/* O painel começa junto da área ilustrada, abaixo da barra de zoom. */
-@media(min-width:901px){.map-region-panel{margin-top:48px}}
-
 /* Etapa 5: Mesa compartilhada */
 .table-page{width:min(100%,1240px);min-width:0}.table-tabs{display:none}.table-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}.table-panel{min-width:0}.table-panel--players{grid-row:span 2}.table-panel--combat,.table-panel--enemies{grid-column:1/-1;padding-top:24px;border-top:1px solid #403a30}.table-section-heading{display:flex;align-items:flex-start;gap:10px;margin-bottom:18px}.table-section-heading h2,.table-section-heading p{margin:0}.table-section-heading p{color:#9f9788;font-size:.8rem}.table-players{display:grid;gap:18px}
 .table-players-empty{display:grid;min-height:220px;place-items:center;align-content:center;gap:10px;padding:34px 24px;border:1px solid #443d31;background:#15130f;text-align:center}
@@ -923,4 +920,29 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
   .resource-control__heading label{align-items:flex-start;flex-direction:column;gap:4px}
   .fall-actions,.condition-add{grid-template-columns:1fr}
   .condition-add button{grid-column:auto}
+}
+
+/* Mesa: comandos iconográficos e uso da coluna visual. */
+.player-combat-card__aside{display:flex;width:240px;min-height:100%;flex-direction:column;background:#10100e}
+.player-combat-card__aside .fall-actions{display:grid;grid-template-columns:1fr;gap:8px;margin:auto 0 0;padding:16px}
+.player-combat-card__aside .fall-actions button{width:100%;min-width:0}
+.player-controls{display:block}
+.resource-actions{grid-template-columns:repeat(4,48px)!important;justify-content:start}
+.resource-action{position:relative;width:48px;min-width:48px;padding:0!important}
+.resource-action .icon{width:22px;height:22px}
+.resource-action__sign{position:absolute;right:5px;bottom:3px;display:grid;width:15px;height:15px;place-items:center;border:1px solid currentColor;border-radius:50%;background:#171511;font-size:.72rem;font-weight:800;line-height:1}
+.resource-action--spend{color:#d8c08b!important}
+.resource-action--recover{color:#b8c9a8!important}
+
+@media(max-width:1100px){
+  .player-combat-card__aside{width:208px}
+}
+
+@media(max-width:760px){
+  .player-combat-card__aside{width:100%;min-height:0;background:transparent}
+  .player-combat-card__aside .fall-actions{grid-template-columns:repeat(2,minmax(0,1fr));width:min(100%,260px);margin:0 auto;padding:0 0 16px}
+}
+
+@media(max-width:420px){
+  .player-combat-card__aside .fall-actions{grid-template-columns:1fr;width:min(100%,232px)}
 }
