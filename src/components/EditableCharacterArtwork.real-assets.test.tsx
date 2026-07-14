@@ -35,14 +35,15 @@ describe('EditableCharacterArtwork com os seis SVGs reais', () => {
       for (const layer of schema) {
         const group = container.querySelector(`#${layer.groupId}`)
         expect(group, `grupo ${layer.groupId} deve existir`).toBeTruthy()
-        const styledChild = group?.querySelector('[style]')
-        expect(styledChild?.getAttribute('style')).toContain(overrides[layer.key])
+        const styledTarget = group?.hasAttribute('style') ? group : group?.querySelector('[style]')
+        expect(styledTarget?.getAttribute('style')).toContain(overrides[layer.key])
 
         if (layer.shadowGroupId) {
           const shadowGroup = container.querySelector(`#${layer.shadowGroupId}`)
           const shadowChild = shadowGroup?.querySelector('[style]')
           const shadowFill = shadowChild?.getAttribute('style') ?? ''
           expect(shadowFill).not.toContain(overrides[layer.key])
+          expect(shadowFill).not.toMatch(/fill:\s*#000000/i)
           expect(shadowFill).toMatch(/fill:\s*#[0-9a-f]{6}/i)
         }
       }

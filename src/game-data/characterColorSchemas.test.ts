@@ -9,7 +9,7 @@ function svgIds(classKey: ClassKey): Set<string> {
   const filename = characterRegistry[classKey].artwork.split('/').pop() as string
   const svg = readFileSync(join(__dirname, '..', '..', 'public', 'assets', 'characters', filename), 'utf-8')
   const ids = new Set<string>()
-  const regex = /<g id="([^"]+)"/g
+  const regex = /\bid="([^"]+)"/g
   let match: RegExpExecArray | null
   while ((match = regex.exec(svg))) ids.add(match[1])
   return ids
@@ -17,7 +17,7 @@ function svgIds(classKey: ClassKey): Set<string> {
 
 describe('characterColorSchemas', () => {
   for (const classKey of Object.keys(characterColorSchemas) as ClassKey[]) {
-    it(`${classKey}: todo groupId/shadowGroupId existe no SVG real`, () => {
+    it(`${classKey}: todo alvo e sombra existem no SVG real`, () => {
       const ids = svgIds(classKey)
       for (const layer of characterColorSchemas[classKey]) {
         expect(ids.has(layer.groupId)).toBe(true)
@@ -46,5 +46,21 @@ describe('characterColorSchemas', () => {
     const keys = characterColorSchemas.arcanist.map((layer) => layer.key)
     expect(keys).toContain('outfit')
     expect(keys).toContain('cape')
+  })
+
+  it('arcanista deriva a sombra do tom de pele pelo grupo real', () => {
+    const skin = characterColorSchemas.arcanist.find((layer) => layer.key === 'skin')
+    expect(skin).toMatchObject({ groupId: 'cor_pele', shadowGroupId: 'sombra_pele', shadowProfile: 'skin' })
+  })
+
+  it('lâmina sombria expõe somente o cabelo real da própria classe', () => {
+    expect(characterColorSchemas.shadow_blade).toContainEqual(expect.objectContaining({ key: 'hair', groupId: 'cabelo' }))
+    expect(characterColorSchemas.arcanist.some((layer) => layer.groupId === 'cabelo')).toBe(false)
+    expect(characterColorSchemas.warrior.some((layer) => layer.groupId === 'cabelo')).toBe(false)
+    expect(characterColorSchemas.necromancer.some((layer) => layer.groupId === 'cabelo')).toBe(false)
+  })
+
+  it('druida expõe os olhos reais como brilho mágico', () => {
+    expect(characterColorSchemas.druid).toContainEqual(expect.objectContaining({ key: 'eyes', label: 'Olhos — brilho mágico', groupId: 'olhos' }))
   })
 })

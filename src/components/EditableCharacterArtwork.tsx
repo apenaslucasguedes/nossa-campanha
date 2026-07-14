@@ -27,10 +27,10 @@ function extractStyleFillMap(doc: Document): Map<string, string> {
 function resolveGroupColor(doc: Document, groupId: string, fillMap: Map<string, string>): string | null {
   const group = doc.getElementById(groupId)
   if (!group) return null
-  const elementWithClass = group.querySelector('[class]')
+  const elementWithClass = group.hasAttribute('class') ? group : group.querySelector('[class]')
   const className = elementWithClass?.getAttribute('class')
   if (className && fillMap.has(className)) return fillMap.get(className) ?? null
-  const elementWithFill = group.querySelector('[fill]')
+  const elementWithFill = group.hasAttribute('fill') ? group : group.querySelector('[fill]')
   return elementWithFill?.getAttribute('fill') ?? null
 }
 

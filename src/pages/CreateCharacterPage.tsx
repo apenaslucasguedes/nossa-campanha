@@ -25,8 +25,6 @@ type Draft = {
   attributes: Attributes
   form: IdentityForm
   specialties: Specialty[]
-  presentation: string
-  accessory: string
   colorsByClass: ColorsByClass
 }
 
@@ -70,8 +68,6 @@ export function CreateCharacterPage() {
   const [attributes, setAttributes] = useState<Attributes>(draft?.attributes ?? role.suggested)
   const [form, setForm] = useState<IdentityForm>(draft?.form ?? { name: '', presentation: '', origin: '', appearance: '', personality: '', objective: '', fear: '', bond: 'Amigos', customBond: '' })
   const [specialties, setSpecialties] = useState<Specialty[]>(draft?.specialties ?? [])
-  const [presentation, setPresentation] = useState(draft?.presentation ?? 'andrógina')
-  const [accessory, setAccessory] = useState(draft?.accessory ?? 'broche')
   const [colorsByClass, setColorsByClass] = useState<ColorsByClass>(draft?.colorsByClass ?? {})
   const [defaultsByClass, setDefaultsByClass] = useState<ColorsByClass>({})
   const [saving, setSaving] = useState(false)
@@ -82,13 +78,13 @@ export function CreateCharacterPage() {
 
   useEffect(() => {
     if (saving) return
-    const nextDraft: Draft = { step, classKey, attributes, form, specialties, presentation, accessory, colorsByClass }
+    const nextDraft: Draft = { step, classKey, attributes, form, specialties, colorsByClass }
     try {
       sessionStorage.setItem(DRAFT_KEY, JSON.stringify(nextDraft))
     } catch {
       // ignore storage failures
     }
-  }, [step, classKey, attributes, form, specialties, presentation, accessory, colorsByClass, saving])
+  }, [step, classKey, attributes, form, specialties, colorsByClass, saving])
 
   function setLayerColor(key: string, value: string) {
     setColorsByClass((current) => ({ ...current, [classKey]: { ...current[classKey], [key]: value } }))
@@ -139,14 +135,15 @@ export function CreateCharacterPage() {
     if (!session || !isValidAttributeDistribution(attributes) || !isValidSpecialties(specialties, role.specialties)) return
     setSaving(true)
     setError('')
+    const resolvedColors = { ...defaults, ...colors }
     const avatar: AvatarOptions = {
-      presentation,
-      accessory,
+      presentation: form.presentation.trim(),
+      accessory: 'nenhum',
       skinTone: colors.skin ?? defaults.skin ?? '#b97850',
       hair: colors.hair ?? defaults.hair ?? colors.skin ?? defaults.skin ?? '#34251e',
       primaryColor: colors.outfit ?? colors.armor ?? defaults.outfit ?? defaults.armor ?? '#7f3f36',
       secondaryColor: colors.accessory ?? colors.cape ?? defaults.accessory ?? defaults.cape ?? '#4f624c',
-      layerColors: colors,
+      layerColors: resolvedColors,
     }
     const payload: CreateCharacterInput = {
       name: form.name.trim(),
@@ -201,14 +198,10 @@ export function CreateCharacterPage() {
             setColor={setLayerColor}
             resetColor={resetLayerColor}
             resetAll={resetAllColors}
-            presentation={presentation}
-            setPresentation={setPresentation}
-            accessory={accessory}
-            setAccessory={setAccessory}
             onDefaultsLoaded={(values) => recordDefaults(classKey, values)}
           />
         ) : null}
-        {step === 6 ? <Review input={{ ...form, bond, classKey, attributes, specialties }} colors={colors} derived={derived} /> : null}
+        {step === 6 ? <Review input={{ ...form, bond, classKey, attributes, specialties }} colors={{ ...defaults, ...colors }} derived={derived} /> : null}
       </section>
       {error ? <ErrorBanner>{error}</ErrorBanner> : null}
       <div className="wizard-actions">
@@ -270,10 +263,6 @@ function VisualStep({
   setColor,
   resetColor,
   resetAll,
-  presentation,
-  setPresentation,
-  accessory,
-  setAccessory,
   onDefaultsLoaded,
 }: {
   classKey: ClassKey
@@ -282,10 +271,6 @@ function VisualStep({
   setColor: (key: string, value: string) => void
   resetColor: (key: string) => void
   resetAll: () => void
-  presentation: string
-  setPresentation: (value: string) => void
-  accessory: string
-  setAccessory: (value: string) => void
   onDefaultsLoaded: (defaults: Record<string, string>) => void
 }) {
   const schema = characterColorSchemas[classKey]
@@ -297,10 +282,6 @@ function VisualStep({
           <EditableCharacterArtwork classKey={classKey} colors={colors} onDefaultsLoaded={onDefaultsLoaded} />
         </div>
         <div className="visual-controls">
-          <div className="visual-controls__options">
-            <label>Apresentação<select value={presentation} onChange={(event) => setPresentation(event.target.value)}><option>feminina</option><option>masculina</option><option>andrógina</option></select></label>
-            <label>Acessório visível<select value={accessory} onChange={(event) => setAccessory(event.target.value)}><option value="broche">Broche</option><option value="capa">Capa</option><option value="brinco">Brinco</option><option value="nenhum">Nenhum</option></select></label>
-          </div>
           <button type="button" className="visual-controls__reset-all" onClick={resetAll}>Restaurar todas as cores padrão</button>
           <div className="color-layer-grid">
             {schema.map((layer) => (

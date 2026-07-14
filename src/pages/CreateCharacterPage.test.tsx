@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { CharacterReview } from '../components/CharacterSections'
+import { createMyCharacter } from '../data/campaigns'
 import { CreateCharacterPage } from './CreateCharacterPage'
 
 vi.mock('../auth/AuthContext', () => ({ useAuth: () => ({ session: { user: { id: 'current-user' } } }) }))
@@ -23,6 +24,7 @@ const FIXTURE_SVG = `<?xml version="1.0" encoding="UTF-8"?>
 </svg>`
 
 beforeEach(() => {
+  vi.clearAllMocks()
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ text: async () => FIXTURE_SVG }))
   sessionStorage.clear()
 })
@@ -43,15 +45,14 @@ function fillIdentityStep() {
   fireEvent.change(screen.getByLabelText(/^Medo/), { target: { value: 'Falhar.' } })
 }
 
-function advanceToVisualStep() {
+function advanceToVisualStep(className?: string, specialties = ['Atletismo', 'Intimidação', 'Sobrevivência']) {
+  if (className) fireEvent.click(screen.getByRole('button', { name: new RegExp(className) }))
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' })) // classe -> atributos
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' })) // atributos -> identidade
   fillIdentityStep()
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' })) // identidade -> vínculo
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' })) // vínculo -> especialidades
-  fireEvent.click(screen.getByRole('checkbox', { name: 'Selecionar Atletismo' }))
-  fireEvent.click(screen.getByRole('checkbox', { name: 'Selecionar Intimidação' }))
-  fireEvent.click(screen.getByRole('checkbox', { name: 'Selecionar Sobrevivência' }))
+  for (const specialty of specialties) fireEvent.click(screen.getByRole('checkbox', { name: `Selecionar ${specialty}` }))
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' })) // especialidades -> visual
 }
 
@@ -152,5 +153,29 @@ describe('criação visual de personagem', () => {
 
     render(<MemoryRouter><CreateCharacterPage /></MemoryRouter>)
     await waitFor(() => expect(screen.getByLabelText('Cor de Armadura')).toHaveValue('#654321'))
+  })
+
+  it.each([
+    ['Arcanista', ['Arcanismo', 'Investigação', 'História'], 'Tom de pele', '#a86445', 'skin'],
+    ['Lâmina Sombria', ['Furtividade', 'Acrobacia', 'Percepção'], 'Cabelo', '#315c78', 'hair'],
+    ['Druida', ['Sobrevivência', 'Medicina', 'Rastreamento'], 'Olhos — brilho mágico', '#45d7c4', 'eyes'],
+  ])('mantém a personalização específica de %s na revisão, no retorno e no payload final', async (className, specialties, label, color, key) => {
+    render(<MemoryRouter><CreateCharacterPage /></MemoryRouter>)
+    advanceToVisualStep(className, specialties)
+
+    await waitFor(() => expect(screen.getByLabelText(`Cor de ${label}`)).toBeInTheDocument())
+    expect(screen.queryByLabelText('Apresentação')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Acessório visível')).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(`Cor de ${label}`), { target: { value: color } })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+    expect(screen.getByText(label)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Voltar' }))
+    await waitFor(() => expect(screen.getByLabelText(`Cor de ${label}`)).toHaveValue(color))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Criar meu personagem' }))
+    await waitFor(() => expect(createMyCharacter).toHaveBeenCalledTimes(1))
+    expect(vi.mocked(createMyCharacter).mock.calls[0][0].avatar.layerColors).toMatchObject({ [key]: color })
   })
 })

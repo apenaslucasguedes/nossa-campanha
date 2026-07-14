@@ -12,7 +12,7 @@ export type ColorLayer = {
 
 export const characterColorSchemas: Record<ClassKey, ColorLayer[]> = {
   arcanist: [
-    { key: 'skin', label: 'Tom de pele', groupId: 'cor_pele', order: 0 },
+    { key: 'skin', label: 'Tom de pele', groupId: 'cor_pele', shadowGroupId: 'sombra_pele', shadowProfile: 'skin', order: 0 },
     { key: 'hair', label: 'Cabelo', groupId: 'cor_cabelo', shadowGroupId: 'sombra_cabelo', shadowProfile: 'hair', order: 1 },
     { key: 'outfit', label: 'Roupa', groupId: 'cor_roupa', shadowGroupId: 'sombra_roupa', shadowProfile: 'fabric', order: 2 },
     { key: 'cape', label: 'Capa', groupId: 'cor_capa', shadowGroupId: 'sombra_capa', shadowProfile: 'fabric', order: 3 },
@@ -32,6 +32,7 @@ export const characterColorSchemas: Record<ClassKey, ColorLayer[]> = {
     { key: 'hair', label: 'Cabelo', groupId: 'cabelo', shadowGroupId: 'sombra_cabelo', shadowProfile: 'hair', order: 1 },
     { key: 'outfit', label: 'Roupa', groupId: 'cor_roupa', shadowGroupId: 'sombra_roupa', shadowProfile: 'fabric', order: 2 },
     { key: 'bear', label: 'Urso', groupId: 'cor_urso', shadowGroupId: 'sombra_urso', shadowProfile: 'hair', order: 3 },
+    { key: 'eyes', label: 'Olhos — brilho mágico', groupId: 'olhos', order: 4 },
   ],
   warrior: [
     { key: 'skin', label: 'Tom de pele', groupId: 'cor_pele', shadowGroupId: 'sombra_pele', shadowProfile: 'skin', order: 0 },
@@ -42,9 +43,10 @@ export const characterColorSchemas: Record<ClassKey, ColorLayer[]> = {
   ],
   shadow_blade: [
     { key: 'skin', label: 'Tom de pele', groupId: 'cor_pele', shadowGroupId: 'sombra_pele', shadowProfile: 'skin', order: 0 },
-    { key: 'outfit', label: 'Roupa', groupId: 'cor_roupa', shadowGroupId: 'sombra_roupa', shadowProfile: 'fabric', order: 1 },
-    { key: 'accessory', label: 'Acessório', groupId: 'cor_acessorio', shadowGroupId: 'sombra_acessorio', shadowProfile: 'metal', order: 2 },
-    { key: 'blade', label: 'Lâmina', groupId: 'cor_lamina', shadowGroupId: 'sombra_lamina', shadowProfile: 'metal', order: 3 },
+    { key: 'hair', label: 'Cabelo', groupId: 'cabelo', order: 1 },
+    { key: 'outfit', label: 'Roupa', groupId: 'cor_roupa', shadowGroupId: 'sombra_roupa', shadowProfile: 'fabric', order: 2 },
+    { key: 'accessory', label: 'Acessório', groupId: 'cor_acessorio', shadowGroupId: 'sombra_acessorio', shadowProfile: 'metal', order: 3 },
+    { key: 'blade', label: 'Lâmina', groupId: 'cor_lamina', shadowGroupId: 'sombra_lamina', shadowProfile: 'metal', order: 4 },
   ],
   necromancer: [
     { key: 'skin', label: 'Tom de pele', groupId: 'cor_pele', shadowGroupId: 'sombra_pele', shadowProfile: 'skin', order: 0 },
