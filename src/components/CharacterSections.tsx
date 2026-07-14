@@ -37,7 +37,7 @@ function classIcon(classKey: ClassKey): IconName {
 
 export function CreationStepHeader({ step, title, children }: { step: number; title: string; children?: ReactNode }) {
   const icons: IconName[] = ['personagens', 'teste-d20', 'diario', 'amuleto', 'habilidades', 'personagens', 'exportar-para-gpt']
-  return <header className="creation-step-header"><span className="creation-step-header__icon"><Icon name={icons[step]} size={24} decorative /></span><div><p>Etapa {step + 1} de 7</p><h2 id="stage-title">{title}</h2>{children ? <div className="creation-step-header__help">{children}</div> : null}</div></header>
+  return <header className="creation-step-header"><span className="creation-step-header__icon"><Icon name={icons[step]} size={34} decorative /></span><div><p>Etapa {step + 1} de 7</p><h2 id="stage-title">{title}</h2>{children ? <div className="creation-step-header__help">{children}</div> : null}</div></header>
 }
 
 export function AttributeItem({ attribute, value, control }: { attribute: keyof Attributes; value: number; control?: ReactNode }) {

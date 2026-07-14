@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { CharacterReview } from '../components/CharacterSections'
@@ -21,6 +21,15 @@ describe('criação visual de personagem', () => {
       expect(screen.getByRole('button', { name: new RegExp(name) })).toBeInTheDocument()
     }
     expect(within(cards[0] as HTMLElement).getByText('Classe selecionada')).toBeInTheDocument()
+  })
+
+  it('usa três segmentos e permite zerar o atributo ao clicar novamente', () => {
+    render(<MemoryRouter><CreateCharacterPage /></MemoryRouter>)
+    fireEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+    const strength = screen.getByRole('group', { name: 'Valor de Força: 3' })
+    expect(within(strength).getAllByRole('button')).toHaveLength(3)
+    fireEvent.click(within(strength).getByRole('button', { name: 'Zerar Força' }))
+    expect(screen.getByRole('group', { name: 'Valor de Força: 0' })).toBeInTheDocument()
   })
 
   it('apresenta a revisão completa antes da criação real', () => {
