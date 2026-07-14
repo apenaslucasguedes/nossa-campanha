@@ -866,3 +866,58 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
   .dice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .dice-grid .wide{grid-column:1/-1}
 }
+
+/* Mesa: ficha operacional — estado, ações e condições em zonas distintas. */
+.player-combat-card{grid-template-columns:240px minmax(0,1fr);overflow:hidden;background:#13120f}
+.player-combat-scene{width:240px}
+.player-combat-card__body{display:flex;flex-direction:column;gap:16px;padding:24px 28px}
+.player-combat-card__body .card-heading{padding-bottom:4px}
+.player-vitals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;padding:16px 0;border-top:1px solid #383329;border-bottom:1px solid #383329}
+.player-vitals .resource-bar{min-width:0}
+.player-vitals .resource-bar+.resource-bar{margin-top:0}
+.player-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:end}
+.resource-control{display:grid;grid-template-columns:1fr;gap:10px;margin:0}
+.resource-control__heading{display:flex;align-items:end;justify-content:space-between;gap:12px}
+.resource-control__heading>span,.condition-editor__heading>span{color:#c9b987;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.resource-control__heading label{display:flex;align-items:center;gap:8px;color:#a9a08f;font-size:.72rem}
+.resource-control__heading input{width:64px;min-height:36px;padding:7px 9px;text-align:center;font-variant-numeric:tabular-nums}
+.resource-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+.resource-action{min-width:0;min-height:44px;padding:8px 10px!important;white-space:nowrap}
+.resource-confirm{margin-top:2px}
+.fall-actions{display:grid;grid-template-columns:1fr;gap:8px;margin:0}
+.fall-actions button{min-width:128px;white-space:nowrap}
+.player-combat-card .condition-editor{display:grid;gap:12px;margin:0;padding-top:20px;border-top:1px solid #383329}
+.condition-editor__heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.condition-editor__heading small{color:#918979;font-size:.75rem}
+.condition-editor .condition-list{margin:0}
+.condition-add{display:grid;grid-template-columns:minmax(160px,1fr) 132px auto;gap:8px}
+.condition-add select,.condition-add input{min-width:0;min-height:44px}
+.condition-add button{min-width:112px;min-height:44px}
+
+@media(max-width:1100px){
+  .player-combat-card{grid-template-columns:208px minmax(0,1fr)}
+  .player-combat-scene{width:208px}
+  .player-combat-card__body{padding:20px}
+  .player-vitals{gap:16px}
+  .player-controls{grid-template-columns:1fr}
+  .fall-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fall-actions button{min-width:0}
+}
+
+@media(max-width:760px){
+  .player-combat-card{display:block}
+  .player-combat-scene{width:min(100%,260px);margin:16px auto 0}
+  .player-vitals{grid-template-columns:1fr;gap:12px}
+  .resource-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .condition-add{grid-template-columns:minmax(0,1fr) minmax(112px,.65fr)}
+  .condition-add button{grid-column:1/-1}
+}
+
+@media(max-width:420px){
+  .player-combat-card__body{padding:18px 16px}
+  .player-combat-scene{width:min(100%,232px)}
+  .resource-control__heading{align-items:flex-start}
+  .resource-control__heading label{align-items:flex-start;flex-direction:column;gap:4px}
+  .fall-actions,.condition-add{grid-template-columns:1fr}
+  .condition-add button{grid-column:auto}
+}
