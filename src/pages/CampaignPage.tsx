@@ -44,14 +44,14 @@ export function CampaignPage() {
         <div className={`campaign-visual ${region ? 'campaign-visual--region' : 'campaign-visual--neutral'}`}>
           {region ? <RegionArtwork region={region} alt={`Região atual: ${region}`} loading="eager" /> : <div className="campaign-visual__neutral" aria-hidden="true" />}
           <div className="campaign-visual__overlay">
-            <span><Icon name="campanhas" size={22} decorative /> Registro de campanha</span>
-            <h2>{data.campaign.name}</h2>
-            {region ? <p>{region}</p> : <p>Região atual ainda não registrada.</p>}
+            <span><Icon name="campanhas" size={22} decorative /> Região atual</span>
+            <h2>{region ?? 'Ainda não registrada'}</h2>
+            <p>{region ? 'Cenário preservado no registro da campanha.' : 'Quando for definida, a região da mesa aparecerá aqui.'}</p>
           </div>
         </div>
         <div className="campaign-actions" aria-label="Ações da campanha">
-          <Link className="card-action" to="/mesa"><Icon name="mesa" size={18} decorative /> Acessar mesa</Link>
-          <Link className="card-action card-action--quiet" to="/personagem"><Icon name="personagens" size={18} decorative /> Ver personagens</Link>
+          <Link className="card-action" to="/mesa">Acessar mesa</Link>
+          <Link className="card-action card-action--quiet" to="/personagem">Ver personagens</Link>
         </div>
       </CampaignCard>
 
