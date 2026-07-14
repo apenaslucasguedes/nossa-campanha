@@ -3,6 +3,8 @@ import type { Attributes, Specialty } from '../types/database'
 export const DIE_SIDES = [4, 6, 8, 10, 12, 20, 100] as const
 export type DieSides = typeof DIE_SIDES[number]
 export type RollResult = { sides: DieSides; quantity: number; modifier: number; rolls: number[]; total: number; naturalD20?: number; critical: boolean; complication: boolean }
+export type DicePool = Partial<Record<DieSides, number>>
+export type DicePoolResult = { entries: { sides: DieSides; rolls: number[] }[]; quantity: number; total: number }
 
 function randomInt(max: number) {
   const cryptoApi = globalThis.crypto
@@ -20,6 +22,14 @@ export function rollDice(sides: DieSides, quantity = 1, modifier = 0, random = r
   const rolls = Array.from({ length: count }, () => random(sides) + 1)
   const naturalD20 = sides === 20 && count === 1 ? rolls[0] : undefined
   return { sides, quantity: count, modifier: Math.trunc(modifier) || 0, rolls, total: rolls.reduce((sum, value) => sum + value, 0) + (Math.trunc(modifier) || 0), naturalD20, critical: naturalD20 === 20, complication: naturalD20 === 1 }
+}
+
+export function rollDicePool(pool: DicePool, random = randomInt): DicePoolResult {
+  const entries = DIE_SIDES.flatMap((sides) => {
+    const quantity = Math.max(0, Math.min(20, Math.trunc(pool[sides] ?? 0)))
+    return quantity ? [{ sides, rolls: Array.from({ length: quantity }, () => random(sides) + 1) }] : []
+  })
+  return { entries, quantity: entries.reduce((sum, entry) => sum + entry.rolls.length, 0), total: entries.reduce((sum, entry) => sum + entry.rolls.reduce((subtotal, value) => subtotal + value, 0), 0) }
 }
 
 export const SPECIALTY_ATTRIBUTES: Partial<Record<Specialty, keyof Attributes>> = {

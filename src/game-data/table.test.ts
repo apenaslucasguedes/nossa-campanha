@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { advanceTurn, attributeModifier, DIE_SIDES, enemyStats, normalizeConditionDuration, orderInitiative, reorderInitiative, resolveEnemyAttack, rollDice, tickConditions } from './table'
+import { advanceTurn, attributeModifier, DIE_SIDES, enemyStats, normalizeConditionDuration, orderInitiative, reorderInitiative, resolveEnemyAttack, rollDice, rollDicePool, tickConditions } from './table'
 
 describe('rolagens da Mesa',()=>{
   it.each(DIE_SIDES)('mantém d%i dentro dos limites',(sides)=>{const result=rollDice(sides,4,0,max=>max-1);expect(result.rolls).toEqual(Array(4).fill(sides))})
   it('aplica modificadores e reconhece naturais',()=>{expect(rollDice(20,1,3,()=>19)).toMatchObject({total:23,critical:true,complication:false,naturalD20:20});expect(rollDice(20,1,-2,()=>0)).toMatchObject({total:-1,critical:false,complication:true,naturalD20:1})})
+  it('soma tipos diferentes sem modificador e preserva cada resultado',()=>{expect(rollDicePool({4:2,8:1,20:1},max=>max-1)).toEqual({entries:[{sides:4,rolls:[4,4]},{sides:8,rolls:[8]},{sides:20,rolls:[20]}],quantity:4,total:36})})
   it('calcula atributo sem inventar especialidade',()=>{const attrs={strength:3,agility:1,intellect:0,presence:1,instinct:2};expect(attributeModifier(attrs,'strength','Atletismo',['Atletismo'])).toBe(4);expect(attributeModifier(attrs,'strength','Atletismo',[])).toBe(3)})
 })
 describe('pendências mecânicas',()=>{

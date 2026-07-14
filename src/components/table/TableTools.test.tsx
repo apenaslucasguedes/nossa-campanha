@@ -12,12 +12,23 @@ describe('rolador de dados',()=>{
     render(<DiceRoller onRoll={onRoll}/>)
 
     expect(screen.getByText('Bandeja de rolagem')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button',{name:'Rolar'}))
+    fireEvent.click(screen.getByRole('button',{name:'Rolar 1 dado'}))
 
     expect(onRoll).toHaveBeenCalledOnce()
-    expect(onRoll.mock.calls[0][0]).toMatchObject({sides:20,quantity:1,modifier:0})
+    expect(onRoll.mock.calls[0][0]).toMatchObject({quantity:1,entries:[{sides:20}]})
     expect(screen.getByRole('button',{name:'Rolando...'})).toBeDisabled()
-    expect(screen.getByRole('status')).toHaveTextContent('1d20 + 0')
+    expect(screen.getByRole('status')).toHaveTextContent('1 dado(s) lançados')
+  })
+
+  it('monta um conjunto com tipos diferentes e não oferece modificador',()=>{
+    render(<DiceRoller/>)
+    fireEvent.click(screen.getByRole('button',{name:'Adicionar d6'}))
+    fireEvent.click(screen.getByRole('button',{name:'Adicionar d6'}))
+    fireEvent.click(screen.getByRole('button',{name:'Adicionar d8'}))
+    expect(screen.getByRole('button',{name:'Rolar 4 dados'})).toBeInTheDocument()
+    expect(screen.queryByLabelText('Modificador')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button',{name:'Remover d20'}))
+    expect(screen.getByRole('button',{name:'Rolar 3 dados'})).toBeInTheDocument()
   })
 })
 
