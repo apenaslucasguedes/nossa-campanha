@@ -66,6 +66,7 @@ export function EditableCharacterArtwork({
         if (cancelled) return
         const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml')
         if (doc.querySelector('parsererror')) throw new Error('invalid svg')
+        doc.documentElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
         const fillMap = extractStyleFillMap(doc)
         const defaults: Record<string, string> = {}
 

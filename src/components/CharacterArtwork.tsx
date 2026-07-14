@@ -91,7 +91,11 @@ export function CharacterArtwork({
     void fetch(asset.artwork)
       .then((response) => response.text())
       .then((svg) => {
-        if (!cancelled) setInlineSvg(recolorArtwork(svg, classKey, avatar))
+        if (cancelled) return
+        const doc = new DOMParser().parseFromString(recolorArtwork(svg, classKey, avatar), 'image/svg+xml')
+        const root = doc.documentElement
+        root.setAttribute('preserveAspectRatio', 'xMidYMid meet')
+        setInlineSvg(new XMLSerializer().serializeToString(doc))
       })
       .catch(() => {
         if (!cancelled) setInlineSvg('')
