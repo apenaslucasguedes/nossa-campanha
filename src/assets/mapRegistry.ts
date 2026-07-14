@@ -1,6 +1,7 @@
 import type { IconName } from './iconRegistry'
 import { publicAssetUrl } from './publicAssetUrl'
 import type { RegionKey } from './regionRegistry'
+import { regionIds, regions } from '../game-data/regions'
 
 export const AUREN_MAP_WIDTH = 1591.7 as const
 export const AUREN_MAP_HEIGHT = 916.3 as const
@@ -30,23 +31,10 @@ export const mapRegistry = {
   },
 } as const
 
-export const aurenRegions = {
-  'vale-de-ardan': { name: 'Vale de Ardan', regionKey: 'vale-de-ardan' },
-  'floresta-de-nhalor': { name: 'Floresta de Nhalor', regionKey: 'floresta-antiga' },
-  'costa-quebrada': { name: 'Costa Quebrada', regionKey: 'costa-quebrada' },
-  'cordilheira-de-ferro': { name: 'Cordilheira de Ferro', regionKey: 'cordilheira-de-ferro' },
-  'pantanos-de-varg': { name: 'Pântanos de Varg', regionKey: 'pantanos-negros' },
-  'deserto-de-sal': { name: 'Deserto de Sal', regionKey: 'deserto-branco' },
-  'mar-de-cinzas': { name: 'Mar de Cinzas', regionKey: 'terras-cinzentas' },
-  'peninsula-da-aurora': { name: 'Península da Aurora', regionKey: 'peninsula-dos-mosteiros' },
-  'estepes-do-norte': { name: 'Estepes do Norte', regionKey: 'estepes-do-norte' },
-  'arquipelago-de-vesper': { name: 'Arquipélago de Vesper', regionKey: 'arquipelago-de-vesper' },
-  'ilhas-cinzentas': { name: 'Ilhas Cinzentas', regionKey: 'ilhas-cinzentas' },
-  ormara: { name: 'Ormara', regionKey: 'ormara' },
-} as const satisfies Record<string, { name: string; regionKey: RegionKey | null }>
+export const aurenRegions = Object.fromEntries(regionIds.map((id)=>[id,{name:regions[id].name,regionKey:regions[id].assetKey as RegionKey}])) as Record<keyof typeof regions,{name:string;regionKey:RegionKey}>
 
 export type AurenRegionId = keyof typeof aurenRegions
-export const aurenRegionIds = Object.keys(aurenRegions) as AurenRegionId[]
+export const aurenRegionIds = regionIds
 export const aurenNonInteractiveLayerIds = ['divisoes-internas', 'contorno-geral'] as const
 
 export type MapMarkerKind = 'metropole'|'cidade'|'vila'|'fortaleza'|'castelo'|'acampamento'|'mosteiro'|'observatorio'|'ruinas'|'caverna'|'mina'|'porto'|'ponte'|'estrada'|'local-revelado'|'missao'|'rumor'|'monstro'|'chefe'|'corrupcao'|'armadilha'|'rota-bloqueada'

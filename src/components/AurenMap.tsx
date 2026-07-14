@@ -40,6 +40,5 @@ export function AurenMap({locations=[],selected,onSelect}:{locations?:readonly M
       {hovered?<div className="auren-map__tooltip" role="tooltip">{aurenRegions[hovered].name}</div>:null}
     </div>
     <p className="auren-map__empty">{shownLocations.length===0?'Nenhum local revelado disponível para exibição.':`${shownLocations.length} locais revelados.`}</p>
-    <details className="auren-map__region-list"><summary>Lista textual de regiões</summary><ul>{aurenRegionIds.map((id)=><li key={id}><button aria-pressed={selected===id} onClick={()=>onSelect(id)}>{aurenRegions[id].name}</button></li>)}</ul></details>
   </section>
 }
