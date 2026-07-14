@@ -63,6 +63,9 @@ select,textarea{font:inherit;background:#0e0e0c;color:var(--paper);border:1px so
 @media(max-width:390px){.auren-map__region-list ul{grid-template-columns:1fr}.auren-map__toolbar output{width:100%;margin:0}.map-region-panel>div{padding:16px}}
 @media(prefers-reduced-motion:reduce){.auren-map__stage,.auren-map__svg [data-auren-region] path{transition:none!important;scroll-behavior:auto!important}}
 
+/* O painel começa junto da área ilustrada, abaixo da barra de zoom. */
+@media(min-width:901px){.map-region-panel{margin-top:48px}}
+
 /* Etapa 5: Mesa compartilhada */
 .table-page{width:min(100%,1240px);min-width:0}.table-tabs{display:none}.table-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}.table-panel{min-width:0}.table-panel--players{grid-row:span 2}.table-panel--combat,.table-panel--enemies{grid-column:1/-1;padding-top:24px;border-top:1px solid #403a30}.table-section-heading{display:flex;align-items:flex-start;gap:10px;margin-bottom:18px}.table-section-heading h2,.table-section-heading p{margin:0}.table-section-heading p{color:#9f9788;font-size:.8rem}.table-players{display:grid;gap:18px}
 .table-players-empty{display:grid;min-height:220px;place-items:center;align-content:center;gap:10px;padding:34px 24px;border:1px solid #443d31;background:#15130f;text-align:center}
