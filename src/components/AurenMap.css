@@ -1,16 +1,26 @@
 .auren-map__water {
   position: absolute;
-  inset: 0;
+  inset: -300%;
   z-index: 0;
   pointer-events: none;
   background-color: #315b6c;
   background-repeat: repeat;
   background-position: center;
-  background-size: var(--auren-water-tile-size) var(--auren-water-tile-size);
+  background-size: 300px 300px;
 }
 
 .auren-map__stage {
   z-index: 1;
+  isolation: isolate;
+}
+
+.auren-map__viewport {
+  background-image: none;
+}
+
+.auren-map__stage .auren-map__svg [data-auren-region] path,
+.auren-map__stage .auren-map__svg path[data-auren-region] {
+  stroke: transparent !important;
 }
 
 .auren-map__viewport,
@@ -34,4 +44,10 @@ body::-webkit-scrollbar,
 .main-content::-webkit-scrollbar {
   width: 0;
   height: 0;
+}
+
+@media (max-width: 512px) {
+  .auren-map__water {
+    background-size: 460px 460px;
+  }
 }

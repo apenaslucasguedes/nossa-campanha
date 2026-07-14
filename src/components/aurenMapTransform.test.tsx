@@ -16,7 +16,10 @@ describe('transformação compartilhada do mapa de Auren',()=>{
     expect(fit.x).toBeCloseTo(0,8)
     expect(fit.y).toBeCloseTo((325-916.3*fit.scale)/2,8)
     const matrix=stageMatrix({width:390,height:325},INITIAL_AUREN_MAP_TRANSFORM)
-    expect(matrix).toEqual({a:fit.scale,d:fit.scale,e:fit.x,f:fit.y})
+    expect(matrix.a).toBeCloseTo(fit.scale*.9,8)
+    expect(matrix.d).toBeCloseTo(fit.scale*.9,8)
+    expect(matrix.e).toBeCloseTo(fit.x+fit.scale*1591.7*.05,8)
+    expect(matrix.f).toBeCloseTo(fit.y+fit.scale*916.3*.05,8)
   })
 
   it('mantém PNG, SVG e marcadores dentro do mesmo palco transformável',async()=>{
@@ -24,6 +27,7 @@ describe('transformação compartilhada do mapa de Auren',()=>{
     const {container}=render(<AurenMap selected={null} onSelect={()=>{}} locations={[{id:'local',name:'Local',kind:'cidade',x:.5,y:.5,revealed:true,regionId:'vale-de-ardan'}]}/>)
     await screen.findAllByRole('button',{name:'Vale de Ardan'})
     const stage=screen.getByTestId('map-stage')
+    expect(stage).toContainElement(container.querySelector('[data-map-layer="water"]'))
     expect(stage).toContainElement(container.querySelector('img'))
     expect(stage).toContainElement(container.querySelector('.auren-map__svg'))
     expect(stage).toContainElement(screen.getByRole('button',{name:'Local'}))
@@ -31,22 +35,22 @@ describe('transformação compartilhada do mapa de Auren',()=>{
     expect(container.querySelector('.auren-map__svg')).not.toHaveAttribute('style')
   })
 
-  it('inicia em 100%, centraliza após zoom e recalcula o fit no resize',async()=>{
+  it('inicia em 90%, centraliza após zoom e recalcula o fit no resize',async()=>{
     vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,text:async()=>svg}))
     render(<AurenMap selected={null} onSelect={()=>{}}/>)
     await screen.findAllByRole('button',{name:'Vale de Ardan'})
     const viewport=screen.getByTestId('map-viewport')
     vi.spyOn(viewport,'getBoundingClientRect').mockReturnValue({width:390,height:325,x:0,y:0,left:0,top:0,right:390,bottom:325,toJSON:()=>({})})
     fireEvent(window,new Event('resize'))
-    await waitFor(()=>expect(screen.getByTestId('map-stage').style.transform).toContain(String(390/1591.7)))
-    expect(screen.getByText('100%')).toBeInTheDocument()
+    await waitFor(()=>expect(screen.getByTestId('map-stage').style.transform).toContain(String(390/1591.7*.9)))
+    expect(screen.getByText('90%')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button',{name:'Aumentar zoom'}))
-    expect(screen.getByText('125%')).toBeInTheDocument()
+    expect(screen.getByText('115%')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button',{name:'Centralizar mapa'}))
     const stage=screen.getByTestId('map-stage')
-    expect(screen.getByText('100%')).toBeInTheDocument()
-    expect(stage).toHaveAttribute('data-map-x','0')
-    expect(stage).toHaveAttribute('data-map-y','0')
+    expect(screen.getByText('90%')).toBeInTheDocument()
+    expect(Number(stage.getAttribute('data-map-x'))).toBeCloseTo(1591.7*.05,8)
+    expect(Number(stage.getAttribute('data-map-y'))).toBeCloseTo(916.3*.05,8)
   })
 
   it('limita zoom mínimo e máximo',async()=>{
@@ -57,7 +61,7 @@ describe('transformação compartilhada do mapa de Auren',()=>{
     for(let index=0;index<12;index+=1)fireEvent.click(plus)
     expect(screen.getByText('300%')).toBeInTheDocument()
     for(let index=0;index<12;index+=1)fireEvent.click(minus)
-    expect(screen.getByText('100%')).toBeInTheDocument()
+    expect(screen.getByText('90%')).toBeInTheDocument()
   })
 
   it('distingue seleção curta de arraste sobre uma região',async()=>{
@@ -86,7 +90,7 @@ describe('transformação compartilhada do mapa de Auren',()=>{
     const wheel=new WheelEvent('wheel',{deltaY:-100,bubbles:true,cancelable:true})
     viewport.dispatchEvent(wheel)
     expect(wheel.defaultPrevented).toBe(true)
-    await waitFor(()=>expect(screen.getByText('120%')).toBeInTheDocument())
+    await waitFor(()=>expect(screen.getByText('110%')).toBeInTheDocument())
   })
 
   it('impede o arraste nativo da arte do mapa',async()=>{

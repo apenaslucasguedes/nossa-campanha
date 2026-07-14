@@ -220,7 +220,7 @@ Os caminhos, dimensões e o `viewBox` são centralizados em `src/assets/mapRegis
 
 ### Arquitetura de camadas do mapa
 
-1. `.auren-map__water` cobre todo o viewport com uma única camada e recebe `agua.jpg` diretamente em `background-image`. A imagem usa `repeat`, e o tamanho responsivo vem de `--auren-water-tile-size`, sem ampliar um único sprite nem criar elementos duplicados.
+1. `.auren-map__water` é uma única camada ampliada dentro de `.auren-map__stage` e recebe `agua.jpg` diretamente em `background-image`. A imagem usa `repeat`; como pertence ao mesmo plano transformável, acompanha zoom e pan junto com o continente, sem elementos duplicados nem aparência de fundo estático.
 2. `.auren-map__stage` é o único plano sujeito a fit, zoom e pan. Seu tamanho lógico é 1591,7 × 916,3 e ele permanece centralizado no viewport.
 3. `mapa-realista-cortado.png` ocupa toda a caixa lógica como camada artística (`z-index: 1`).
 4. `mapa-auren.svg` ocupa a mesma caixa e o mesmo plano de transformação como camada interativa (`z-index: 2`). Seus IDs reais são associados em `aurenRegions`, sem alteração da geometria.
@@ -229,6 +229,8 @@ Os caminhos, dimensões e o `viewBox` são centralizados em `src/assets/mapRegis
 IDs interativos confirmados no SVG: `vale-de-ardan`, `floresta-de-nhalor`, `costa-quebrada`, `cordilheira-de-ferro`, `pantanos-de-varg`, `deserto-de-sal`, `mar-de-cinzas`, `peninsula-da-aurora`, `estepes-do-norte`, `arquipelago-de-vesper`, `ilhas-cinzentas` e `ormara`. `divisoes-internas` e `contorno-geral` permanecem camadas passivas e são ocultadas na cópia preparada no navegador, sem alterar a geometria do arquivo original.
 
 O viewport captura a roda do mouse com um listener não passivo: enquanto o cursor está sobre o mapa, a roda controla somente o zoom. O pan usa eventos de ponteiro e bloqueia o arraste nativo do PNG e do SVG. A rolagem normal da página continua disponível fora do mapa, com a barra visual ocultada.
+
+O mapa inicia centralizado em 90%. Os paths interativos não recebem contorno no estado neutro; o traço aparece apenas em hover, foco ou seleção, evitando que o SVG redesenhe divisões sobre a arte do PNG.
 
 ## Pendências reais
 
