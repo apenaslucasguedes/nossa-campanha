@@ -794,3 +794,75 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
   .resource-confirm button{flex:1}
   .class-option__selection{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
 }
+
+/* Mesa: composição densa para estado, ações e rolagens recorrentes. */
+.table-layout{grid-template-columns:minmax(0,1fr) 360px;gap:24px}
+.table-section-heading{gap:12px;margin-bottom:16px}
+.table-section-heading h2{font-size:1.35rem;line-height:1.1}
+.table-section-heading p{margin-top:4px;font-size:.82rem;line-height:1.45}
+.table-players{gap:24px}
+.player-combat-card{grid-template-columns:224px minmax(0,1fr);align-items:start;overflow:visible}
+.player-combat-scene{position:relative;isolation:isolate;width:224px;aspect-ratio:1;overflow:hidden;background:#151a17}
+.player-combat-scene>.region-artwork{position:absolute;z-index:-3;inset:0;margin:0}
+.player-combat-scene>.region-artwork img{display:block;width:100%;height:100%;object-fit:cover}
+.player-combat-scene__shade{position:absolute;z-index:-2;inset:0;background:linear-gradient(180deg,rgba(8,10,9,.05) 22%,rgba(8,10,9,.2) 58%,rgba(8,10,9,.82))}
+.player-combat-scene>.character-portrait{position:absolute;z-index:-1;inset:0;background:transparent}
+.player-combat-scene>.character-portrait .character-artwork{height:100%;min-height:0;background:transparent}
+.player-combat-scene>.character-portrait .character-artwork img,
+.player-combat-scene>.character-portrait .character-artwork svg{width:100%;height:100%;padding:24px 8px 0;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 4px 4px rgba(0,0,0,.48))}
+.player-combat-scene>.character-portrait .character-portrait__class-icon{right:10px;bottom:40px}
+.player-combat-scene__region{position:absolute;z-index:2;right:0;bottom:0;left:0;display:flex;min-height:36px;align-items:center;gap:8px;padding:8px 12px;background:rgba(12,13,11,.82);color:#eee6d4;font-size:.75rem;font-weight:650}
+.player-combat-card__body{gap:12px;padding:24px}
+.player-combat-card__body .card-heading{margin-bottom:4px}
+.player-combat-card__body .card-heading h2{font-size:1.75rem;line-height:1}
+.resource-control{grid-template-columns:80px minmax(0,1fr);gap:12px;margin-top:4px}
+.resource-actions{gap:12px}
+.resource-actions__group{gap:8px}
+.resource-action{gap:8px;padding:8px 12px;font-size:.86rem;line-height:1.2}
+.fall-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.fall-actions button{min-height:44px;padding:8px 12px;border:1px solid #574d3d;background:#1b1813;color:#d8cebc;cursor:pointer}
+.fall-actions button:first-child{border-color:#75483d;color:#efb7a8}
+.player-combat-card .condition-editor{margin-top:12px;padding-top:16px}
+
+.dice-roller{padding:16px}
+.dice-roller>.table-section-heading{margin-bottom:16px}
+.dice-roller>.table-section-heading>.icon{width:20px;height:20px}
+.dice-roller>.table-section-heading h2{font-size:1.35rem}
+.dice-roller>.table-section-heading p{font-size:.8rem}
+.dice-tray{margin-bottom:16px;border:0;border-block:1px solid #4b4335;border-radius:0;background:#11100d}
+.dice-tray__heading{min-height:32px;padding:8px 4px;font-size:.75rem}
+.dice-tray__heading strong{font-size:.8rem}
+.dice-tray__surface{min-height:104px;gap:8px;padding:16px;box-shadow:inset 0 0 0 1px #76664b}
+.dice-tray__surface::after{inset:8px;border-radius:4px}
+.die-token{width:52px;height:52px}
+.die-token small{font-size:.62rem}
+.dice-tray__result{min-height:36px;gap:8px;padding:8px 4px;font-size:.75rem}
+.dice-grid{grid-template-columns:minmax(0,1fr) minmax(72px,.7fr) minmax(72px,.7fr);gap:12px 8px}
+.dice-grid .wide{grid-column:1/-1}
+.dice-grid label{gap:4px;font-size:.78rem}
+.dice-grid input,.dice-grid select{min-height:44px;padding:9px 10px}
+.dice-button{min-height:48px;margin-top:12px}
+
+@media(max-width:1100px){
+  .table-layout{grid-template-columns:minmax(0,1fr) 320px}
+  .player-combat-card{grid-template-columns:192px minmax(0,1fr)}
+  .player-combat-scene{width:192px}
+  .dice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dice-grid .wide{grid-column:1/-1}
+}
+
+@media(max-width:900px){
+  .table-layout{display:block}
+  .dice-roller{max-width:680px}
+  .dice-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .dice-grid .wide{grid-column:1/-1}
+}
+
+@media(max-width:620px){
+  .player-combat-card{display:block}
+  .player-combat-scene{width:min(100%,320px);margin:16px auto 0}
+  .player-combat-card__body{padding:20px 16px}
+  .resource-control{grid-template-columns:1fr}
+  .dice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dice-grid .wide{grid-column:1/-1}
+}

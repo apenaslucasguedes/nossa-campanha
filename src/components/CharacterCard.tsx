@@ -10,7 +10,7 @@ export function CharacterCard({ character, playerName, action, headingId }: { ch
   const role = getClassDefinition(character.class_key)
   return (
     <article className="character-card" data-character-class={character.class_key}>
-      <CharacterPortrait classKey={character.class_key} name={character.name} />
+      <CharacterPortrait classKey={character.class_key} name={character.name} avatar={character.avatar} />
       <div className="character-card__body">
         <div className="card-heading">
           <div>
