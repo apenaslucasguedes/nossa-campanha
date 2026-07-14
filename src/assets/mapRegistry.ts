@@ -18,6 +18,7 @@ export const AUREN_RASTER_CALIBRATION = {
 
 export const mapRegistry = {
   auren: {
+    water: publicAssetUrl('maps/agua.jpg'),
     illustrated: publicAssetUrl('maps/mapa-realista-cortado.png'),
     interactive: publicAssetUrl('maps/mapa-auren.svg'),
     viewBox: AUREN_VIEW_BOX,
@@ -39,9 +40,9 @@ export const aurenRegions = {
   'mar-de-cinzas': { name: 'Mar de Cinzas', regionKey: 'terras-cinzentas' },
   'peninsula-da-aurora': { name: 'Península da Aurora', regionKey: 'peninsula-dos-mosteiros' },
   'estepes-do-norte': { name: 'Estepes do Norte', regionKey: 'estepes-do-norte' },
-  'arquipelago-de-vesper': { name: 'Arquipélago de Vesper', regionKey: null },
-  'ilhas-cinzentas': { name: 'Ilhas Cinzentas', regionKey: null },
-  ormara: { name: 'Ormara', regionKey: null },
+  'arquipelago-de-vesper': { name: 'Arquipélago de Vesper', regionKey: 'arquipelago-de-vesper' },
+  'ilhas-cinzentas': { name: 'Ilhas Cinzentas', regionKey: 'ilhas-cinzentas' },
+  ormara: { name: 'Ormara', regionKey: 'ormara' },
 } as const satisfies Record<string, { name: string; regionKey: RegionKey | null }>
 
 export type AurenRegionId = keyof typeof aurenRegions

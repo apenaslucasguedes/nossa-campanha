@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent, type WheelEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type WheelEvent } from 'react'
 import { AUREN_MAP_HEIGHT, AUREN_MAP_WIDTH, aurenRegionIds, aurenRegions, isAurenRegionId, mapMarkerIcons, mapRegistry, type AurenRegionId } from '../assets/mapRegistry'
 import { Icon } from './Icon'
 import { isAurenActivationKey, prepareAurenSvg, visibleMapLocations, type MapLocation } from './aurenMapUtils'
@@ -6,7 +6,7 @@ import { fitAurenMap, INITIAL_AUREN_MAP_TRANSFORM, stageMatrix, zoomAurenMap, ty
 
 function RegionOverlay({svg,onSelect,onHover}:{svg:string;onSelect:(id:AurenRegionId)=>void;onHover:(id:AurenRegionId|null)=>void}){
   const findRegion=(target:EventTarget|null)=>{const element=target instanceof Element?target.closest('[data-auren-region]'):null;const id=element?.getAttribute('data-auren-region');return id&&isAurenRegionId(id)?id:null}
-  return <div className="auren-map__svg" onClick={(event)=>{const id=findRegion(event.target);if(id)onSelect(id)}} onKeyDown={(event)=>{const id=findRegion(event.target);if(id&&isAurenActivationKey(event.key)){event.preventDefault();onSelect(id)}}} onPointerOver={(event)=>onHover(findRegion(event.target))} onPointerLeave={()=>onHover(null)} dangerouslySetInnerHTML={{__html:svg}} />
+  return <div className="auren-map__svg" data-map-layer="interactive" onClick={(event)=>{const id=findRegion(event.target);if(id)onSelect(id)}} onKeyDown={(event)=>{const id=findRegion(event.target);if(id&&isAurenActivationKey(event.key)){event.preventDefault();onSelect(id)}}} onFocus={(event)=>onHover(findRegion(event.target))} onBlur={()=>onHover(null)} onPointerOver={(event)=>onHover(findRegion(event.target))} onPointerLeave={()=>onHover(null)} dangerouslySetInnerHTML={{__html:svg}} />
 }
 
 export function AurenMap({locations=[],selected,onSelect}:{locations?:readonly MapLocation[];selected:AurenRegionId|null;onSelect:(id:AurenRegionId|null)=>void}){
@@ -26,12 +26,13 @@ export function AurenMap({locations=[],selected,onSelect}:{locations?:readonly M
   const cancelDrag=()=>{drag.current=null}
   const wheel=(event:WheelEvent<HTMLDivElement>)=>{event.preventDefault();zoom(event.deltaY<0?.2:-.2)}
   const matrix=stageMatrix(viewportSize,transform)
+  const waterStyle={'--auren-water-image':`url("${mapRegistry.auren.water}")`} as CSSProperties
   return <section className="auren-map" aria-label="Mapa interativo de Auren">
     <div className="auren-map__toolbar" aria-label="Controles do mapa"><button onClick={()=>zoom(.25)} aria-label="Aumentar zoom">+</button><button onClick={()=>zoom(-.25)} aria-label="Diminuir zoom">−</button><button onClick={center}>Centralizar mapa</button><output aria-live="polite">{Math.round(transform.scale*100)}%</output></div>
-    <div ref={viewport} className="auren-map__viewport" data-testid="map-viewport" onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={cancelDrag} onWheel={wheel}>
+    <div ref={viewport} className="auren-map__viewport" data-testid="map-viewport" data-water-pattern="repeat" style={waterStyle} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={cancelDrag} onWheel={wheel}>
       {failed?<div className="auren-map__fallback" role="alert">Não foi possível carregar {failed==='svg'?'a camada interativa':'a imagem ilustrada'} do mapa.</div>:null}
       <div className="auren-map__stage" data-testid="map-stage" data-map-scale={transform.scale} data-map-x={transform.x} data-map-y={transform.y} style={{width:AUREN_MAP_WIDTH,height:AUREN_MAP_HEIGHT,transform:`matrix(${matrix.a},0,0,${matrix.d},${matrix.e},${matrix.f})`}}>
-        <img src={mapRegistry.auren.illustrated} width={mapRegistry.auren.rasterWidth} height={mapRegistry.auren.rasterHeight} alt="Mapa ilustrado de Auren" loading="lazy" draggable={false} onError={()=>setFailed('image')}/>
+        <img data-map-layer="artwork" src={mapRegistry.auren.illustrated} width={mapRegistry.auren.rasterWidth} height={mapRegistry.auren.rasterHeight} alt="Mapa ilustrado de Auren" loading="lazy" draggable={false} onError={()=>setFailed('image')}/>
         {svg?<RegionOverlay svg={svg} onSelect={onSelect} onHover={setHovered}/>:<div className="auren-map__loading" role="status">Carregando regiões…</div>}
         <div className="auren-map__markers" aria-label="Locais revelados">{shownLocations.map((location)=><button key={location.id} className="auren-map__marker" style={{left:`${location.x*100}%`,top:`${location.y*100}%`}} aria-label={location.name}><Icon name={mapMarkerIcons[location.kind]} size={24} decorative/></button>)}</div>
       </div>

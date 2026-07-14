@@ -8,9 +8,9 @@ Inventário conferido:
 
 - 72 de 72 ícones encontrados e organizados;
 - 6 de 6 personagens encontrados;
-- 9 de 9 imagens de regiões encontradas e convertidas de PNG para WebP;
+- 12 de 12 imagens de regiões e ilhas encontradas; as nove anteriores permanecem em WebP e as três novas preservam os nomes e o formato PNG fornecidos;
 - logo e favicon encontrados;
-- dois mapas de Auren foram fornecidos e copiados para `public/assets/maps/`, mantendo os originais em `assets/mapa/`.
+- o SVG interativo, o PNG recortado do continente e a textura de água foram conferidos e copiados para `public/assets/maps/`, mantendo os originais em `assets/mapa/`.
 
 Os SVGs copiados mantêm o conteúdo original. Somente os nomes e diretórios de destino foram normalizados. Os nomes consumidos pelo código usam kebab-case, sem acentos.
 
@@ -78,6 +78,9 @@ Todos os caminhos passam por `publicAssetUrl`, respeitando o `BASE_URL` usado no
 | `assets/bg-regioes/Terras Cinzentas.png` | `public/assets/regions/terras-cinzentas.webp` |
 | `assets/bg-regioes/Vale de Ardan - Floresta Antiga.png` | `public/assets/regions/vale-de-ardan-floresta-antiga.webp` |
 | `assets/bg-regioes/Vale de Ardan.png` | `public/assets/regions/vale-de-ardan.webp` |
+| `assets/bg-regioes/Arquipelago de Vesper.png` | `public/assets/regions/Arquipelago de Vesper.png` |
+| `assets/bg-regioes/Ilhas Cinzentas.png` | `public/assets/regions/Ilhas Cinzentas.png` |
+| `assets/bg-regioes/Ormara.png` | `public/assets/regions/Ormara.png` |
 
 ## Mapeamento dos ícones
 
@@ -209,13 +212,23 @@ O prefixo numérico do arquivo original foi removido no destino.
 
 | Origem | Destino | Uso |
 | --- | --- | --- |
-| `assets/mapa/mapa-realista.png` | `public/assets/maps/mapa-realista.png` | camada ilustrada |
-| `assets/mapa/mapa-auren.svg` | `public/assets/maps/mapa-auren.svg` | geometria e interação |
+| `assets/mapa/agua.jpg` | `public/assets/maps/agua.jpg` | textura repetível de água, 1000 × 1000 px |
+| `assets/mapa/mapa-realista-cortado.png` | `public/assets/maps/mapa-realista-cortado.png` | camada artística recortada e transparente, 1593 × 916 px |
+| `assets/mapa/mapa-auren.svg` | `public/assets/maps/mapa-auren.svg` | geometria e interação, `viewBox="0 0 1591.7 916.3"` |
 
-Os caminhos e o `viewBox` são centralizados em `src/assets/mapRegistry.ts`. O SVG original não foi alterado.
+Os caminhos, dimensões e o `viewBox` são centralizados em `src/assets/mapRegistry.ts`. O SVG original não é reescrito: `prepareAurenSvg` prepara somente a cópia carregada no navegador com semântica, foco e atributos de interação.
+
+### Arquitetura de camadas do mapa
+
+1. `.auren-map__viewport` cobre toda a área disponível com `agua.jpg`, usando uma única `background-image` repetida. O tamanho do padrão vem de `--auren-water-tile-size`, reduzido no breakpoint móvel sem distorcer a textura quadrada.
+2. `.auren-map__stage` é o único plano sujeito a fit, zoom e pan. Seu tamanho lógico é 1591,7 × 916,3 e ele permanece centralizado no viewport.
+3. `mapa-realista-cortado.png` ocupa toda a caixa lógica como camada artística (`z-index: 1`).
+4. `mapa-auren.svg` ocupa a mesma caixa e o mesmo plano de transformação como camada interativa (`z-index: 2`). Seus IDs reais são associados em `aurenRegions`, sem alteração da geometria.
+5. Marcadores revelados ficam acima do SVG (`z-index: 3`) e tooltips acima das camadas do mapa (`z-index: 4`). Estados de carregamento e erro ficam no topo.
+
+IDs interativos confirmados no SVG: `vale-de-ardan`, `floresta-de-nhalor`, `costa-quebrada`, `cordilheira-de-ferro`, `pantanos-de-varg`, `deserto-de-sal`, `mar-de-cinzas`, `peninsula-da-aurora`, `estepes-do-norte`, `arquipelago-de-vesper`, `ilhas-cinzentas` e `ormara`. `divisoes-internas` e `contorno-geral` permanecem camadas passivas.
 
 ## Pendências reais
 
 - Ainda não existem dados reais de locais revelados para alimentar marcadores no mapa.
-- Ormara, Ilhas Cinzentas e Arquipélago de Vesper ainda não possuem imagens regionais registradas.
 - Os originais em `assets/` só devem ser removidos depois da validação visual e funcional final.

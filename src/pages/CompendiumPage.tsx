@@ -5,6 +5,7 @@ import { Icon } from '../components/Icon'
 import { ATTRIBUTE_NAMES, type ClassDefinition } from '../game-data/classes'
 import { COMPENDIUM_SOURCE, ENEMY_ARCHETYPES, attributeName, classIcon, type CompendiumCategory } from '../game-data/compendium'
 import type { Attributes } from '../types/database'
+import { RegionArtwork } from '../components/RegionArtwork'
 
 type Detail={title:string;icon:IconName;body:ReactNode}|null
 const normalize=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
@@ -23,4 +24,4 @@ export function CompendiumPage(){const[query,setQuery]=useState(''),[category,se
  {visible('items')?<CompendiumSection id="items" title="Itens" count={0}><CompendiumEmptyState title="Itens e equipamentos" icons={['inventario','equipamento','capacete','armadura','luvas','botas','anel','amuleto','ouro']}/></CompendiumSection>:null}
  </div>{detail?<CompendiumDetail title={detail.title} icon={detail.icon} onClose={()=>setDetail(null)}>{detail.body}</CompendiumDetail>:null}</div>}
 function CharacterArtworkForDetail({definition}:{definition:ClassDefinition}){return <div className="detail-art"><Icon name={classIcon(definition.key)} size={30} decorative/><span>{definition.name}</span></div>}
-function RegionArtworkForDetail({region,name}:{region:string;name:string}){return <div className="detail-region"><img src={COMPENDIUM_SOURCE.regions.find(item=>item.key===region)?.image} alt={name}/></div>}
+function RegionArtworkForDetail({region,name}:{region:string;name:string}){return <RegionArtwork region={region} alt={name} className="detail-region" loading="lazy"/>}

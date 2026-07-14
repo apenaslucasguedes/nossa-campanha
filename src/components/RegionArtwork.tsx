@@ -14,7 +14,7 @@ export function RegionArtwork({ region, className = '', alt, loading = 'lazy' }:
   const asset = key ? regionRegistry[key] : null
 
   if (!asset || failed) {
-    return <div className={`region-artwork region-artwork--fallback ${className}`.trim()} role="img" aria-label={alt ?? 'Imagem de região indisponível'} />
+    return <div className={`region-artwork region-artwork--fallback ${className}`.trim()} role="img" aria-label={alt ?? 'Imagem de região indisponível'}><span>Imagem indisponível</span></div>
   }
 
   return (

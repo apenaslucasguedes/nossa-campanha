@@ -10,6 +10,9 @@ const REGIONS = {
   'terras-cinzentas': { name: 'Terras Cinzentas', image: publicAssetUrl('regions/terras-cinzentas.webp'), aliases: ['Terras Cinzentas', 'Mar de Cinzas'] },
   'peninsula-dos-mosteiros': { name: 'Península dos Mosteiros', image: publicAssetUrl('regions/peninsula-dos-mosteiros.webp'), aliases: ['Península dos Mosteiros', 'Peninsula dos Mosteiros', 'Península da Aurora'] },
   'estepes-do-norte': { name: 'Estepes do Norte', image: publicAssetUrl('regions/estepes-do-norte.webp'), aliases: ['Estepes do Norte'] },
+  'arquipelago-de-vesper': { name: 'Arquipélago de Vesper', image: publicAssetUrl('regions/Arquipelago de Vesper.png'), aliases: ['Arquipélago de Vesper', 'Arquipelago de Vesper'] },
+  'ilhas-cinzentas': { name: 'Ilhas Cinzentas', image: publicAssetUrl('regions/Ilhas Cinzentas.png'), aliases: ['Ilhas Cinzentas'] },
+  ormara: { name: 'Ormara', image: publicAssetUrl('regions/Ormara.png'), aliases: ['Ormara'] },
 } as const
 
 export const regionRegistry: Readonly<typeof REGIONS> = REGIONS
