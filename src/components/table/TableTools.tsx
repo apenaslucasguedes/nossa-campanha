@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from '../Icon'
 import { CharacterPortrait } from '../CharacterPortrait'
 import { ConditionBadge, ResourceBar } from '../CharacterCard'
@@ -9,7 +9,39 @@ import type { Character, Specialty } from '../../types/database'
 export const CONDITIONS=['Ferido','Exausto','Amedrontado','Envenenado','Imobilizado','Desorientado','Corrompido'] as const
 export type TableCondition=typeof CONDITIONS[number]
 export function DiceResult({result}:{result:RollResult|null}){if(!result)return null;return <output className={`dice-result ${result.critical?'is-critical':''} ${result.complication?'is-complication':''}`} aria-live="polite"><strong>{result.total}</strong><span>{result.quantity}d{result.sides}{result.modifier>=0?' + ':' - '}{Math.abs(result.modifier)} · [{result.rolls.join(', ')}]</span>{result.critical?<em>Crítico: 20 natural</em>:result.complication?<em>Complicação: 1 natural</em>:result.naturalD20?<em>Natural {result.naturalD20}</em>:null}</output>}
-export function DiceRoller({onRoll}:{onRoll?:(result:RollResult)=>void}){const[sides,setSides]=useState<DieSides>(20),[quantity,setQuantity]=useState(1),[modifier,setModifier]=useState(0),[reason,setReason]=useState(''),[result,setResult]=useState<RollResult|null>(null),[rolling,setRolling]=useState(false);function roll(){const value=rollDice(sides,quantity,modifier);setResult(value);setRolling(true);onRoll?.(value);window.setTimeout(()=>setRolling(false),220)}return <section className="dice-roller" aria-labelledby="dice-title"><div className="table-section-heading"><Icon name="teste-d20" decorative/><div><h2 id="dice-title">Rolador de dados</h2><p>Resultado calculado no navegador.</p></div></div><div className="dice-grid"><label>Dado<select value={sides} onChange={e=>setSides(Number(e.target.value) as DieSides)}>{DIE_SIDES.map(d=><option key={d} value={d}>d{d}</option>)}</select></label><label>Quantidade<input type="number" min="1" max="20" value={quantity} onChange={e=>setQuantity(Number(e.target.value))}/></label><label>Modificador<input type="number" min="-99" max="99" value={modifier} onChange={e=>setModifier(Number(e.target.value))}/></label><label className="wide">Motivo opcional<input maxLength={80} value={reason} onChange={e=>setReason(e.target.value)}/></label></div><button className={`primary-button dice-button ${rolling?'is-rolling':''}`} type="button" onClick={roll}><Icon name="teste-d20" size={19} decorative/>Rolar{reason?` · ${reason}`:''}</button><DiceResult result={result}/></section>}
+
+function DiceTray({result,sides,rolling,rollKey}:{result:RollResult|null;sides:DieSides;rolling:boolean;rollKey:number}){
+  const visibleRolls=result?.rolls.slice(0,8)??[]
+  const outcome=result?.critical?'Crítico: 20 natural':result?.complication?'Complicação: 1 natural':result?.naturalD20?`Natural ${result.naturalD20}`:null
+  return <div className={`dice-tray ${rolling?'is-rolling':''}`} aria-busy={rolling}>
+    <div className="dice-tray__heading"><span>Bandeja de rolagem</span>{result?<strong>Total {result.total}</strong>:<strong>d{sides}</strong>}</div>
+    <div className="dice-tray__surface" key={rollKey} aria-hidden="true">
+      {result?visibleRolls.map((value,index)=><span className={`die-token die-token--d${result.sides}`} key={`${rollKey}-${index}`}><small>d{result.sides}</small><b>{value}</b></span>):<span className={`die-token die-token--idle die-token--d${sides}`}><small>d{sides}</small><b>?</b></span>}
+      {result&&result.rolls.length>visibleRolls.length?<span className="dice-tray__more">+{result.rolls.length-visibleRolls.length}</span>:null}
+    </div>
+    <output className={`dice-tray__result ${result?.critical?'is-critical':''} ${result?.complication?'is-complication':''}`} aria-live="polite">
+      {result?<><span>{result.quantity}d{result.sides}{result.modifier>=0?' + ':' - '}{Math.abs(result.modifier)} · [{result.rolls.join(', ')}]</span>{outcome?<em>{outcome}</em>:null}</>:<span>Escolha os dados e faça sua rolagem.</span>}
+    </output>
+  </div>
+}
+
+export function DiceRoller({onRoll}:{onRoll?:(result:RollResult)=>void}){
+  const[sides,setSides]=useState<DieSides>(20),[quantity,setQuantity]=useState(1),[modifier,setModifier]=useState(0),[reason,setReason]=useState(''),[result,setResult]=useState<RollResult|null>(null),[rolling,setRolling]=useState(false),[rollKey,setRollKey]=useState(0)
+  const rollTimeout=useRef<number|null>(null)
+  useEffect(()=>()=>{if(rollTimeout.current!==null)window.clearTimeout(rollTimeout.current)},[])
+  function roll(){
+    const value=rollDice(sides,quantity,modifier)
+    if(rollTimeout.current!==null)window.clearTimeout(rollTimeout.current)
+    setResult(value);setRolling(true);setRollKey(key=>key+1);onRoll?.(value)
+    rollTimeout.current=window.setTimeout(()=>setRolling(false),720)
+  }
+  return <section className="dice-roller" aria-labelledby="dice-title">
+    <div className="table-section-heading"><Icon name="teste-d20" decorative/><div><h2 id="dice-title">Rolador de dados</h2><p>Role na bandeja. O resultado continua calculado no navegador.</p></div></div>
+    <DiceTray result={result} sides={sides} rolling={rolling} rollKey={rollKey}/>
+    <div className="dice-grid"><label>Dado<select value={sides} onChange={e=>setSides(Number(e.target.value) as DieSides)}>{DIE_SIDES.map(d=><option key={d} value={d}>d{d}</option>)}</select></label><label>Quantidade<input type="number" min="1" max="20" value={quantity} onChange={e=>setQuantity(Math.min(20,Math.max(1,Number(e.target.value)||1)))}/></label><label>Modificador<input type="number" min="-99" max="99" value={modifier} onChange={e=>setModifier(Math.min(99,Math.max(-99,Number(e.target.value)||0)))}/></label><label className="wide">Motivo opcional<input maxLength={80} value={reason} onChange={e=>setReason(e.target.value)}/></label></div>
+    <button className={`primary-button dice-button ${rolling?'is-rolling':''}`} type="button" onClick={roll} disabled={rolling}><Icon name="teste-d20" size={19} decorative/>{rolling?'Rolando...':`Rolar${reason?` · ${reason}`:''}`}</button>
+  </section>
+}
 export function QuickRoll({characters,onRoll}:{characters:Character[];onRoll?:(result:RollResult)=>void}){const[id,setId]=useState(characters[0]?.id??''),[attribute,setAttribute]=useState<keyof Character['attributes']>('strength'),[specialty,setSpecialty]=useState<Specialty|''>(''),[difficulty,setDifficulty]=useState(''),[result,setResult]=useState<RollResult|null>(null);const character=characters.find(c=>c.id===id);const available=character?.character_specialties.map(s=>s.name)??[];function run(){if(!character)return;const mod=attributeModifier(character.attributes,attribute,specialty||undefined,available);const value=rollDice(20,1,mod);setResult(value);onRoll?.(value)}return <section className="quick-roll"><h2>Teste de atributo</h2><div className="dice-grid"><label>Personagem<select value={id} onChange={e=>setId(e.target.value)}>{characters.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label><label>Atributo<select value={attribute} onChange={e=>setAttribute(e.target.value as keyof Character['attributes'])}>{Object.entries(ATTRIBUTE_NAMES).map(([key,name])=><option key={key} value={key}>{name}</option>)}</select></label><label>Especialidade<select value={specialty} onChange={e=>setSpecialty(e.target.value as Specialty|'')}><option value="">Nenhuma</option>{SPECIALTIES.filter(s=>available.includes(s)).map(s=><option key={s}>{s}</option>)}</select></label><label>Dificuldade opcional<input type="number" min="1" value={difficulty} onChange={e=>setDifficulty(e.target.value)}/></label></div><button type="button" onClick={run} disabled={!character}>Rolar teste</button><DiceResult result={result}/>{result&&difficulty?<p className="roll-verdict">{result.total>=Number(difficulty)?'Sucesso':'Falha'} contra dificuldade {difficulty}.</p>:null}</section>}
 
 export function ResourceControl({disabled,onDamage,onHeal,onResource}:{disabled:boolean;onDamage:(n:number)=>void;onHeal:(n:number)=>void;onResource:(n:number)=>void}){const[value,setValue]=useState(1);return <div className="resource-control"><label>Valor<input type="number" min="1" value={value} onChange={e=>setValue(Math.max(1,Number(e.target.value)||1))}/></label><div><button disabled={disabled} onClick={()=>onDamage(value)}>Dano</button><button disabled={disabled} onClick={()=>onHeal(value)}>Cura</button><button disabled={disabled} onClick={()=>onResource(-value)}>Gastar recurso</button><button disabled={disabled} onClick={()=>onResource(value)}>Recuperar</button></div></div>}
