@@ -3,11 +3,10 @@
   inset: -300%;
   z-index: 0;
   pointer-events: none;
-  background-color: #708994;
-  background-blend-mode: multiply;
+  opacity: .38;
   background-repeat: repeat;
   background-position: center;
-  background-size: 240px 240px;
+  background-size: 312px 312px;
 }
 
 .auren-map__stage {
@@ -15,8 +14,18 @@
   isolation: isolate;
 }
 
-.auren-map__viewport {
+.auren-map .auren-map__viewport {
+  background-color: #102936;
   background-image: none;
+}
+
+.auren-map__viewport::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 52% 48%, rgba(45,82,94,.08) 0%, rgba(8,17,22,.1) 68%, rgba(3,8,11,.28) 100%);
 }
 
 .auren-map__stage .auren-map__svg [data-auren-region] path,
@@ -49,6 +58,6 @@ body::-webkit-scrollbar,
 
 @media (max-width: 512px) {
   .auren-map__water {
-    background-size: 360px 360px;
+    background-size: 468px 468px;
   }
 }
