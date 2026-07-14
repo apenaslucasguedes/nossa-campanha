@@ -220,13 +220,15 @@ Os caminhos, dimensões e o `viewBox` são centralizados em `src/assets/mapRegis
 
 ### Arquitetura de camadas do mapa
 
-1. `.auren-map__viewport` cobre toda a área disponível com `agua.jpg`, usando uma única `background-image` repetida. O tamanho do padrão vem de `--auren-water-tile-size`, reduzido no breakpoint móvel sem distorcer a textura quadrada.
+1. `.auren-map__water` cobre todo o viewport com uma única camada e recebe `agua.jpg` diretamente em `background-image`. A imagem usa `repeat`, e o tamanho responsivo vem de `--auren-water-tile-size`, sem ampliar um único sprite nem criar elementos duplicados.
 2. `.auren-map__stage` é o único plano sujeito a fit, zoom e pan. Seu tamanho lógico é 1591,7 × 916,3 e ele permanece centralizado no viewport.
 3. `mapa-realista-cortado.png` ocupa toda a caixa lógica como camada artística (`z-index: 1`).
 4. `mapa-auren.svg` ocupa a mesma caixa e o mesmo plano de transformação como camada interativa (`z-index: 2`). Seus IDs reais são associados em `aurenRegions`, sem alteração da geometria.
 5. Marcadores revelados ficam acima do SVG (`z-index: 3`) e tooltips acima das camadas do mapa (`z-index: 4`). Estados de carregamento e erro ficam no topo.
 
-IDs interativos confirmados no SVG: `vale-de-ardan`, `floresta-de-nhalor`, `costa-quebrada`, `cordilheira-de-ferro`, `pantanos-de-varg`, `deserto-de-sal`, `mar-de-cinzas`, `peninsula-da-aurora`, `estepes-do-norte`, `arquipelago-de-vesper`, `ilhas-cinzentas` e `ormara`. `divisoes-internas` e `contorno-geral` permanecem camadas passivas.
+IDs interativos confirmados no SVG: `vale-de-ardan`, `floresta-de-nhalor`, `costa-quebrada`, `cordilheira-de-ferro`, `pantanos-de-varg`, `deserto-de-sal`, `mar-de-cinzas`, `peninsula-da-aurora`, `estepes-do-norte`, `arquipelago-de-vesper`, `ilhas-cinzentas` e `ormara`. `divisoes-internas` e `contorno-geral` permanecem camadas passivas e são ocultadas na cópia preparada no navegador, sem alterar a geometria do arquivo original.
+
+O viewport captura a roda do mouse com um listener não passivo: enquanto o cursor está sobre o mapa, a roda controla somente o zoom. O pan usa eventos de ponteiro e bloqueia o arraste nativo do PNG e do SVG. A rolagem normal da página continua disponível fora do mapa, com a barra visual ocultada.
 
 ## Pendências reais
 

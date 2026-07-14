@@ -77,4 +77,26 @@ describe('transformação compartilhada do mapa de Auren',()=>{
     fireEvent.pointerUp(viewport,{pointerId:2,clientX:120,clientY:120})
     expect(select).not.toHaveBeenCalled()
   })
+
+  it('captura a roda dentro do mapa sem rolar a página',async()=>{
+    vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,text:async()=>svg}))
+    render(<AurenMap selected={null} onSelect={()=>{}}/>)
+    await screen.findAllByRole('button',{name:'Vale de Ardan'})
+    const viewport=screen.getByTestId('map-viewport')
+    const wheel=new WheelEvent('wheel',{deltaY:-100,bubbles:true,cancelable:true})
+    viewport.dispatchEvent(wheel)
+    expect(wheel.defaultPrevented).toBe(true)
+    await waitFor(()=>expect(screen.getByText('120%')).toBeInTheDocument())
+  })
+
+  it('impede o arraste nativo da arte do mapa',async()=>{
+    vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,text:async()=>svg}))
+    const {container}=render(<AurenMap selected={null} onSelect={()=>{}}/>)
+    await screen.findAllByRole('button',{name:'Vale de Ardan'})
+    const artwork=container.querySelector('[data-map-layer="artwork"]')!
+    const dragStart=new Event('dragstart',{bubbles:true,cancelable:true})
+    artwork.dispatchEvent(dragStart)
+    expect(dragStart.defaultPrevented).toBe(true)
+    expect(artwork).toHaveAttribute('draggable','false')
+  })
 })
