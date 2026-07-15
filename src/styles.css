@@ -1031,6 +1031,33 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
   .condition-add button{grid-column:auto}
 }
 
+/* Mesa: escolhas mecânicas por ícone. */
+.quick-roll__identity{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.quick-roll__identity label{display:grid;gap:5px;color:#c6bca9;font-size:.78rem}
+.quick-roll__identity select{min-width:0;min-height:44px;padding:9px 10px;border-color:#4a4337;background:#11110e}
+.quick-roll__attributes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:12px}
+.quick-roll__attributes button{display:grid;min-width:0;min-height:58px;place-items:center;gap:3px;padding:7px 3px;border:1px solid #4a4337;background:#12110e;color:#a9a08f;cursor:pointer}
+.quick-roll__attributes button:hover{border-color:#74664f;color:#e6d9bf}
+.quick-roll__attributes button.is-selected{border-color:#b79a5c;background:#2a2419;color:#f1dfb6}
+.quick-roll__attributes button span{overflow:hidden;max-width:100%;font-size:.61rem;text-overflow:ellipsis;white-space:nowrap}
+.condition-list--interactive{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.condition-list--interactive li{display:block}
+.condition-list--interactive li button,.condition-list--interactive li>span{display:flex;min-height:40px;align-items:center;gap:7px;padding:7px 10px;border:1px solid #5a4a37;border-radius:20px;background:#211b14;color:#e2cfa6;cursor:pointer}
+.condition-list--interactive li button:hover{border-color:#985846;background:#2b1b17;color:#f0b6a8}
+.condition-palette{display:grid;grid-template-columns:repeat(7,44px);gap:8px;margin-top:2px}
+.condition-palette button{display:grid;width:44px;height:44px;place-items:center;border:1px solid #554b3d;background:#171511;color:#e5dbc8;cursor:pointer}
+.condition-palette button:hover:not(:disabled){border-color:#b79a5c;background:#282116}
+.condition-palette button:disabled{opacity:.28}
+
+@media(max-width:420px){
+  .quick-roll__identity{grid-template-columns:1fr}
+  .quick-roll__attributes{gap:4px}
+  .quick-roll__attributes button{min-height:52px}
+  .quick-roll__attributes button span{display:none}
+  .condition-palette{grid-template-columns:repeat(7,minmax(36px,1fr));gap:4px}
+  .condition-palette button{width:100%;height:40px}
+}
+
 /* Ficha: retrato inteiro e leitura compacta lado a lado. */
 .characters-page .protagonist-grid{
   grid-template-columns:1fr;

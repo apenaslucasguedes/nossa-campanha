@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { DiceRoller, ResourceControl } from './TableTools'
+import { ConditionEditor, DiceRoller, ResourceControl } from './TableTools'
 
 afterEach(()=>cleanup())
 
@@ -26,10 +26,23 @@ describe('rolador de dados',()=>{
     fireEvent.click(screen.getByRole('button',{name:'Adicionar d6'}))
     fireEvent.click(screen.getByRole('button',{name:'Adicionar d8'}))
     expect(screen.getByRole('button',{name:'Rolar 4 dados'})).toBeInTheDocument()
+    expect(screen.getByRole('button',{name:'Remover um d20 da bandeja'})).not.toHaveTextContent('×')
     expect(screen.queryByLabelText('Modificador')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button',{name:'Remover um d20 da bandeja'}))
     expect(screen.getByRole('button',{name:'Rolar 3 dados'})).toBeInTheDocument()
     expect(screen.queryByLabelText('Motivo opcional')).not.toBeInTheDocument()
+  })
+})
+
+describe('condições por ícone',()=>{
+  it('adiciona pelo ícone e remove ao clicar na condição ativa',()=>{
+    const onAdd=vi.fn(),onRemove=vi.fn()
+    render(<ConditionEditor disabled={false} conditions={[{id:'condition-1',character_id:'character-1',name:'Ferido',created_by:'user-1',created_at:''}]} onAdd={onAdd} onRemove={onRemove}/>)
+    fireEvent.click(screen.getByRole('button',{name:'Adicionar Exausto'}))
+    expect(onAdd).toHaveBeenCalledWith('Exausto',{kind:'indefinite'})
+    fireEvent.click(screen.getByRole('button',{name:'Remover Ferido'}))
+    expect(onRemove).toHaveBeenCalledWith('condition-1','Ferido')
+    expect(screen.queryByRole('combobox',{name:'Condição'})).not.toBeInTheDocument()
   })
 })
 
