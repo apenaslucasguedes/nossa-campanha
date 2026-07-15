@@ -21,6 +21,7 @@
   --focus: #e0b45f;
   --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --font-ui: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mechanical: var(--font-display);
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -524,7 +525,12 @@ textarea:disabled {
 .combat-controls button,
 .enemy-actions button,
 .enemy-creator button,
+.enemy-attack-panel button,
 .quick-roll__button,
+.combat-empty button,
+.fall-actions button,
+.table-section-heading > button,
+.initiative-list button,
 .character-header__actions button,
 .character-header__actions a {
   display: inline-flex;
@@ -538,7 +544,10 @@ textarea:disabled {
   background: linear-gradient(180deg, #242019, #171714);
   box-shadow: inset 0 0 0 2px rgb(7 8 7 / 52%);
   color: var(--text-primary);
-  font-weight: 700;
+  font-family: var(--font-mechanical);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.1;
   text-decoration: none;
 }
 
@@ -551,6 +560,7 @@ textarea:disabled {
 .combat-controls button:hover,
 .enemy-actions button:hover,
 .enemy-creator button:hover,
+.enemy-attack-panel button:hover,
 .quick-roll__button:hover {
   border-color: var(--border-gold-bright);
   background: var(--bg-warm);
@@ -1588,6 +1598,93 @@ body,
   width: 100%;
 }
 
+.table-layout {
+  grid-template-areas: none;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 370px);
+  align-items: start;
+}
+
+.table-primary-stack,
+.table-side-stack {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: var(--space-6);
+}
+
+.table-panel--players,
+.table-panel--combat,
+.table-panel--dice,
+.table-panel--enemies {
+  grid-area: auto;
+}
+
+.table-panel--dice {
+  position: static;
+  top: auto;
+}
+
+.table-side-stack .dice-roller {
+  padding-right: 18px;
+  padding-left: 18px;
+}
+
+.table-panel--enemies {
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+}
+
+.enemy-creator,
+.enemy-attack-panel {
+  position: static;
+  z-index: auto;
+  display: grid;
+  height: auto;
+  min-height: 0;
+  align-content: start;
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--border-dark);
+  background: var(--bg-panel-raised);
+  box-shadow: var(--shadow-inset);
+  transform: none;
+}
+
+.enemy-creator h2,
+.enemy-attack-panel h2 {
+  margin: 0;
+}
+
+.enemy-creator .dice-grid,
+.enemy-attack-panel label {
+  min-width: 0;
+}
+
+.enemy-attack-panel label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
+.enemy-attack-panel select {
+  width: 100%;
+}
+
+.enemy-creator > button,
+.enemy-attack-panel > button {
+  width: auto;
+  max-width: 100%;
+  min-height: 44px;
+  justify-self: start;
+  margin: 0;
+}
+
+.enemy-list:empty {
+  display: none;
+}
+
 .page-header,
 .page-header h1,
 .page-header .eyebrow,
@@ -1630,7 +1727,10 @@ body,
   background: linear-gradient(180deg, #242019, #171714);
   box-shadow: var(--shadow-inset);
   color: var(--text-primary);
-  font-weight: 700;
+  font-family: var(--font-mechanical);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.1;
 }
 
 .table-section-heading > button {
@@ -1659,9 +1759,30 @@ body,
 
 .initiative-list input {
   width: 88px;
+  height: 44px;
   min-width: 0;
+  min-height: 44px;
+  padding-block: 8px;
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+.combat-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.combat-controls > strong {
+  margin-right: auto;
+}
+
+.combat-controls button,
+.initiative-list button,
+.table-section-heading > button {
+  min-height: 44px;
+  padding: 10px 16px;
 }
 
 .resource-actions {
@@ -1687,22 +1808,27 @@ body,
 
 .dice-picker {
   display: grid;
-  grid-template-columns: repeat(7, minmax(42px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(7, max-content);
+  justify-content: space-between;
+  gap: 3px;
+  margin-top: var(--space-4);
+  padding: 10px 0 14px;
   overflow: visible;
 }
 
 .dice-choice {
   position: relative;
   display: grid;
-  min-width: 0;
+  width: 44px;
+  min-width: 44px;
+  min-height: 48px;
   place-items: center;
-  padding-bottom: 4px;
+  padding: 0;
 }
 
 .dice-picker .dice-choice__add {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border: 0;
   background: var(--die);
   color: #fff8e8;
@@ -1710,9 +1836,16 @@ body,
 }
 
 .dice-picker .dice-choice__add span {
-  font-size: 0.82rem;
+  font-family: var(--font-mechanical);
+  font-size: 0.78rem;
+  font-weight: 600;
   line-height: 1;
   text-shadow: 0 1px 2px rgb(0 0 0 / 68%);
+}
+
+.dice-picker .die-token--d100 {
+  width: 48px;
+  height: 48px;
 }
 
 .dice-picker .dice-choice__add:hover {
@@ -1733,8 +1866,9 @@ body,
 
 .dice-choice__count {
   position: absolute;
-  top: -5px;
-  left: calc(50% + 9px);
+  top: -4px;
+  right: -2px;
+  left: auto;
   z-index: 2;
   display: grid;
   width: 19px;
@@ -1747,6 +1881,7 @@ body,
   font-family: var(--font-ui);
   font-size: 0.64rem;
   line-height: 1;
+  pointer-events: none;
 }
 
 .auren-map__toolbar {
@@ -1778,6 +1913,26 @@ body,
 
   .map-region-panel__empty {
     min-height: 220px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .table-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .table-panel {
+    display: none;
+  }
+
+  .table-panel.is-visible {
+    display: block;
+  }
+
+  .table-panel--enemies.is-visible {
+    display: grid;
   }
 }
 
@@ -1837,6 +1992,15 @@ body,
   .table-tabs {
     width: 100%;
     max-width: 100%;
+    overflow-x: visible;
+  }
+
+  .table-tabs button {
+    flex: 1 1 25%;
+    min-width: 0;
+    padding-right: 4px;
+    padding-left: 4px;
+    font-size: 0.9rem;
   }
 
   .table-section-heading {
@@ -1846,6 +2010,36 @@ body,
   .table-section-heading > button {
     width: 100%;
     margin-left: 0;
+  }
+
+  .enemy-creator > button,
+  .enemy-attack-panel > button {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .dice-picker {
+    grid-template-columns: repeat(4, minmax(48px, 1fr));
+    justify-content: stretch;
+    gap: 12px 8px;
+    padding: 12px 4px 16px;
+  }
+
+  .dice-choice {
+    width: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    justify-self: center;
+  }
+
+  .dice-picker .dice-choice__add {
+    width: 44px;
+    height: 44px;
+  }
+
+  .dice-picker .die-token--d100 {
+    width: 48px;
+    height: 48px;
   }
 
   .resource-actions {
@@ -1891,8 +2085,4 @@ body,
     grid-column: 1 / -1;
   }
 
-  .dice-picker {
-    grid-template-columns: repeat(4, minmax(44px, 1fr));
-    gap: 10px 6px;
-  }
 }
