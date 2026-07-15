@@ -6,3 +6,17 @@ dist
 coverage
 *.tsbuildinfo
 .DS_Store
+
+# Local AI and coding tools
+.agents/
+.claude/
+.codex/
+.impeccable/
+.github/hooks/
+.github/skills/
+
+# Supabase local cache
+supabase/.temp/
+
+# Local duplicates of already versioned region assets
+docs/reference/region-originals/
