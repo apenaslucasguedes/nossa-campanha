@@ -38,8 +38,19 @@
   user-select: none;
 }
 
+html,
+body,
+.main-content,
 .auren-map__viewport {
   scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.auren-map__viewport::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .auren-map__viewport img,
