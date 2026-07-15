@@ -57,7 +57,8 @@ export function SpecialtyCard({ name, suggested = false, level, selected, contro
 
 export function CharacterHeader({ classKey, name, level, playerName, presentation, origin, currentBond, avatar, edit, remove, removing, portrait }: { classKey: ClassKey; name: string; level: number; playerName?: string; presentation: string; origin: string; currentBond?: string; avatar?: AvatarOptions; edit?: () => void; remove?: () => void; removing?: boolean; portrait?: ReactNode }) {
   const role = getClassDefinition(classKey)
-  if (!portrait && avatar) portrait = <CharacterPortrait classKey={classKey} name={name} avatar={avatar} />
+  if (!portrait && avatar) portrait = <CharacterPortrait classKey={classKey} name={name} avatar={avatar} artworkFit="cover" />
+  if (!portrait) portrait = <CharacterPortrait classKey={classKey} name={name} artworkFit="cover" />
   return <header className="character-header" data-character-class={classKey}>{portrait ?? <CharacterPortrait classKey={classKey} name={name} />}<div className="character-header__content"><p className="character-header__level"><Icon name="nivel" size={18} decorative /> Nível {level}</p><h2>{name}</h2><p className="character-header__class"><Icon name={classIcon(classKey)} size={24} decorative /><strong>{role.name}</strong><span>{role.role}</span></p><dl className="character-header__facts"><div><dt>Apresentação</dt><dd>{presentation}</dd></div><div><dt>Origem</dt><dd>{origin}</dd></div>{playerName ? <div><dt>Jogador</dt><dd>{playerName}</dd></div> : null}{currentBond ? <div><dt>Vínculo atual</dt><dd>{currentBond}</dd></div> : null}</dl><div className="character-header__actions">{edit ? <button className="character-header__edit" type="button" onClick={edit}>Editar ficha</button> : null}{remove ? <button className="character-header__delete danger-button" type="button" disabled={removing} onClick={remove}>{removing ? 'Apagando…' : 'Apagar personagem'}</button> : null}</div></div></header>
 }
 

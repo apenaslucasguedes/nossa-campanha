@@ -315,6 +315,8 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
 .character-header[data-character-class="warrior"]{--class-accent:#8e5c45}.character-header[data-character-class="arcanist"]{--class-accent:#626f91}.character-header[data-character-class="shadow_blade"]{--class-accent:#665676}.character-header[data-character-class="necromancer"]{--class-accent:#59664e}.character-header[data-character-class="bard"]{--class-accent:#92704a}.character-header[data-character-class="druid"]{--class-accent:#58705a}
 .character-header>.character-portrait{border-bottom:0;border-right:1px solid #4b4335}
 .character-header>.character-portrait .character-artwork{height:420px}
+.character-header>.character-portrait .character-artwork--cover img,
+.character-header>.character-portrait .character-artwork--cover svg{width:100%;height:100%;max-width:none;max-height:none;padding:0;object-fit:cover;object-position:center bottom}
 .character-header__content{display:flex;min-width:0;flex-direction:column;justify-content:center;padding:clamp(24px,4vw,46px)}
 .character-header__level{display:flex;align-items:center;gap:7px;margin:0;color:#c9ad71;font-size:.76rem;text-transform:uppercase;letter-spacing:.09em}
 .character-header h2{margin:8px 0 0;color:#eee6d4;font-size:clamp(2.5rem,6vw,4.5rem);line-height:.9;letter-spacing:-.03em;overflow-wrap:anywhere;text-wrap:balance}

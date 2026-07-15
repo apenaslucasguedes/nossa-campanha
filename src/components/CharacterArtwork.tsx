@@ -9,6 +9,7 @@ type CharacterArtworkProps = {
   className?: string
   loading?: 'eager' | 'lazy'
   avatar?: AvatarOptions
+  fit?: 'contain' | 'cover'
 }
 
 const classColorTargets: Record<CharacterClassKey, { skin: string[]; hair: string[]; primary: string[]; secondary: string[] }> = {
@@ -75,6 +76,7 @@ export function CharacterArtwork({
   className = '',
   loading = 'lazy',
   avatar,
+  fit = 'contain',
 }: CharacterArtworkProps) {
   const [failed, setFailed] = useState(false)
   const [inlineSvg, setInlineSvg] = useState('')
@@ -94,7 +96,7 @@ export function CharacterArtwork({
         if (cancelled) return
         const doc = new DOMParser().parseFromString(recolorArtwork(svg, classKey, avatar), 'image/svg+xml')
         const root = doc.documentElement
-        root.setAttribute('preserveAspectRatio', 'xMidYMid meet')
+        root.setAttribute('preserveAspectRatio', fit === 'cover' ? 'xMidYMax slice' : 'xMidYMid meet')
         setInlineSvg(new XMLSerializer().serializeToString(doc))
       })
       .catch(() => {
@@ -104,12 +106,12 @@ export function CharacterArtwork({
     return () => {
       cancelled = true
     }
-  }, [asset.artwork, avatar, classKey, failed])
+  }, [asset.artwork, avatar, classKey, failed, fit])
 
   if (avatar && inlineSvg && !failed) {
     return (
       <figure
-        className={`character-artwork character-artwork--inline ${className}`.trim()}
+        className={`character-artwork character-artwork--inline character-artwork--${fit} ${className}`.trim()}
         role="img"
         aria-label={description}
         dangerouslySetInnerHTML={{ __html: inlineSvg }}
@@ -118,7 +120,7 @@ export function CharacterArtwork({
   }
 
   return (
-    <figure className={`character-artwork ${failed ? 'is-fallback' : ''} ${className}`.trim()}>
+    <figure className={`character-artwork character-artwork--${fit} ${failed ? 'is-fallback' : ''} ${className}`.trim()}>
       <img
         src={failed ? brandRegistry.symbol : asset.artwork}
         alt={failed ? `Arte indisponivel para ${description}` : description}

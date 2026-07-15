@@ -11,6 +11,7 @@ type EditableCharacterArtworkProps = {
   decorative?: boolean
   onLoadError?: () => void
   onDefaultsLoaded?: (defaults: Record<string, string>) => void
+  fit?: 'contain' | 'cover'
 }
 
 function extractStyleFillMap(doc: Document): Map<string, string> {
@@ -51,6 +52,7 @@ export function EditableCharacterArtwork({
   decorative = false,
   onLoadError,
   onDefaultsLoaded,
+  fit = 'contain',
 }: EditableCharacterArtworkProps) {
   const [failed, setFailed] = useState(false)
   const [inlineSvg, setInlineSvg] = useState('')
@@ -66,7 +68,7 @@ export function EditableCharacterArtwork({
         if (cancelled) return
         const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml')
         if (doc.querySelector('parsererror')) throw new Error('invalid svg')
-        doc.documentElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
+        doc.documentElement.setAttribute('preserveAspectRatio', fit === 'cover' ? 'xMidYMax slice' : 'xMidYMid meet')
         const fillMap = extractStyleFillMap(doc)
         const defaults: Record<string, string> = {}
 
@@ -94,15 +96,15 @@ export function EditableCharacterArtwork({
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [asset.artwork, classKey, JSON.stringify(colors)])
+  }, [asset.artwork, classKey, fit, JSON.stringify(colors)])
 
   if (failed || !inlineSvg) {
-    return <figure className={`character-artwork character-artwork--editable ${className}`.trim()} style={size ? { width: size, height: size } : undefined} aria-hidden={decorative || undefined} />
+    return <figure className={`character-artwork character-artwork--editable character-artwork--${fit} ${className}`.trim()} style={size ? { width: size, height: size } : undefined} aria-hidden={decorative || undefined} />
   }
 
   return (
     <figure
-      className={`character-artwork character-artwork--editable ${className}`.trim()}
+      className={`character-artwork character-artwork--editable character-artwork--${fit} ${className}`.trim()}
       style={size ? { width: size, height: size } : undefined}
       role={decorative ? undefined : 'img'}
       aria-label={decorative ? undefined : description}
