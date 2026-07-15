@@ -150,7 +150,7 @@ select,textarea{font:inherit;background:#0e0e0c;color:var(--paper);border:1px so
 .empty-seat p{max-width:35ch;margin:7px auto 0;color:#9f9787;font-size:.86rem}
 .empty-seat .card-action{margin-top:4px}
 .empty-seat__note{color:#8f8879;font-size:.78rem}
-.selected-sheet{margin-top:48px;padding-top:36px;border-top:1px solid #4a4233;scroll-margin-top:24px}
+.selected-sheet{margin-top:0;scroll-margin-top:24px}
 .creation-preview-stack{display:grid;gap:14px}
 .class-option{overflow:hidden;padding:0;border-color:#443d31;background:#171511}
 .class-option>.character-portrait{margin-bottom:17px;border-bottom-color:#443d31;--class-accent:#705c3f}
@@ -183,7 +183,7 @@ select,textarea{font:inherit;background:#0e0e0c;color:var(--paper);border:1px so
   .character-portrait .character-artwork{height:235px}
   .character-card__body{padding:18px 16px}
   .empty-seat{min-height:330px;padding:30px 18px}
-  .selected-sheet{margin-top:36px;padding-top:28px}
+  .selected-sheet{margin-top:0}
   .class-option__role,.class-option__name,.class-option>dl,.class-option>p{margin-right:15px;margin-left:15px}
 }
 
