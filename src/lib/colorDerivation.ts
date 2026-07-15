@@ -49,7 +49,7 @@ const profileAdjustments: Record<ShadowProfile, { lightness: number; saturation:
   skin: { lightness: -15, saturation: 3, hue: -3 },
   hair: { lightness: -20, saturation: 5, hue: 0 },
   wood: { lightness: -24, saturation: 2, hue: -4 },
-  magic: { lightness: -6, saturation: 0, hue: 3 },
+  magic: { lightness: -22, saturation: 6, hue: 0 },
 }
 
 export function deriveShadow(baseColor: string, profile: ShadowProfile): string {

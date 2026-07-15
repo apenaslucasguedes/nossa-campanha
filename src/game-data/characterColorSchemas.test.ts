@@ -63,4 +63,13 @@ describe('characterColorSchemas', () => {
   it('druida expõe os olhos reais como brilho mágico', () => {
     expect(characterColorSchemas.druid).toContainEqual(expect.objectContaining({ key: 'eyes', label: 'Olhos — brilho mágico', groupId: 'olhos' }))
   })
+  it('necromante usa uma unica cor para o brilho e deriva testa e colar como sombra', () => {
+    const glow = characterColorSchemas.necromancer.find((layer) => layer.key === 'accessory')
+    expect(glow).toMatchObject({
+      label: 'Brilho mágico',
+      groupId: 'brilho_acessorios',
+      shadowGroupId: 'sombra_acessorios',
+      shadowProfile: 'magic',
+    })
+  })
 })

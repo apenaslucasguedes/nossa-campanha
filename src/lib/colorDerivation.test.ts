@@ -9,6 +9,13 @@ describe('hexToHsl / hslToHex', () => {
     const hex = hslToHex(hsl)
     expect(hex).toBe('#7f3f36')
   })
+  it('deixa a sombra do brilho magico claramente mais escura', () => {
+    const base = hexToHsl('#45d7c4')
+    const shadow = hexToHsl(deriveShadow('#45d7c4', 'magic'))
+    expect(base.l - shadow.l).toBeGreaterThanOrEqual(20)
+    expect(base.l - shadow.l).toBeLessThanOrEqual(24)
+    expect(shadow.h).toBeCloseTo(base.h, 0)
+  })
 })
 
 describe('deriveShadow', () => {
