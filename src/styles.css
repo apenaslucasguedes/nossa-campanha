@@ -310,7 +310,7 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
 .character-review__body>section>h3{margin:0 0 14px;color:#e6dcc8}
 .creation-confirmation{display:flex;align-items:flex-start;gap:12px;margin:0;padding:16px;border:1px solid #76643f;background:#211c13;color:#c8bfad}
 .creation-confirmation strong{display:block;color:#f0ddb0;font-size:1rem}
-.full-sheet{width:100%;max-width:1100px}
+.full-sheet{width:100%;max-width:none}
 .character-header{--class-accent:#705c3f;display:grid;grid-template-columns:minmax(280px,.9fr) minmax(0,1.1fr);overflow:hidden;border:1px solid #4b4335;background:#15130f}
 .character-header[data-character-class="warrior"]{--class-accent:#8e5c45}.character-header[data-character-class="arcanist"]{--class-accent:#626f91}.character-header[data-character-class="shadow_blade"]{--class-accent:#665676}.character-header[data-character-class="necromancer"]{--class-accent:#59664e}.character-header[data-character-class="bard"]{--class-accent:#92704a}.character-header[data-character-class="druid"]{--class-accent:#58705a}
 .character-header>.character-portrait{border-bottom:0;border-right:1px solid #4b4335}
