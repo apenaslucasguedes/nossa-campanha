@@ -5,7 +5,7 @@ import type { Character } from '../types/database'
 import { CharacterPortrait } from './CharacterPortrait'
 import { Icon } from './Icon'
 
-export function CharacterCard({ character, playerName, action, headingId }: { character: Character; playerName?: string; action?: ReactNode; headingId?: string }) {
+export function PortraitCard({ character, playerName, action, headingId }: { character: Character; playerName?: string; action?: ReactNode; headingId?: string }) {
   const state = character.character_states
   const role = getClassDefinition(character.class_key)
   return (
@@ -23,8 +23,8 @@ export function CharacterCard({ character, playerName, action, headingId }: { ch
         {character.current_bond ? <p className="character-card__bond"><strong>Vínculo atual</strong> {character.current_bond}</p> : null}
         {state ? (
           <div className="resource-bars">
-            <ResourceBar icon="vitalidade" label="Vitalidade" value={state.vitality_current} max={state.vitality_max} tone="vitality" />
-            <ResourceBar icon="recurso-de-classe" label={role.resource} value={state.resource_current} max={state.resource_max} tone="resource" />
+            <StatBar icon="vitalidade" label="Vitalidade" value={state.vitality_current} max={state.vitality_max} tone="vitality" />
+            <StatBar icon="recurso-de-classe" label={role.resource} value={state.resource_current} max={state.resource_max} tone="resource" />
           </div>
         ) : <p className="muted">Estado mecânico ainda não configurado.</p>}
         <div className="condition-summary">
@@ -37,7 +37,7 @@ export function CharacterCard({ character, playerName, action, headingId }: { ch
   )
 }
 
-export function ResourceBar({ icon, label, value, max, tone }: { icon: IconName; label: string; value: number; max: number; tone: 'vitality' | 'resource' }) {
+export function StatBar({ icon, label, value, max, tone }: { icon: IconName; label: string; value: number; max: number; tone: 'vitality' | 'resource' }) {
   const percent = max > 0 ? Math.max(0, Math.min(100, Math.round(value / max * 100))) : 0
   return (
     <div className={`resource-bar resource-bar--${tone}`}>
@@ -46,6 +46,9 @@ export function ResourceBar({ icon, label, value, max, tone }: { icon: IconName;
     </div>
   )
 }
+
+export const CharacterCard = PortraitCard
+export const ResourceBar = StatBar
 
 export function ConditionBadge({ name }: { name: string }) {
   const normalized = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
