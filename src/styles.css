@@ -408,7 +408,7 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
 :root{color-scheme:dark}
 .icon:not(.icon--fallback){filter:invert(84%) sepia(20%) saturate(625%) hue-rotate(359deg) brightness(94%) contrast(88%)}
 .brand{display:block;min-height:112px;padding:0 0 28px}
-.brand__full{width:100%;height:auto;max-height:none}
+.brand__full{width:88%;height:auto;max-height:none;object-position:left center}
 .brand{text-decoration:none;cursor:pointer}
 .brand:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
 .character-portrait[data-character-class="warrior"],.class-option[data-character-class="warrior"],.class-compendium-card[data-class="warrior"]{--class-accent:#9b6047}
@@ -1065,7 +1065,7 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
 }
 .characters-page .protagonist-grid .character-card{
   display:grid;
-  grid-template-columns:minmax(230px,34%) minmax(0,1fr);
+  grid-template-columns:minmax(250px,38%) minmax(0,1fr);
   min-height:370px;
 }
 .characters-page .protagonist-grid .character-portrait{
