@@ -151,6 +151,13 @@ select,textarea{font:inherit;background:#0e0e0c;color:var(--paper);border:1px so
 .empty-seat .card-action{margin-top:4px}
 .empty-seat__note{color:#8f8879;font-size:.78rem}
 .selected-sheet{margin-top:0;scroll-margin-top:24px}
+.character-switcher{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #4b4335}
+.character-switcher>span{color:#8f887a;font-size:.72rem;text-transform:uppercase;letter-spacing:.09em}
+.character-switcher>div{display:flex;min-width:0;gap:6px}
+.character-switcher button{display:flex;min-height:40px;align-items:baseline;gap:8px;padding:8px 13px;border:1px solid #4b4335;border-radius:4px;background:#15130f;color:#aaa291;cursor:pointer}
+.character-switcher button:hover{border-color:#756649;color:#eee6d4}
+.character-switcher button[aria-selected="true"]{border-color:#b79a5c;background:#1b1813;color:#eee6d4}
+.character-switcher small{color:#c9ad71;font-size:.66rem}
 .creation-preview-stack{display:grid;gap:14px}
 .class-option{overflow:hidden;padding:0;border-color:#443d31;background:#171511}
 .class-option>.character-portrait{margin-bottom:17px;border-bottom-color:#443d31;--class-accent:#705c3f}
@@ -395,6 +402,8 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
   .wizard-actions{margin-inline:-16px;padding-inline:16px}
 }
 @media(max-width:390px){
+  .character-switcher button{align-items:center;flex-direction:column;gap:0;padding-inline:8px}
+  .character-switcher button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .stepper li{min-width:102px}.stepper button{font-size:.68rem}
   .class-grid,.attribute-grid,.attribute-readout,.bond-grid{grid-template-columns:1fr}
   .class-option>.character-portrait .character-artwork{height:220px}
@@ -695,6 +704,9 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
   .specialty-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:768px){
+  .character-switcher{align-items:stretch;flex-direction:column;gap:7px}
+  .character-switcher>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .character-switcher button{justify-content:center;min-width:0}
   .class-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .form-grid--identity{
     grid-template-columns:1fr 1fr;

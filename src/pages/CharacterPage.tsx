@@ -17,10 +17,11 @@ export function CharacterPage() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null)
   if (loading) return <LoadingState />
 
   const ownCharacter = data?.characters.find((character) => character.owner_id === session?.user.id)
-  const selectedCharacter = ownCharacter ?? data?.characters[0]
+  const selectedCharacter = data?.characters.find((character) => character.id === selectedCharacterId) ?? ownCharacter ?? data?.characters[0]
   const selectedMember = data?.members.find((member) => member.user_id === selectedCharacter?.owner_id)
 
   if (!data) {
@@ -42,7 +43,12 @@ export function CharacterPage() {
     }
   }
 
-  return <div className="characters-page"><PageHeader eyebrow="Personagem" title="Ficha">Consulte e atualize sua ficha completa.</PageHeader>{error ? <ErrorBanner>{error}</ErrorBanner> : null}{selectedCharacter ? <section className="selected-sheet" id="ficha-selecionada" aria-label={`Ficha de ${selectedCharacter.name}`}>{saveError ? <ErrorBanner>{saveError}</ErrorBanner> : null}{editing && selectedCharacter.owner_id === session?.user.id ? <EditCharacter character={selectedCharacter} saving={saving} cancel={() => { setSaveError(''); setEditing(false) }} save={async (changes) => { try { setSaving(true); setSaveError(''); await updateMyCharacter(selectedCharacter.id, changes); await refresh(); setEditing(false) } catch (reason) { setSaveError(reason instanceof Error ? reason.message : 'Não foi possível salvar. O conteúdo preenchido foi preservado.') } finally { setSaving(false) } }} /> : <FilledSheet character={selectedCharacter} playerName={readPlayerName(selectedMember)} edit={selectedCharacter.owner_id === session?.user.id ? () => { if (window.confirm('Editar campos narrativos e vínculo atual? Classe e atributos permanecerão protegidos.')) setEditing(true) } : undefined} remove={selectedCharacter.owner_id === session?.user.id ? () => void removeCharacter(selectedCharacter) : undefined} removing={deleting} />}</section> : <EmptyState title="Nenhum personagem criado" icon="personagens">A criação acontece em etapas e só grava dados depois da revisão. <Link to="/criar-personagem">Criar meu personagem</Link>.</EmptyState>}</div>
+  return <div className="characters-page"><PageHeader eyebrow="Personagem" title="Ficha">Consulte e atualize sua ficha completa.</PageHeader>{error ? <ErrorBanner>{error}</ErrorBanner> : null}{selectedCharacter ? <><CharacterSwitcher characters={data.characters} selectedId={selectedCharacter.id} ownCharacterId={ownCharacter?.id} select={(characterId) => { setEditing(false); setSaveError(''); setSelectedCharacterId(characterId) }} /><section className="selected-sheet" id="ficha-selecionada" aria-label={`Ficha de ${selectedCharacter.name}`}>{saveError ? <ErrorBanner>{saveError}</ErrorBanner> : null}{editing && selectedCharacter.owner_id === session?.user.id ? <EditCharacter character={selectedCharacter} saving={saving} cancel={() => { setSaveError(''); setEditing(false) }} save={async (changes) => { try { setSaving(true); setSaveError(''); await updateMyCharacter(selectedCharacter.id, changes); await refresh(); setEditing(false) } catch (reason) { setSaveError(reason instanceof Error ? reason.message : 'Não foi possível salvar. O conteúdo preenchido foi preservado.') } finally { setSaving(false) } }} /> : <FilledSheet character={selectedCharacter} playerName={readPlayerName(selectedMember)} edit={selectedCharacter.owner_id === session?.user.id ? () => { if (window.confirm('Editar campos narrativos e vínculo atual? Classe e atributos permanecerão protegidos.')) setEditing(true) } : undefined} remove={selectedCharacter.owner_id === session?.user.id ? () => void removeCharacter(selectedCharacter) : undefined} removing={deleting} />}</section></> : <EmptyState title="Nenhum personagem criado" icon="personagens">A criação acontece em etapas e só grava dados depois da revisão. <Link to="/criar-personagem">Criar meu personagem</Link>.</EmptyState>}</div>
+}
+
+export function CharacterSwitcher({ characters, selectedId, ownCharacterId, select }: { characters: Character[]; selectedId: string; ownCharacterId?: string; select: (characterId: string) => void }) {
+  if (characters.length < 2) return null
+  return <nav className="character-switcher" aria-label="Ver personagem"><span>Ver personagem</span><div role="tablist" aria-label="Personagens da campanha">{characters.map((character) => <button key={character.id} type="button" role="tab" aria-selected={character.id === selectedId} onClick={() => select(character.id)}><span>{character.name}</span>{character.id === ownCharacterId ? <small>Sua ficha</small> : null}</button>)}</div></nav>
 }
 
 export function FilledSheet({ character, playerName, edit, remove, removing }: { character: Character; playerName?: string; edit?: () => void; remove?: () => void; removing?: boolean }) {
