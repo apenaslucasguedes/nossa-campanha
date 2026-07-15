@@ -49,7 +49,7 @@ export function DiceRoller({onRoll}:{onRoll?:(result:DicePoolResult)=>void}){
   return <section className="dice-roller" aria-labelledby="dice-title">
     <SectionTitle icon="teste-d20" id="dice-title" title="Rolador de dados" description="Role na bandeja. O resultado continua calculado no navegador." />
     <DiceTray result={result} pool={pool} rolling={rolling} rollKey={rollKey} onRemove={sides=>changeDie(sides,-1)}/>
-    <div className="dice-picker" aria-label="Adicionar dados">{DIE_SIDES.map(sides=><button type="button" className={`dice-choice__add die-token--d${sides} ${pool[sides]?'is-selected':''}`} aria-label={`Adicionar d${sides}`} key={sides} onClick={()=>changeDie(sides,1)}><span>d{sides}</span>{pool[sides]?<b>{pool[sides]}</b>:null}</button>)}</div>
+    <div className="dice-picker" aria-label="Adicionar dados">{DIE_SIDES.map(sides=><span className={`dice-choice ${pool[sides]?'is-selected':''}`} key={sides}><button type="button" className={`dice-choice__add die-token--d${sides}`} aria-label={`Adicionar d${sides}`} onClick={()=>changeDie(sides,1)}><span>d{sides}</span></button>{pool[sides]?<b className="dice-choice__count" aria-hidden="true">{pool[sides]}</b>:null}</span>)}</div>
     <MechanicalButton tone="primary" icon="teste-d20" className={`primary-button dice-button ${rolling?'is-rolling':''}`} type="button" onClick={roll} disabled={rolling||!quantity}>{rolling?'Rolando...':`Rolar ${quantity} dado${quantity===1?'':'s'}`}</MechanicalButton>
   </section>
 }

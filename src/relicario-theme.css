@@ -1534,3 +1534,336 @@ textarea:disabled {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Correções responsivas pós-redesign: uma única geometria para Mesa, mapa e shell. */
+body,
+.app-shell {
+  overflow-x: visible;
+}
+
+.main-content,
+.main-frame,
+.table-page,
+.table-layout,
+.table-panel,
+.player-combat-card,
+.player-combat-card__body,
+.map-page,
+.map-page__layout,
+.auren-map {
+  min-width: 0;
+}
+
+.table-page,
+.map-page {
+  width: 100%;
+}
+
+.page-header,
+.page-header h1,
+.page-header .eyebrow,
+.page-header .lede,
+.map-page__header,
+.map-page__header h1 {
+  max-width: 100%;
+}
+
+.page-header h1,
+.map-page__header h1 {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.player-combat-card {
+  grid-template-columns: clamp(190px, 31%, 240px) minmax(0, 1fr);
+  overflow: visible;
+}
+
+.player-combat-card__aside,
+.player-combat-scene {
+  width: 100%;
+  min-width: 0;
+}
+
+.player-combat-card__body > * {
+  min-width: 0;
+}
+
+.table-section-heading > button,
+.initiative-list button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, #242019, #171714);
+  box-shadow: var(--shadow-inset);
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.table-section-heading > button {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.table-section-heading > button:hover,
+.initiative-list button:hover:not(:disabled) {
+  border-color: var(--border-gold-bright);
+  background: var(--bg-warm);
+  color: #fff5df;
+}
+
+.initiative-list li {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) 88px repeat(3, auto);
+  align-items: center;
+  gap: 10px;
+}
+
+.initiative-list li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.initiative-list input {
+  width: 88px;
+  min-width: 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.resource-actions {
+  grid-template-columns: repeat(4, minmax(44px, 48px)) !important;
+  justify-content: start;
+}
+
+.condition-palette {
+  grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+}
+
+.condition-palette button {
+  width: 100%;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.condition-palette .icon,
+.resource-action .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.dice-picker {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(42px, 1fr));
+  gap: 8px;
+  overflow: visible;
+}
+
+.dice-choice {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  padding-bottom: 4px;
+}
+
+.dice-picker .dice-choice__add {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  background: var(--die);
+  color: #fff8e8;
+  box-shadow: none;
+}
+
+.dice-picker .dice-choice__add span {
+  font-size: 0.82rem;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 68%);
+}
+
+.dice-picker .dice-choice__add:hover {
+  border: 0;
+  background: var(--die);
+  color: #fff;
+  filter: brightness(1.13) drop-shadow(0 4px 3px rgb(0 0 0 / 42%));
+  transform: translateY(-1px);
+}
+
+.dice-picker .dice-choice__add:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.dice-choice.is-selected .dice-choice__add {
+  filter: brightness(1.08) drop-shadow(0 0 5px rgb(214 170 91 / 42%));
+}
+
+.dice-choice__count {
+  position: absolute;
+  top: -5px;
+  left: calc(50% + 9px);
+  z-index: 2;
+  display: grid;
+  width: 19px;
+  height: 19px;
+  place-items: center;
+  border: 1px solid var(--border-gold-bright);
+  border-radius: 50%;
+  background: var(--text-primary);
+  color: var(--bg-deep);
+  font-family: var(--font-ui);
+  font-size: 0.64rem;
+  line-height: 1;
+}
+
+.auren-map__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.map-region-panel {
+  overflow: visible;
+}
+
+@media (max-width: 1180px) {
+  .player-combat-card {
+    grid-template-columns: minmax(190px, 208px) minmax(0, 1fr);
+  }
+
+  .map-page__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .map-region-panel {
+    position: static;
+    min-height: 0;
+    margin-top: 0;
+  }
+
+  .map-region-panel__empty {
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 760px) {
+  .player-combat-card {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .player-combat-card__aside {
+    width: 100%;
+  }
+
+  .player-combat-scene {
+    width: 100%;
+    margin: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .player-combat-card__aside .fall-actions {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .initiative-list li {
+    grid-template-columns: minmax(0, 1fr) repeat(3, auto);
+  }
+
+  .initiative-list li > span {
+    grid-column: 1 / -1;
+  }
+
+  .initiative-list input {
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  h1,
+  .page-header h1,
+  .map-page__header h1 {
+    font-size: clamp(2rem, 7vw, 4.5rem);
+    line-height: 1;
+  }
+
+  .page-header,
+  .map-page__header {
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .page-header__rule {
+    width: 100%;
+  }
+
+  .table-tabs {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .table-section-heading {
+    flex-wrap: wrap;
+  }
+
+  .table-section-heading > button {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .resource-actions {
+    grid-template-columns: repeat(4, minmax(44px, 48px)) !important;
+  }
+
+  .condition-palette {
+    grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .main-content {
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  .main-frame {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .page-header .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+  }
+
+  .initiative-list li {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .initiative-list input,
+  .initiative-list li > span {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .initiative-list button {
+    width: 100%;
+  }
+
+  .initiative-list button:first-of-type {
+    grid-column: 1 / -1;
+  }
+
+  .dice-picker {
+    grid-template-columns: repeat(4, minmax(44px, 1fr));
+    gap: 10px 6px;
+  }
+}
