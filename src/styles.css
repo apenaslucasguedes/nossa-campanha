@@ -1038,7 +1038,7 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
 }
 .characters-page .protagonist-grid .character-card{
   display:grid;
-  grid-template-columns:minmax(250px,38%) minmax(0,1fr);
+  grid-template-columns:minmax(230px,34%) minmax(0,1fr);
   min-height:370px;
 }
 .characters-page .protagonist-grid .character-portrait{
