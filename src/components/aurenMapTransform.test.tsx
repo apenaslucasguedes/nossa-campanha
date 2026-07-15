@@ -93,6 +93,17 @@ describe('transformação compartilhada do mapa de Auren',()=>{
     await waitFor(()=>expect(screen.getByText('110%')).toBeInTheDocument())
   })
 
+  it('libera a rolagem da página quando o mapa já está no zoom mínimo',async()=>{
+    vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,text:async()=>svg}))
+    render(<AurenMap selected={null} onSelect={()=>{}}/>)
+    await screen.findAllByRole('button',{name:'Vale de Ardan'})
+    const viewport=screen.getByTestId('map-viewport')
+    const wheel=new WheelEvent('wheel',{deltaY:100,bubbles:true,cancelable:true})
+    viewport.dispatchEvent(wheel)
+    expect(wheel.defaultPrevented).toBe(false)
+    expect(screen.getByText('90%')).toBeInTheDocument()
+  })
+
   it('impede o arraste nativo da arte do mapa',async()=>{
     vi.stubGlobal('fetch',vi.fn().mockResolvedValue({ok:true,text:async()=>svg}))
     const {container}=render(<AurenMap selected={null} onSelect={()=>{}}/>)

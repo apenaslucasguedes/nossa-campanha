@@ -38,22 +38,13 @@
   user-select: none;
 }
 
-.auren-map__viewport img,
-.auren-map__viewport svg {
-  -webkit-user-drag: none;
-}
-
-html,
-body,
-.main-content {
+.auren-map__viewport {
   scrollbar-width: none;
 }
 
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-.main-content::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+.auren-map__viewport img,
+.auren-map__viewport svg {
+  -webkit-user-drag: none;
 }
 
 @media (max-width: 512px) {
