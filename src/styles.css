@@ -111,8 +111,8 @@ select,textarea{font:inherit;background:#0e0e0c;color:var(--paper);border:1px so
 .character-card[data-character-class="bard"]{--class-accent:#92704a}
 .character-card[data-character-class="druid"]{--class-accent:#58705a}
 .character-portrait{position:relative;display:grid;min-width:0;place-items:center;overflow:hidden;border-bottom:1px solid color-mix(in srgb,var(--class-accent) 55%,#332f27);background:radial-gradient(circle at 50% 24%,color-mix(in srgb,var(--class-accent) 24%,transparent),transparent 48%),#11110f}
-.character-portrait .character-artwork{display:grid;width:100%;height:270px;place-items:center}
-.character-portrait .character-artwork img{width:100%;height:100%;padding:12px 16px 0;object-fit:contain;object-position:center bottom}
+.character-portrait .character-artwork{display:flex;width:100%;height:270px;align-items:flex-end;justify-content:center;overflow:hidden}
+.character-portrait .avatar-media img,.character-portrait .avatar-media svg{display:block;width:auto;height:100%;max-width:none;max-height:100%;padding:0;object-fit:contain;object-position:center bottom;flex:none}
 .character-portrait__class-icon{position:absolute;right:12px;bottom:12px;display:grid;width:38px;height:38px;place-items:center;border:1px solid color-mix(in srgb,var(--class-accent) 70%,#6d6049);border-radius:50%;background:#171510}
 .character-portrait__class-icon .icon{width:var(--icon-size);height:var(--icon-size);object-fit:contain}
 .character-portrait--compact .character-artwork{height:150px}
@@ -315,9 +315,6 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
 .character-header[data-character-class="warrior"]{--class-accent:#8e5c45}.character-header[data-character-class="arcanist"]{--class-accent:#626f91}.character-header[data-character-class="shadow_blade"]{--class-accent:#665676}.character-header[data-character-class="necromancer"]{--class-accent:#59664e}.character-header[data-character-class="bard"]{--class-accent:#92704a}.character-header[data-character-class="druid"]{--class-accent:#58705a}
 .character-header>.character-portrait{border-bottom:0;border-right:1px solid #4b4335}
 .character-header>.character-portrait .character-artwork{height:420px}
-.character-header>.character-portrait .character-artwork--cover img,
-.character-header>.character-portrait .character-artwork--cover svg{width:100%;height:100%;max-width:none;max-height:none;padding:0;object-fit:cover;object-position:center bottom}
-.character-header[data-character-class="necromancer"]>.character-portrait .character-artwork--cover svg{transform:translateY(11%)}
 .character-header__content{display:flex;min-width:0;flex-direction:column;justify-content:center;padding:clamp(24px,4vw,46px)}
 .character-header__level{display:flex;align-items:center;gap:7px;margin:0;color:#c9ad71;font-size:.76rem;text-transform:uppercase;letter-spacing:.09em}
 .character-header h2{margin:8px 0 0;color:#eee6d4;font-size:clamp(2.5rem,6vw,4.5rem);line-height:.9;letter-spacing:-.03em;overflow-wrap:anywhere;text-wrap:balance}
@@ -430,7 +427,7 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
 .character-portrait[data-character-class="bard"],.class-option[data-character-class="bard"],.class-compendium-card[data-class="bard"]{--class-accent:#a97848}
 .character-portrait[data-character-class="druid"],.class-option[data-character-class="druid"],.class-compendium-card[data-class="druid"]{--class-accent:#5f8064}
 .character-portrait{background:radial-gradient(circle at 50% 34%,color-mix(in srgb,var(--class-accent) 42%,transparent),transparent 56%),color-mix(in srgb,var(--class-accent) 8%,#11110f)}
-.character-portrait .character-artwork svg{display:block;width:auto;height:auto;max-width:100%;max-height:100%;aspect-ratio:1;object-fit:contain}
+.character-portrait .character-artwork svg{aspect-ratio:1}
 .character-portrait__class-icon{background:color-mix(in srgb,var(--class-accent) 18%,#171510)}
 .class-option{background:linear-gradient(180deg,color-mix(in srgb,var(--class-accent) 8%,#171511),#171511 54%)}
 .class-option>.character-portrait--compact .character-artwork{height:auto;aspect-ratio:4/3}
@@ -1098,13 +1095,13 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
 }
 .characters-page .protagonist-grid .character-artwork img,
 .characters-page .protagonist-grid .character-artwork svg{
-  width:100%;
+  width:auto;
   height:100%;
-  max-width:100%;
+  max-width:none;
   max-height:100%;
-  padding:22px 18px;
+  padding:0;
   object-fit:contain;
-  object-position:center;
+  object-position:center bottom;
 }
 .characters-page .protagonist-grid .character-portrait__class-icon{
   right:14px;
