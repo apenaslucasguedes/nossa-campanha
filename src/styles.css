@@ -317,6 +317,7 @@ select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outlin
 .character-header>.character-portrait .character-artwork{height:420px}
 .character-header>.character-portrait .character-artwork--cover img,
 .character-header>.character-portrait .character-artwork--cover svg{width:100%;height:100%;max-width:none;max-height:none;padding:0;object-fit:cover;object-position:center bottom}
+.character-header[data-character-class="necromancer"]>.character-portrait .character-artwork--cover svg{transform:translateY(11%)}
 .character-header__content{display:flex;min-width:0;flex-direction:column;justify-content:center;padding:clamp(24px,4vw,46px)}
 .character-header__level{display:flex;align-items:center;gap:7px;margin:0;color:#c9ad71;font-size:.76rem;text-transform:uppercase;letter-spacing:.09em}
 .character-header h2{margin:8px 0 0;color:#eee6d4;font-size:clamp(2.5rem,6vw,4.5rem);line-height:.9;letter-spacing:-.03em;overflow-wrap:anywhere;text-wrap:balance}
