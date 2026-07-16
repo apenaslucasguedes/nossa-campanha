@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 const on = vi.fn().mockReturnThis()
 const subscribe = vi.fn().mockReturnThis()
-const channel = vi.fn((_topic: string) => ({ on, subscribe }))
+const channel = vi.fn((topic: string) => { void topic; return { on, subscribe } })
 const removeChannel = vi.fn(() => undefined)
 vi.mock('../lib/supabase', () => ({ supabase: { channel, removeChannel } }))
 
