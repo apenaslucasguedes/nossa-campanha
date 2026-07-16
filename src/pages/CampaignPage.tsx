@@ -10,7 +10,7 @@ import { updateCampaignContext, updateCampaignRegion, type CampaignContextInput 
 import { rememberLastCampaign } from '../data/lastCampaign'
 import { regionIds, regions, type RegionId } from '../game-data/regions'
 import { useCampaignParam } from '../hooks/useCampaignParam'
-import type { Campaign } from '../types/database'
+import type { Campaign, CampaignLocation } from '../types/database'
 
 const limits = { name: 120, status: 40, premise: 1200, current_summary: 2400, last_session_summary: 3200, important_notes: 3200 }
 
@@ -103,7 +103,7 @@ export function CampaignPage() {
 
   return (
     <div className="campaign-page">
-      <PageHeader eyebrow="Painel de contexto" title={data.campaign.name}>Contexto geral da campanha, protagonistas, regiao atual e pacote pronto para o GPT Mestre.</PageHeader>
+      <PageHeader eyebrow="Painel de contexto" title={data.campaign.name}>Registro vivo da campanha, protagonistas, regiao atual e continuidade da mesa.</PageHeader>
       {error ? <ErrorBanner>{error}</ErrorBanner> : null}
       {message ? <div className="action-toast" role="status">{message}</div> : null}
 
@@ -142,22 +142,8 @@ export function CampaignPage() {
           <Icon name="campanhas" size={24} decorative />
           <div><h2 id="campaign-state-title">Estado da campanha</h2><p>Resumo colado pelos jogadores para orientar continuidade narrativa.</p></div>
         </div>
-        <CampaignNarrativeRead campaign={data.campaign} />
+        <CampaignNarrativeRead campaign={data.campaign} locations={revealedLocations} campaignId={campaignId!} />
       </section>
-
-      <section className="campaign-panel" aria-labelledby="campaign-locations-title">
-        <div className="section-heading">
-          <Icon name="mapa" size={24} decorative />
-          <div><h2 id="campaign-locations-title">Locais revelados</h2><p>Dados persistidos do mapa, sem lista paralela.</p></div>
-        </div>
-        {revealedLocations.length ? <ul className="revealed-location-list">{revealedLocations.map((location) => <li key={location.id}><div><strong>{location.name}</strong><span>{regions[location.region_id].name}{location.kind ? ` - ${location.kind}` : ''}</span></div><Link className="card-action card-action--quiet" to={`/campanhas/${campaignId}/mapa?region=${location.region_id}`}>Abrir no mapa</Link></li>)}</ul> : <p className="compact-empty">Nenhum local revelado nesta campanha.</p>}
-      </section>
-
-      {canEdit ? (
-        <p className="campaign-inline-actions campaign-settings-hint">
-          <Link className="card-action card-action--quiet" to={`/campanhas/${campaignId}/configuracoes`}><Icon name="configuracoes" size={18} decorative /> Configurações da campanha e GPT Mestre</Link>
-        </p>
-      ) : null}
 
       <div className="seat-grid" aria-label="Assentos da campanha">
         {[1, 2].map((seat) => {
@@ -178,8 +164,8 @@ function CampaignIdentityRead({ campaign, regionName, canEdit, onEdit }: { campa
   return <div className="campaign-readout"><dl><div><dt>Nome</dt><dd>{campaign.name}</dd></div><div><dt>Status</dt><dd>{campaign.status || 'Nao registrado'}</dd></div><div><dt>Regiao atual</dt><dd>{regionName ?? 'Nao definida'}</dd></div><div><dt>Criada em</dt><dd>{campaign.created_at ? new Date(campaign.created_at).toLocaleDateString('pt-BR') : 'Nao disponivel'}</dd></div></dl><TextBlock title="Premissa" value={campaign.premise} /><TextBlock title="Resumo atual" value={campaign.current_summary} />{canEdit ? <button className="card-action" type="button" onClick={onEdit}>Editar identidade</button> : null}</div>
 }
 
-function CampaignNarrativeRead({ campaign }: { campaign: Campaign }) {
-  return <div className="campaign-readout campaign-readout--narrative"><TextBlock title="Resumo da ultima sessao" value={campaign.last_session_summary} /><div><h3>Objetivos ativos</h3>{campaign.active_objectives.length ? <ul>{campaign.active_objectives.map((objective) => <li key={objective}>{objective}</li>)}</ul> : <p>Nenhum objetivo registrado.</p>}</div><TextBlock title="Anotacoes importantes" value={campaign.important_notes} /></div>
+function CampaignNarrativeRead({ campaign, locations, campaignId }: { campaign: Campaign; locations: CampaignLocation[]; campaignId: string }) {
+  return <div className="campaign-readout campaign-readout--narrative"><TextBlock title="Resumo da ultima sessao" value={campaign.last_session_summary} /><div><h3>Objetivos ativos</h3>{campaign.active_objectives.length ? <ul>{campaign.active_objectives.map((objective) => <li key={objective}>{objective}</li>)}</ul> : <p>Nenhum objetivo registrado.</p>}</div><TextBlock title="Anotacoes importantes" value={campaign.important_notes} /><div className="campaign-locations-readout"><h3>Locais revelados</h3>{locations.length ? <ul className="revealed-location-list revealed-location-list--compact">{locations.map((location) => <li key={location.id}><div><strong>{location.name}</strong><span>{regions[location.region_id].name}{location.kind ? ` - ${location.kind}` : ''}</span></div><Link className="card-action card-action--quiet" to={`/campanhas/${campaignId}/mapa?region=${location.region_id}`}>Mapa</Link></li>)}</ul> : <p>Nenhum local revelado nesta campanha.</p>}</div></div>
 }
 
 function TextBlock({ title, value }: { title: string; value: string }) {

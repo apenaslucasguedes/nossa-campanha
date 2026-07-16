@@ -43,15 +43,14 @@ export function RelicarioShell() {
           {navLinks.map((link) => <SidebarNavItem key={link.to} {...link} />)}
         </nav>
         <div className="sidebar__footer">
-          {campaignId ? (
-            <NavLink to={`/campanhas/${campaignId}/configuracoes`} className="text-button sidebar__settings" aria-label="Configurações da campanha" title="Configurações da campanha">
-              <Icon name="configuracoes" size={18} decorative />
-              <span>Configurações</span>
-            </NavLink>
-          ) : null}
           <button className="text-button" onClick={() => void signOut()}>
             Encerrar sessão
           </button>
+          {campaignId ? (
+            <NavLink to={`/campanhas/${campaignId}/configuracoes`} className="sidebar__settings" aria-label="Configurações da campanha" title="Configurações da campanha">
+              <Icon name="configuracoes" size={18} decorative />
+            </NavLink>
+          ) : null}
         </div>
       </aside>
       <main className="main-content">

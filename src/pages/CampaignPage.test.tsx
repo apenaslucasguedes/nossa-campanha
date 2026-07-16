@@ -91,9 +91,9 @@ describe('CampaignPage', () => {
     expect(screen.queryByRole('button', { name: 'Baixar pacote da campanha' })).not.toBeInTheDocument()
   })
 
-  it('leva o administrador as configuracoes da campanha pela engrenagem', () => {
+  it('nao embute atalho de configuracoes na entrada principal (acesso fica na engrenagem lateral)', () => {
     renderPage(dashboard({ currentRole: 'table_admin' }))
-    expect(screen.getByRole('link', { name: /Configurações da campanha e GPT Mestre/ })).toHaveAttribute('href', '/campanhas/camp-1/configuracoes')
+    expect(screen.queryByRole('link', { name: /Configurações da campanha/ })).not.toBeInTheDocument()
   })
 
   it('nao mostra o atalho de configuracoes para jogador comum', () => {
@@ -113,7 +113,7 @@ describe('CampaignPage', () => {
   it('lista locais revelados com link para o mapa', () => {
     renderPage(dashboard({ campaign: { ...dashboard().campaign, current_region_id: 'vale-de-ardan' } }))
     expect(screen.getByText('Portao Velado')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Abrir no mapa' })).toHaveAttribute('href', '/campanhas/camp-1/mapa?region=vale-de-ardan')
+    expect(screen.getByRole('link', { name: 'Mapa' })).toHaveAttribute('href', '/campanhas/camp-1/mapa?region=vale-de-ardan')
   })
 
   it('copia o mesmo contexto Markdown e nao inclui dados privados', async () => {

@@ -32,7 +32,7 @@ describe('CampaignSettingsPage', () => {
     renderPage('table_admin')
     expect(screen.getByRole('button', { name: 'Baixar pacote da campanha' })).toBeInTheDocument()
     expect(screen.getByTestId('gpt-connections-panel')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '← Voltar à campanha' })).toHaveAttribute('href', '/campanhas/camp-1')
+    expect(screen.getByRole('button', { name: /Fechar configurações/ })).toBeInTheDocument()
   })
 
   it('esconde a conexão técnica do GPT para jogador comum', () => {

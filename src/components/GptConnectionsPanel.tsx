@@ -141,19 +141,22 @@ export function GptConnectionsPanel({ campaignId }: { campaignId: string }) {
         </ul>
       ) : null}
 
-      <div className="gpt-connection-urls">
-        {snapshotActionUrl && rollActionUrl ? (
-          <>
-            <p className="form-note">Cole a chave criada acima na configuração do GPT, usando estas URLs de Action:</p>
-            <dl>
-              <div><dt>getCampaignSnapshot</dt><dd>{snapshotActionUrl}</dd></div>
-              <div><dt>requestDiceRoll</dt><dd>{rollActionUrl}</dd></div>
-            </dl>
-          </>
-        ) : (
-          <p className="form-error">Configuração ausente: defina VITE_SUPABASE_URL para gerar as URLs de Action.</p>
-        )}
-      </div>
+      <details className="settings-advanced">
+        <summary>Opções avançadas · URLs técnicas</summary>
+        <div className="gpt-connection-urls">
+          {snapshotActionUrl && rollActionUrl ? (
+            <>
+              <p className="form-note">Cole a chave criada acima na configuração do GPT, usando estas URLs de Action:</p>
+              <dl>
+                <div><dt>getCampaignSnapshot</dt><dd>{snapshotActionUrl}</dd></div>
+                <div><dt>requestDiceRoll</dt><dd>{rollActionUrl}</dd></div>
+              </dl>
+            </>
+          ) : (
+            <p className="form-error">Configuração ausente: defina VITE_SUPABASE_URL para gerar as URLs de Action.</p>
+          )}
+        </div>
+      </details>
     </section>
   )
 }

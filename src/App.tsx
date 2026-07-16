@@ -20,7 +20,7 @@ export function App(){return <HashRouter><AuthProvider><Routes>
   <Route element={<Protected/>}>
     <Route path="/campanhas" element={<CampaignListPage/>}/>
     <Route path="/campanhas/:campaignId" element={<CampaignPage/>}/>
-    <Route path="/campanhas/:campaignId/configuracoes" element={<CampaignSettingsPage/>}/>
+    <Route path="/campanhas/:campaignId/configuracoes" element={<><CampaignPage/><CampaignSettingsPage/></>}/>
     <Route path="/campanhas/:campaignId/mesa" element={<TablePage/>}/>
     <Route path="/campanhas/:campaignId/mapa" element={<MapPage/>}/>
     <Route path="/campanhas/:campaignId/personagens" element={<CharacterPage/>}/>
