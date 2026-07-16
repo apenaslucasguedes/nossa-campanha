@@ -165,11 +165,16 @@ function CampaignIdentityRead({ campaign, regionName, canEdit, onEdit }: { campa
 }
 
 function CampaignNarrativeRead({ campaign, locations, campaignId }: { campaign: Campaign; locations: CampaignLocation[]; campaignId: string }) {
-  return <div className="campaign-readout campaign-readout--narrative"><TextBlock title="Resumo da ultima sessao" value={campaign.last_session_summary} /><div><h3>Objetivos ativos</h3>{campaign.active_objectives.length ? <ul>{campaign.active_objectives.map((objective) => <li key={objective}>{objective}</li>)}</ul> : <p>Nenhum objetivo registrado.</p>}</div><TextBlock title="Anotacoes importantes" value={campaign.important_notes} /><div className="campaign-locations-readout"><h3>Locais revelados</h3>{locations.length ? <ul className="revealed-location-list revealed-location-list--compact">{locations.map((location) => <li key={location.id}><div><strong>{location.name}</strong><span>{regions[location.region_id].name}{location.kind ? ` - ${location.kind}` : ''}</span></div><Link className="card-action card-action--quiet" to={`/campanhas/${campaignId}/mapa?region=${location.region_id}`}>Mapa</Link></li>)}</ul> : <p>Nenhum local revelado nesta campanha.</p>}</div></div>
+  const visibleObjectives = campaign.active_objectives.slice(0, 3)
+  const remaining = campaign.active_objectives.length - visibleObjectives.length
+  return <div className="campaign-readout campaign-readout--narrative"><TextBlock title="Resumo da ultima sessao" value={campaign.last_session_summary} lines={4} /><div><h3>Objetivos ativos</h3>{visibleObjectives.length ? <><ul>{visibleObjectives.map((objective) => <li key={objective}>{objective.replace(/^\s*[-•]\s*/, '')}</li>)}</ul>{remaining > 0 ? <p className="campaign-overflow-count">+ {remaining} objetivos</p> : null}</> : <p>Nenhum objetivo registrado.</p>}</div><TextBlock title="Anotacoes importantes" value={campaign.important_notes} lines={4} /><details className="campaign-locations-readout"><summary>Locais revelados <span>{locations.length || '—'}</span></summary>{locations.length ? <ul className="revealed-location-list revealed-location-list--compact">{locations.map((location) => <li key={location.id}><div><strong>{location.name}</strong><span>{regions[location.region_id].name}{location.kind ? ` - ${location.kind}` : ''}</span></div><Link className="card-action card-action--quiet" to={`/campanhas/${campaignId}/mapa?region=${location.region_id}`}>Mapa</Link></li>)}</ul> : <p>Nenhum local revelado nesta campanha.</p>}</details></div>
 }
 
-function TextBlock({ title, value }: { title: string; value: string }) {
-  return <div><h3>{title}</h3><p>{value.trim() || 'Nao registrado.'}</p></div>
+function TextBlock({ title, value, lines = 3 }: { title: string; value: string; lines?: number }) {
+  const text = value.trim() || 'Nao registrado.'
+  const [expanded, setExpanded] = useState(false)
+  const canExpand = text.length > (lines === 4 ? 220 : 150)
+  return <div className="campaign-text-block"><h3>{title}</h3><p className={expanded ? '' : `line-clamp line-clamp--${lines}`}>{text}</p>{canExpand ? <button type="button" className="campaign-text-toggle" aria-expanded={expanded} onClick={() => setExpanded((value) => !value)}>{expanded ? 'Ver menos' : 'Ver mais'}</button> : null}</div>
 }
 
 function CampaignIdentityForm({ form, setForm, validation, busy, onSave, onCancel }: { form: CampaignContextInput; setForm: (form: CampaignContextInput) => void; validation: string | null; busy: boolean; onSave: () => void; onCancel: () => void }) {

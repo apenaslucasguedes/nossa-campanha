@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -38,5 +38,12 @@ describe('CampaignSettingsPage', () => {
   it('esconde a conexão técnica do GPT para jogador comum', () => {
     renderPage('player')
     expect(screen.queryByTestId('gpt-connections-panel')).not.toBeInTheDocument()
+  })
+
+  it('fecha o drawer por Escape sem cair no ErrorBoundary', () => {
+    renderPage('table_admin')
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 })

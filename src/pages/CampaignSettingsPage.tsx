@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { GptConnectionsPanel } from '../components/GptConnectionsPanel'
@@ -14,15 +14,32 @@ export function CampaignSettingsPage() {
   const navigate = useNavigate()
   const { data, loading, error } = useCampaignParam(campaignId, session?.user.id)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const drawerRef = useRef<HTMLDivElement>(null)
 
   const closeTo = campaignId ? `/campanhas/${campaignId}` : '/campanhas'
   function close() { navigate(closeTo) }
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null
+    const drawer = drawerRef.current
+    drawer?.querySelector<HTMLElement>('button, a, input, select, textarea')?.focus()
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') { event.preventDefault(); navigate(closeTo); return }
+      if (event.key !== 'Tab' || !drawer) return
+      const focusable = [...drawer.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary')]
+      if (!focusable.length) return
+      const first = focusable[0], last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => { document.removeEventListener('keydown', onKeyDown); previous?.focus() }
+  }, [closeTo, navigate])
 
   if (loading) return <LoadingState />
   if (!data) {
     return (
       <div className="settings-overlay">
-        <div className="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settings-drawer-title">
+        <div ref={drawerRef} className="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settings-drawer-title">
           <header className="settings-drawer__header">
             <div>
               <span className="settings-drawer__eyebrow"><Icon name="configuracoes" size={16} decorative /> Configurações</span>
@@ -48,7 +65,7 @@ export function CampaignSettingsPage() {
 
   return (
     <div className="settings-overlay">
-      <div className="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settings-drawer-title">
+      <div ref={drawerRef} className="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settings-drawer-title">
         <header className="settings-drawer__header">
           <div>
             <span className="settings-drawer__eyebrow"><Icon name="configuracoes" size={16} decorative /> Configurações da campanha</span>

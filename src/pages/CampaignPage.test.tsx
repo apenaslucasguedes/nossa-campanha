@@ -57,6 +57,15 @@ function renderPage(data = dashboard()) {
 afterEach(() => { cleanup(); vi.clearAllMocks() })
 
 describe('CampaignPage', () => {
+  it('compacta objetivos e permite expandir textos narrativos longos', () => {
+    const longText = 'Um registro extenso da campanha. '.repeat(12)
+    renderPage(dashboard({ campaign: { ...dashboard().campaign, premise: longText, last_session_summary: longText, active_objectives: ['- Um', '- Dois', '- Tres', '- Quatro', '- Cinco'] } }))
+    expect(screen.getByText('+ 2 objetivos')).toBeInTheDocument()
+    const premise = screen.getByRole('heading', { name: 'Premissa' }).parentElement
+    expect(premise?.querySelector('.line-clamp--3')).toBeInTheDocument()
+    fireEvent.click(within(premise as HTMLElement).getByRole('button', { name: 'Ver mais' }))
+    expect(premise?.querySelector('.line-clamp')).not.toBeInTheDocument()
+  })
   it('mostra regiao indefinida, assento preenchido e assento vazio', () => {
     renderPage()
     expect(screen.getByRole('heading', { name: 'Ainda nao registrada' })).toBeInTheDocument()

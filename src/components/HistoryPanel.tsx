@@ -138,7 +138,7 @@ export function HistoryPanel({ campaignId, sessionId, userId, isAdmin }: { campa
                 {lines.result ? <p className="history-item__result">{lines.result}</p> : null}
                 <time dateTime={event.created_at}>{new Date(event.created_at).toLocaleString('pt-BR')}</time>
               </div>
-              {isAdmin && !event.is_archived ? <MechanicalButton onClick={() => void archiveEvent(event.id).then(load)}>Arquivar</MechanicalButton> : null}
+              {isAdmin && !event.is_archived ? <details className="history-item__menu"><summary aria-label={`Ações para ${lines.headline}`}>•••</summary><button type="button" onClick={() => void archiveEvent(event.id).then(load)}>Arquivar</button></details> : null}
             </li>
             )
           })}

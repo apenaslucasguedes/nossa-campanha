@@ -45,4 +45,13 @@ describe('HistoryPanel', () => {
     expect(details).not.toHaveAttribute('open')
     expect(screen.getByText('Filtros e arquivamento')).toBeInTheDocument()
   })
+
+  it('mantém arquivamento no menu compacto de três pontos', async () => {
+    loadEventsPage.mockResolvedValue([event()])
+    render(<HistoryPanel campaignId="camp-1" sessionId="s1" userId="u1" isAdmin />)
+    await screen.findByText('Aldra lançou 1d20 e obteve 17.')
+    const menu = screen.getByLabelText(/Ações para/).closest('details')
+    expect(menu).not.toHaveAttribute('open')
+    expect(menu).toContainElement(screen.getByRole('button', { name: 'Arquivar' }))
+  })
 })
