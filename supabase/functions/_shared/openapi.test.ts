@@ -56,4 +56,47 @@ describe('OpenAPI das GPT Actions (fase 1)', () => {
     expect(source).not.toMatch(/sb_secret_[A-Za-z0-9_-]+/)
     expect(source).not.toMatch(/Authorization: Bearer/)
   })
+
+  it('não tem nenhuma description acima de 300 caracteres', () => {
+    const descriptions = [...source.matchAll(/description:\s*(.+)/g)].map(match =>
+      match[1].trim().replace(/^['"]|['"]$/g, ''),
+    )
+    expect(descriptions.length).toBeGreaterThan(0)
+    for (const description of descriptions) expect(description.length).toBeLessThanOrEqual(300)
+  })
+
+  it('não tem nenhum schema do tipo object sem properties', () => {
+    const doc = yaml.load(source) as Record<string, unknown>
+    const offenders: string[] = []
+    const walk = (node: unknown, path: string) => {
+      if (Array.isArray(node)) {
+        node.forEach((item, index) => walk(item, `${path}[${index}]`))
+        return
+      }
+      if (node && typeof node === 'object') {
+        const obj = node as Record<string, unknown>
+        if (obj.type === 'object' && !('properties' in obj)) offenders.push(path)
+        for (const key of Object.keys(obj)) walk(obj[key], `${path}.${key}`)
+      }
+    }
+    walk(doc, 'root')
+    expect(offenders).toEqual([])
+  })
+
+  it('não referencia mais o schema EmptyRequest', () => {
+    expect(source).not.toMatch(/EmptyRequest/)
+  })
+
+  it('campaign-snapshot não tem requestBody e request-dice-roll tem requestBody do tipo object', () => {
+    const doc = yaml.load(source) as {
+      paths: Record<string, { post: { requestBody?: { content: Record<string, { schema: unknown }> } } }>
+      components: { schemas: Record<string, { type?: string }> }
+    }
+    expect(doc.paths['/campaign-snapshot'].post.requestBody).toBeUndefined()
+    const diceRollBody = doc.paths['/request-dice-roll'].post.requestBody
+    expect(diceRollBody).toBeDefined()
+    const schema = diceRollBody!.content['application/json'].schema as { $ref?: string }
+    expect(schema.$ref).toBe('#/components/schemas/RequestDiceRollRequest')
+    expect(doc.components.schemas.RequestDiceRollRequest.type).toBe('object')
+  })
 })

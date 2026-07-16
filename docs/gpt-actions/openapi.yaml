@@ -13,12 +13,7 @@ paths:
     post:
       operationId: getCampaignSnapshot
       summary: Consultar o snapshot completo da campanha vinculada à chave
-      description: Use sempre antes de narrar qualquer estado mecânico. Retorna contexto narrativo, região atual, locais revelados, sessão ativa, personagens com estado mecânico, combate ativo, solicitações de rolagem pendentes, rolagens recentes e eventos recentes. A campanha é resolvida pela própria chave; não é preciso informar campaign_id.
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/EmptyRequest' }
+      description: Obtém o estado atual da campanha vinculada à chave, incluindo contexto narrativo, região, sessão, personagens, combate, rolagens e eventos recentes. Use antes de narrar ou verificar mudanças.
       responses:
         '200': { $ref: '#/components/responses/CampaignSnapshotSuccess' }
         default: { $ref: '#/components/responses/ApiError' }
@@ -26,7 +21,7 @@ paths:
     post:
       operationId: requestDiceRoll
       summary: Solicitar que um jogador role um teste no site
-      description: Use para pedir um teste de atributo ou especialidade a um personagem. Esta Action nunca executa a rolagem nem gera um resultado; ela apenas registra o pedido. A rolagem em si é sempre feita pelo jogador clicando nos dados no site. Depois de solicitar, consulte novamente getCampaignSnapshot para ver o resultado quando o jogador rolar.
+      description: Cria uma solicitação de rolagem para um personagem da campanha. O GPT apenas solicita o teste; o jogador deve realizar a rolagem no Relicário antes que o resultado seja consultado.
       requestBody:
         required: true
         content:
@@ -41,7 +36,7 @@ components:
       type: apiKey
       in: header
       name: X-Relicario-Key
-      description: "Chave de conexão gerada para exatamente uma campanha, com permissões fechadas (read_snapshot, request_roll) e revogável a qualquer momento pelo administrador da campanha. Nunca use a anon key do Supabase, a service_role, um JWT de usuário fixo ou uma senha como valor desta chave; o servidor armazena somente o hash da chave."
+      description: "Chave de conexão de uma campanha, com permissões fechadas e revogável pelo administrador. Nunca use a anon key do Supabase, a service_role, um JWT de usuário fixo ou uma senha como valor desta chave; o servidor armazena somente o hash da chave."
   responses:
     CampaignSnapshotSuccess:
       description: Snapshot atual e completo da campanha vinculada à chave.
@@ -56,9 +51,6 @@ components:
     Uuid:
       type: string
       format: uuid
-    EmptyRequest:
-      type: object
-      additionalProperties: false
     ApiFailure:
       type: object
       additionalProperties: false
@@ -69,7 +61,7 @@ components:
           type: string
           enum: [UNAUTHENTICATED, FORBIDDEN, CAMPAIGN_NOT_FOUND, INVALID_ACTION, INVALID_TARGET, LIMIT_EXCEEDED, CONFLICT, MIGRATION_REQUIRED]
         message: { type: string }
-        details: { type: object, additionalProperties: true }
+        details: { type: object, additionalProperties: true, properties: {} }
     AttributeName:
       type: string
       enum: [strength, agility, intellect, presence, instinct]
@@ -118,17 +110,17 @@ components:
         id: { $ref: '#/components/schemas/Uuid' }
         name: { type: string }
         class_key: { type: string }
-        character_states: { oneOf: [{ type: object, additionalProperties: true }, { type: 'null' }] }
-        character_conditions: { type: array, items: { type: object, additionalProperties: true } }
-        character_specialties: { type: array, items: { type: object, additionalProperties: true } }
+        character_states: { oneOf: [{ type: object, additionalProperties: true, properties: {} }, { type: 'null' }] }
+        character_conditions: { type: array, items: { type: object, additionalProperties: true, properties: {} } }
+        character_specialties: { type: array, items: { type: object, additionalProperties: true, properties: {} } }
     ActiveCombat:
       oneOf:
         - type: object
           additionalProperties: true
           properties:
-            session: { type: object, additionalProperties: true }
-            participants: { type: array, items: { type: object, additionalProperties: true } }
-            enemies: { type: array, items: { type: object, additionalProperties: true } }
+            session: { type: object, additionalProperties: true, properties: {} }
+            participants: { type: array, items: { type: object, additionalProperties: true, properties: {} } }
+            enemies: { type: array, items: { type: object, additionalProperties: true, properties: {} } }
         - { type: 'null' }
     RollRequestSnapshot:
       type: object
