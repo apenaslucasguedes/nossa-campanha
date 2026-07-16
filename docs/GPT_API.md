@@ -2,7 +2,7 @@
 
 ## Fase 1 — conexão por chave de campanha (etapa atual)
 
-A conexão real com o GPT Mestre usa duas Edge Functions e uma chave de conexão vinculada a exatamente uma campanha, nunca a um usuário. A configuração manual está preparada em [`gpt-actions/openapi.yaml`](gpt-actions/openapi.yaml) e [`gpt-actions/GPT_MASTER_INSTRUCTIONS.md`](gpt-actions/GPT_MASTER_INSTRUCTIONS.md). Esta entrega não aplica a migração, não implanta as funções e não configura ou publica um GPT.
+A conexão real com o GPT Mestre usa duas Edge Functions e uma chave de conexão vinculada a exatamente uma campanha, nunca a um usuário. A configuração manual está preparada em [`gpt-actions/openapi.yaml`](gpt-actions/openapi.yaml) e [`gpt-actions/GPT_MASTER_INSTRUCTIONS.md`](gpt-actions/GPT_MASTER_INSTRUCTIONS.md). A migração e as Edge Functions já estão em produção; a configuração do GPT dentro do ChatGPT (colar instruções, importar o OpenAPI, gerar a chave) continua sendo um passo manual.
 
 ### Autenticação
 
@@ -30,13 +30,14 @@ Recebe `character_id` e `attribute` e/ou `specialty`, mais `modifier`, `reason` 
 
 ### Migrations desta fase
 
-- `202607160003_gpt_campaign_connections.sql` — aditiva, cria `gpt_campaign_connections`, as RPCs de gestão/validação de chave e as RPCs `_for_gpt` que reaproveitam `get_campaign_snapshot`/`request_dice_roll`. Ainda não aplicada remotamente.
+- `202607160003_gpt_campaign_connections.sql` — aditiva, cria `gpt_campaign_connections`, as RPCs de gestão/validação de chave e as RPCs `_for_gpt` que reaproveitam `get_campaign_snapshot`/`request_dice_roll`. Aplicada remotamente.
+- `202607160004_gpt_connection_management.sql` — aditiva, cria a RPC `list_gpt_campaign_connections` (admin-only, nunca retorna `key_hash`). Aplicada remotamente.
 
 ### Fora do escopo desta fase
 
 - `applyGameAction` não está disponível para esta chave — nenhuma escrita mecânica (dano, cura, recurso, condição, combate) acontece pelo GPT nesta etapa.
 - Não há RPC/Action para revelar local, criar campanha ou gerenciar sessões pelo GPT.
-- Não há UI no Relicário para criar/revogar a chave nesta etapa; as RPCs existem e estão prontas, mas o painel de administração fica para uma etapa futura.
+- O painel de administração no Relicário ("Conectar GPT Mestre") permite criar, listar e revogar conexões; visível apenas para `table_admin`.
 
 ## Legado — API por JWT de usuário (etapa 8A/8B)
 

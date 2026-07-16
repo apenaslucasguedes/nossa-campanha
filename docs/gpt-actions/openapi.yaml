@@ -2,10 +2,10 @@ openapi: 3.1.0
 info:
   title: Relicário — Actions do GPT Mestre (fase 1)
   version: 2.0.0
-  description: Primeira fase da conexão do GPT Mestre com o Relicário. Expõe somente leitura do snapshot multicampanha e solicitação de rolagem, autenticadas por uma chave de conexão vinculada a uma única campanha. Substitua SEU_PROJECT_REF antes de importar.
+  description: Primeira fase da conexão do GPT Mestre com o Relicário. Expõe somente leitura do snapshot multicampanha e solicitação de rolagem, autenticadas por uma chave de conexão vinculada a uma única campanha.
 servers:
-  - url: https://SEU_PROJECT_REF.supabase.co/functions/v1
-    description: Substitua SEU_PROJECT_REF pelo identificador real do projeto Supabase.
+  - url: https://advdjsleblaosiagmrny.supabase.co/functions/v1
+    description: Projeto Supabase de produção (Minha Campanha).
 security:
   - relicarioGptKey: []
 paths:

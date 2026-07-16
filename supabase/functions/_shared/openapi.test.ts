@@ -49,7 +49,8 @@ describe('OpenAPI das GPT Actions (fase 1)', () => {
   })
 
   it('não contém credenciais reais nem sugere anon key, service_role, senha ou JWT fixo como valor da chave', () => {
-    expect(source).toContain('SEU_PROJECT_REF')
+    expect(source).not.toContain('SEU_PROJECT_REF')
+    expect(source).toContain('https://advdjsleblaosiagmrny.supabase.co/functions/v1')
     expect(source).toMatch(/Nunca use a anon key.*service_role.*JWT de usuário fixo ou uma senha/)
     expect(source).not.toMatch(/eyJ[A-Za-z0-9_-]{20,}/)
     expect(source).not.toMatch(/sb_secret_[A-Za-z0-9_-]+/)
