@@ -28,6 +28,10 @@ export type CampaignMember = { campaign_id: string; user_id: string; role: Role;
 export type CampaignLocation = { id: string; campaign_id: string; name: string; region_id: RegionId; kind: string | null; x: number; y: number; revealed: boolean; created_at: string }
 export type Profile = { id: string; display_name: string; gpt_master_url: string | null; created_at: string; updated_at: string }
 
+export type GptConnectionPermission = 'read_snapshot' | 'request_roll'
+export type GptCampaignConnection = { id: string; campaign_id: string; label: string; permissions: GptConnectionPermission[]; created_at: string; last_used_at: string | null; revoked_at: string | null }
+export type GptCampaignConnectionCreated = { id: string; raw_key: string; label: string; permissions: GptConnectionPermission[]; created_at: string }
+
 type Table<Row, Insert = Partial<Row>, Update = Partial<Insert>> = { Row: Row; Insert: Insert; Update: Update; Relationships: [] }
 export type Database = { public: { Tables: {
   profiles: Table<Profile, { id: string; display_name: string }, Partial<Pick<Profile, 'display_name'|'gpt_master_url'|'updated_at'>>>
@@ -53,4 +57,7 @@ export type Database = { public: { Tables: {
   cancel_roll_request:{Args:{target_request:string};Returns:void}
   perform_dice_roll:{Args:{payload:unknown};Returns:unknown}
   get_campaign_snapshot:{Args:{target_campaign:string};Returns:unknown}
+  list_gpt_campaign_connections:{Args:{p_campaign_id:string};Returns:GptCampaignConnection[]}
+  create_gpt_campaign_connection:{Args:{target_campaign:string;connection_label:string;connection_permissions:GptConnectionPermission[]};Returns:unknown}
+  revoke_gpt_campaign_connection:{Args:{target_connection:string};Returns:void}
 }; Enums: { member_role: Role }; CompositeTypes: Record<string, never> } }

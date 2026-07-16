@@ -11,6 +11,7 @@ import { CampaignPage } from './CampaignPage'
 
 vi.mock('../auth/AuthContext', () => ({ useAuth: () => ({ session: { user: { id: 'u1' } } }) }))
 vi.mock('../hooks/useCampaignParam', () => ({ useCampaignParam: vi.fn() }))
+vi.mock('../components/GptConnectionsPanel', () => ({ GptConnectionsPanel: ({ campaignId }: { campaignId: string }) => <div data-testid="gpt-connections-panel">{campaignId}</div> }))
 vi.mock('../data/campaigns', async () => {
   const actual = await vi.importActual<typeof import('../data/campaigns')>('../data/campaigns')
   return { ...actual, updateCampaignContext: vi.fn(), updateCampaignRegion: vi.fn() }
@@ -80,6 +81,16 @@ describe('CampaignPage', () => {
     expect(screen.getByRole('heading', { name: 'Vale de Ardan' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Alterar regiao' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Editar identidade' })).not.toBeInTheDocument()
+  })
+
+  it('esconde o painel de conexoes do GPT para jogador comum', () => {
+    renderPage(dashboard({ currentRole: 'player' }))
+    expect(screen.queryByTestId('gpt-connections-panel')).not.toBeInTheDocument()
+  })
+
+  it('mostra o painel de conexoes do GPT para o administrador da mesa', () => {
+    renderPage(dashboard({ currentRole: 'table_admin' }))
+    expect(screen.getByTestId('gpt-connections-panel')).toBeInTheDocument()
   })
 
   it('salva identidade e estado narrativo com validacao simples', async () => {

@@ -856,6 +856,57 @@ textarea:disabled {
   border-color: var(--border-muted);
 }
 
+.gpt-connection-label-field {
+  display: grid;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  flex: 1;
+  min-width: 220px;
+}
+
+.gpt-connection-reveal {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid var(--border-accent, var(--border-dark));
+  background: var(--surface-raised, transparent);
+}
+
+.gpt-connection-reveal code {
+  display: block;
+  margin: 8px 0;
+  padding: 10px;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  border: 1px solid var(--border-dark);
+  background: var(--surface-sunken, rgba(0, 0, 0, 0.2));
+  color: var(--text-primary);
+  font-size: 0.82rem;
+}
+
+.gpt-connection-urls {
+  margin-top: 14px;
+}
+
+.gpt-connection-urls dl {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+}
+
+.gpt-connection-urls dt {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+}
+
+.gpt-connection-urls dd {
+  margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+}
+
 .settings-page {
   width: min(100%, 860px);
 }

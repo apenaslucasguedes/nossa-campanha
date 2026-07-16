@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { CampaignCard, PlayerSeat } from '../components/CampaignCard'
+import { GptConnectionsPanel } from '../components/GptConnectionsPanel'
 import { Icon } from '../components/Icon'
 import { RegionArtwork } from '../components/RegionArtwork'
 import { readPlayerName } from '../components/playerName'
@@ -174,6 +175,8 @@ export function CampaignPage() {
         {copyState === 'copied' ? <p className="form-note">Contexto copiado.</p> : null}
         {copyState === 'error' ? <p className="form-error">Nao foi possivel copiar neste navegador.</p> : null}
       </section>
+
+      {canEdit ? <GptConnectionsPanel campaignId={dashboard.campaign.id} /> : null}
 
       <div className="seat-grid" aria-label="Assentos da campanha">
         {[1, 2].map((seat) => {
