@@ -2957,3 +2957,28 @@ body,
   background: var(--bg-panel);
 }
 
+/* Rolador conectado: recupera bandeja e dados geométricos do redesign anterior. */
+.dice-roll-widget__request-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;margin:0 0 var(--space-3);background:var(--border-dark)}
+.dice-roll-widget__request-summary>div{min-width:0;padding:8px 9px;background:rgb(17 16 13 / 82%)}
+.dice-roll-widget__request-summary dt{margin-bottom:3px;color:var(--text-muted);font-size:.67rem;letter-spacing:.05em;text-transform:uppercase}
+.dice-roll-widget__request-summary dd{overflow:hidden;margin:0;color:var(--text-primary);font-family:var(--font-mechanical);font-size:.78rem;font-weight:650;text-overflow:ellipsis;white-space:nowrap}
+.dice-roll-widget__pending-reason strong{color:var(--text-primary);font-style:normal}
+.dice-roll-widget__tray{margin:var(--space-3) 0;border:1px solid var(--border-gold);border-radius:4px;background:#100f0c}
+.dice-roll-widget__tray .dice-tray__surface{min-height:116px;background:radial-gradient(circle at 50% 32%,rgb(74 128 111 / 32%),transparent 58%),#173027;box-shadow:inset 0 0 0 4px #121510,inset 0 0 0 5px #665a42,inset 0 7px 9px rgb(0 0 0 / 42%)}
+.dice-roll-widget__tray .die-token,.dice-roll-widget__picker .dice-choice__add{--die:#8f7865}
+.dice-roll-widget__tray.has-result .dice-tray__result em{animation:official-result 320ms cubic-bezier(.16,1,.3,1)}
+.dice-roll-widget__tray .dice-tray__result .is-sucesso{color:#b8c69d}
+.dice-roll-widget__tray .dice-tray__result .is-falha{color:#e19a87}
+.dice-roll-widget__picker{margin-top:0;padding-top:2px}
+.dice-roll-widget__picker .dice-choice__add[aria-pressed=true]{background:#a28a75}
+.dice-roll-widget__free-options{display:grid;grid-template-columns:minmax(90px,.65fr) minmax(100px,.75fr) minmax(150px,1.6fr);gap:var(--space-2)}
+.dice-roll-widget__free-options label{display:grid;gap:5px;color:var(--text-muted);font-size:.78rem}
+.dice-roll-widget__test-toggle{display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:.82rem}
+.dice-roll-widget__pending>.dice-button,.dice-roll-widget__free>.dice-button{width:100%;min-height:48px;margin-top:0;border-color:#bb7658;background:#8f4934;color:#fff3e4}
+.dice-roll-widget__pending>.dice-button:hover:not(:disabled),.dice-roll-widget__free>.dice-button:hover:not(:disabled){background:#a4563d}
+.dice-roll-widget__tray.is-rolling .die-token{animation:server-die-roll 850ms cubic-bezier(.16,1,.3,1) both}
+@keyframes server-die-roll{0%{transform:translate3d(-13px,0,0) rotate(-70deg) scale(.9)}30%{transform:translate3d(12px,-20px,0) rotate(115deg) scale(1.04)}62%{transform:translate3d(-6px,-5px,0) rotate(220deg) scale(.98)}84%{transform:translate3d(3px,-2px,0) rotate(292deg)}100%{transform:translate3d(0,0,0) rotate(360deg) scale(1)}}
+@keyframes official-result{from{opacity:.4;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+@media(max-width:760px){.dice-roll-widget__request-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.dice-roll-widget__request-summary>div:first-child{grid-column:1/-1}.dice-roll-widget__free-options{grid-template-columns:repeat(2,minmax(0,1fr))}.dice-roll-widget__free-options label:last-child{grid-column:1/-1}}
+@media(prefers-reduced-motion:reduce){.dice-roll-widget__tray.is-rolling .die-token{animation:none;opacity:.72}.dice-roll-widget__tray.has-result .dice-tray__result em{animation:none}}
+
