@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2'
-import { databaseErrorCode, type ApiErrorCode, type ApiFailure, type ApiResponse } from './contracts.ts'
+import { ApiError, databaseErrorCode, type ApiErrorCode, type ApiFailure, type ApiResponse } from './contracts.ts'
 
-export class ApiError extends Error{constructor(public code:ApiErrorCode,message:string,public status=400,public details?:Record<string,unknown>){super(message)}}
+export { ApiError }
 const messages:Record<ApiErrorCode,string>={UNAUTHENTICATED:'Autenticação válida é obrigatória.',FORBIDDEN:'Você não tem permissão para esta operação.',CAMPAIGN_NOT_FOUND:'Campanha não encontrada.',INVALID_ACTION:'A ação informada não é permitida.',INVALID_TARGET:'O alvo informado não pertence à campanha.',LIMIT_EXCEEDED:'A alteração ultrapassa os limites mecânicos.',CONFLICT:'O estado mudou e a ação não pôde ser aplicada.',MIGRATION_REQUIRED:'A estrutura necessária ainda não foi instalada.'}
 
 function corsHeaders(request:Request){const origin=request.headers.get('origin');const allowed=(Deno.env.get('GPT_API_ALLOWED_ORIGINS')??'').split(',').map(v=>v.trim()).filter(Boolean);return origin&&allowed.includes(origin)?{'Access-Control-Allow-Origin':origin,'Vary':'Origin','Access-Control-Allow-Headers':'authorization, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'}:{'Access-Control-Allow-Headers':'authorization, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'}}

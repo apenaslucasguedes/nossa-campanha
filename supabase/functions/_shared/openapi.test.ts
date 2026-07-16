@@ -5,10 +5,9 @@ import { describe, expect, it } from 'vitest'
 
 const source = readFileSync(resolve(process.cwd(), 'docs/gpt-actions/openapi.yaml'), 'utf8')
 const yaml = createRequire(import.meta.url)('js-yaml') as { load(value: string): unknown }
-const actions = ['apply_damage','apply_healing','spend_resource','restore_resource','add_condition','remove_condition','start_combat','end_combat','advance_turn','advance_round','create_enemy','update_enemy','defeat_enemy']
 const errors = ['UNAUTHENTICATED','FORBIDDEN','CAMPAIGN_NOT_FOUND','INVALID_ACTION','INVALID_TARGET','LIMIT_EXCEEDED','CONFLICT','MIGRATION_REQUIRED']
 
-describe('OpenAPI das GPT Actions', () => {
+describe('OpenAPI das GPT Actions (fase 1)', () => {
   it('é YAML estruturalmente válido e OpenAPI 3.1', () => {
     expect(() => yaml.load(source)).not.toThrow()
     expect(source).toMatch(/^openapi: 3\.1\.0$/m)
@@ -19,12 +18,18 @@ describe('OpenAPI das GPT Actions', () => {
     expect(source).not.toMatch(/^\s*[^#\s][^:]*\s+[^:]+$/m)
   })
 
-  it('expõe exatamente os quatro endpoints e operationIds únicos', () => {
+  it('expõe exatamente os dois endpoints da fase 1, com operationIds únicos', () => {
     const paths = [...source.matchAll(/^ {2}\/([^:]+):$/gm)].map(match => match[1])
-    expect(paths).toEqual(['campaign-state','table-state','world-state','apply-game-action'])
+    expect(paths).toEqual(['campaign-snapshot', 'request-dice-roll'])
     const ids = [...source.matchAll(/^ {6}operationId: (\S+)$/gm)].map(match => match[1])
-    expect(ids).toEqual(['getCampaignState','getTableState','getWorldState','applyGameAction'])
+    expect(ids).toEqual(['getCampaignSnapshot', 'requestDiceRoll'])
     expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('não expõe applyGameAction nem os endpoints legados nesta fase', () => {
+    expect(source).not.toMatch(/applyGameAction/)
+    expect(source).not.toMatch(/getCampaignState|getTableState|getWorldState/)
+    expect(source).not.toMatch(/\/campaign-state|\/table-state|\/world-state|\/apply-game-action/)
   })
 
   it('mantém referências locais resolvíveis', () => {
@@ -34,22 +39,20 @@ describe('OpenAPI das GPT Actions', () => {
     for (const ref of refs) expect(schemas.has(ref), `schema ausente: ${ref}`).toBe(true)
   })
 
-  it('documenta somente a união fechada implementada', () => {
-    for (const action of actions) expect(source).toContain(`          ${action}: '#/components/schemas/`)
-    expect(source).not.toMatch(/reveal_location/i)
-    expect(source).not.toMatch(/execute_sql/i)
-  })
-
-  it('exige request_id na escrita e documenta todos os erros estáveis', () => {
-    expect(source).toContain('required: [campaign_id, request_id, action]')
+  it('autentica por chave de campanha via cabeçalho customizado, documenta todos os erros estáveis e exige character_id', () => {
+    expect(source).toContain('type: apiKey')
+    expect(source).toContain('in: header')
+    expect(source).toContain('name: X-Relicario-Key')
+    expect(source).toContain('- relicarioGptKey: []')
+    expect(source).toContain('required: [character_id]')
     for (const error of errors) expect(source).toContain(error)
   })
 
-  it('não contém credenciais nem autenticação administrativa', () => {
-    expect(source).toContain('Authorization: Bearer <JWT>')
+  it('não contém credenciais reais nem sugere anon key, service_role, senha ou JWT fixo como valor da chave', () => {
     expect(source).toContain('SEU_PROJECT_REF')
+    expect(source).toMatch(/Nunca use a anon key.*service_role.*JWT de usuário fixo ou uma senha/)
     expect(source).not.toMatch(/eyJ[A-Za-z0-9_-]{20,}/)
     expect(source).not.toMatch(/sb_secret_[A-Za-z0-9_-]+/)
-    expect(source).not.toMatch(/service_role/i)
+    expect(source).not.toMatch(/Authorization: Bearer/)
   })
 })

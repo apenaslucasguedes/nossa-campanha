@@ -36,6 +36,73 @@ export const CONDITIONS:readonly ConditionName[] = ['Ferido','Exausto','Amedront
 export const ZONES:readonly Zone[] = ['corpo a corpo','perto','distante','fora de alcance']
 export const CATEGORIES:readonly EnemyCategory[] = ['lacaio','comum','elite','chefe']
 
+export class ApiError extends Error{constructor(public code:ApiErrorCode,message:string,public status=400,public details?:Record<string,unknown>){super(message)}}
+
+export const API_ERROR_MESSAGES:Record<ApiErrorCode,string>={UNAUTHENTICATED:'Autenticação válida é obrigatória.',FORBIDDEN:'Você não tem permissão para esta operação.',CAMPAIGN_NOT_FOUND:'Campanha não encontrada.',INVALID_ACTION:'A ação informada não é permitida.',INVALID_TARGET:'O alvo informado não pertence à campanha.',LIMIT_EXCEEDED:'A alteração ultrapassa os limites mecânicos.',CONFLICT:'O estado mudou e a ação não pôde ser aplicada.',MIGRATION_REQUIRED:'A estrutura necessária ainda não foi instalada.'}
+
+export function apiErrorStatus(code:ApiErrorCode):number{return code==='UNAUTHENTICATED'?401:code==='FORBIDDEN'?403:code==='CAMPAIGN_NOT_FOUND'?404:code==='MIGRATION_REQUIRED'?503:code==='CONFLICT'?409:400}
+
+// ---------------------------------------------------------------------------
+// Fase 1 da conexão do GPT Mestre: autenticação por chave de campanha via o
+// cabeçalho customizado X-Relicario-Key (nunca JWT de usuário, anon key,
+// senha ou service_role). Este bloco é livre de imports específicos do Deno
+// para permanecer testável por vitest.
+// ---------------------------------------------------------------------------
+
+export type GptPermission = 'read_snapshot'|'request_roll'
+export const GPT_PERMISSIONS:readonly GptPermission[] = ['read_snapshot','request_roll']
+export const GPT_KEY_HEADER = 'x-relicario-key'
+
+export const ATTRIBUTE_NAMES:readonly string[] = ['strength','agility','intellect','presence','instinct']
+export const SPECIALTY_NAMES:readonly string[] = ['Atletismo','Acrobacia','Furtividade','Investigação','Percepção','Sobrevivência','Medicina','Persuasão','Intimidação','História','Arcanismo','Performance','Rastreamento','Alquimia']
+
+export function extractGptKey(request:Request):string|null{
+  const value = request.headers.get(GPT_KEY_HEADER)
+  return value && value.trim().length>0 ? value.trim() : null
+}
+
+export async function sha256Hex(value:string):Promise<string>{
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
+  return Array.from(new Uint8Array(digest)).map(byte=>byte.toString(16).padStart(2,'0')).join('')
+}
+
+export type GptRollRequestInput = { campaign_id?:string; character_id:string; attribute?:string; specialty?:string; modifier?:number; reason?:string; difficulty?:number }
+
+export function validateGptRollRequest(value:unknown):value is GptRollRequestInput{
+  if(!value || typeof value!=='object') return false
+  const input = value as Record<string,unknown>
+  if(!isUuid(input.character_id)) return false
+  if(input.campaign_id!==undefined && !isUuid(input.campaign_id)) return false
+  const attribute = input.attribute
+  const specialty = input.specialty
+  if(attribute!==undefined && (typeof attribute!=='string' || !ATTRIBUTE_NAMES.includes(attribute))) return false
+  if(specialty!==undefined && (typeof specialty!=='string' || !SPECIALTY_NAMES.includes(specialty))) return false
+  if(attribute===undefined && specialty===undefined) return false
+  if(input.modifier!==undefined && (!Number.isInteger(input.modifier) || Number(input.modifier)< -10 || Number(input.modifier)>10)) return false
+  if(input.difficulty!==undefined && (!Number.isInteger(input.difficulty) || Number(input.difficulty)<1 || Number(input.difficulty)>30)) return false
+  if(input.reason!==undefined && (typeof input.reason!=='string' || input.reason.length>240)) return false
+  const allowedKeys = new Set(['campaign_id','character_id','attribute','specialty','modifier','reason','difficulty'])
+  return Object.keys(input).every(key=>allowedKeys.has(key))
+}
+
+export function gptDatabaseErrorCode(message:string,code?:string):ApiErrorCode{
+  const marker = message.match(/(GPT_KEY_INVALID|GPT_KEY_FORBIDDEN|CAMPAIGN_MISMATCH|SESSION_INACTIVE|INVALID_TARGET|INVALID_REQUEST|INVALID_PERMISSION)/)?.[1]
+  switch(marker){
+    case 'GPT_KEY_INVALID': return 'UNAUTHENTICATED'
+    case 'GPT_KEY_FORBIDDEN': return 'FORBIDDEN'
+    case 'CAMPAIGN_MISMATCH': return 'FORBIDDEN'
+    case 'SESSION_INACTIVE': return 'CONFLICT'
+    case 'INVALID_TARGET': return 'INVALID_TARGET'
+    case 'INVALID_REQUEST': case 'INVALID_PERMISSION': return 'INVALID_ACTION'
+    default: return databaseErrorCode(message,code)
+  }
+}
+
+export function gptRpcError(error:{code?:string;message?:string}):ApiError{
+  const code = gptDatabaseErrorCode(error.message??'', error.code)
+  return new ApiError(code, API_ERROR_MESSAGES[code], apiErrorStatus(code))
+}
+
 export function isUuid(value:unknown):value is string{return typeof value==='string'&&UUID_PATTERN.test(value)}
 export function authorizationCode(userId:string|null,role:'player'|'table_admin'|null,write=false):ApiErrorCode|null{if(!userId)return'UNAUTHENTICATED';if(!role)return'CAMPAIGN_NOT_FOUND';if(write&&role!=='table_admin')return'FORBIDDEN';return null}
 export function databaseErrorCode(message:string,code?:string):ApiErrorCode{const marker=message.match(/(UNAUTHENTICATED|FORBIDDEN|CAMPAIGN_NOT_FOUND|INVALID_ACTION|INVALID_TARGET|LIMIT_EXCEEDED|CONFLICT|MIGRATION_REQUIRED)/)?.[1] as ApiErrorCode|undefined;return marker??(code==='42883'||code==='42P01'||code==='PGRST205'?'MIGRATION_REQUIRED':'CONFLICT')}

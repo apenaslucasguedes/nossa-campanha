@@ -1,86 +1,54 @@
 openapi: 3.1.0
 info:
-  title: Relicário — Actions do GPT Mestre
-  version: 1.0.0
-  description: API mecânica restrita do Relicário. Substitua SEU_PROJECT_REF antes de importar.
+  title: Relicário — Actions do GPT Mestre (fase 1)
+  version: 2.0.0
+  description: Primeira fase da conexão do GPT Mestre com o Relicário. Expõe somente leitura do snapshot multicampanha e solicitação de rolagem, autenticadas por uma chave de conexão vinculada a uma única campanha. Substitua SEU_PROJECT_REF antes de importar.
 servers:
   - url: https://SEU_PROJECT_REF.supabase.co/functions/v1
     description: Substitua SEU_PROJECT_REF pelo identificador real do projeto Supabase.
 security:
-  - userJwt: []
+  - relicarioGptKey: []
 paths:
-  /campaign-state:
+  /campaign-snapshot:
     post:
-      operationId: getCampaignState
-      summary: Consultar campanha e personagens
-      description: Use no início da sessão e antes de depender de campanha, papel, membros ou resumo mecânico dos personagens.
+      operationId: getCampaignSnapshot
+      summary: Consultar o snapshot completo da campanha vinculada à chave
+      description: Use sempre antes de narrar qualquer estado mecânico. Retorna contexto narrativo, região atual, locais revelados, sessão ativa, personagens com estado mecânico, combate ativo, solicitações de rolagem pendentes, rolagens recentes e eventos recentes. A campanha é resolvida pela própria chave; não é preciso informar campaign_id.
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CampaignRequest' }
+            schema: { $ref: '#/components/schemas/EmptyRequest' }
       responses:
-        '200': { $ref: '#/components/responses/CampaignStateSuccess' }
+        '200': { $ref: '#/components/responses/CampaignSnapshotSuccess' }
         default: { $ref: '#/components/responses/ApiError' }
-  /table-state:
+  /request-dice-roll:
     post:
-      operationId: getTableState
-      summary: Consultar Mesa e combate
-      description: Use antes e durante cenas mecânicas para obter Vitalidade, recursos, condições, combate, participantes e inimigos atuais.
+      operationId: requestDiceRoll
+      summary: Solicitar que um jogador role um teste no site
+      description: Use para pedir um teste de atributo ou especialidade a um personagem. Esta Action nunca executa a rolagem nem gera um resultado; ela apenas registra o pedido. A rolagem em si é sempre feita pelo jogador clicando nos dados no site. Depois de solicitar, consulte novamente getCampaignSnapshot para ver o resultado quando o jogador rolar.
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CampaignRequest' }
+            schema: { $ref: '#/components/schemas/RequestDiceRollRequest' }
       responses:
-        '200': { $ref: '#/components/responses/TableStateSuccess' }
-        default: { $ref: '#/components/responses/ApiError' }
-  /world-state:
-    post:
-      operationId: getWorldState
-      summary: Consultar mundo revelado
-      description: Use somente para regiões e locais persistidos como revelados. Atualmente pode responder MIGRATION_REQUIRED sem dados de mundo.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/CampaignRequest' }
-      responses:
-        '200': { $ref: '#/components/responses/WorldStateSuccess' }
-        default: { $ref: '#/components/responses/ApiError' }
-  /apply-game-action:
-    post:
-      operationId: applyGameAction
-      summary: Aplicar uma ação mecânica confirmada
-      description: Use somente após confirmação quando necessário. Exige table_admin e request_id UUID novo; aceita apenas a união fechada documentada.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/ApplyGameActionRequest' }
-      responses:
-        '200': { $ref: '#/components/responses/ActionSuccess' }
+        '200': { $ref: '#/components/responses/RequestDiceRollSuccess' }
         default: { $ref: '#/components/responses/ApiError' }
 components:
   securitySchemes:
-    userJwt:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: "JWT válido do usuário do Relicário enviado em Authorization: Bearer <JWT>. Não use anon key, service role, segredo administrativo ou token pessoal fixo. O editor de GPTs pode não fornecer esse JWT dinâmico; resolva com OAuth ou camada intermediária autorizada antes do uso real."
+    relicarioGptKey:
+      type: apiKey
+      in: header
+      name: X-Relicario-Key
+      description: "Chave de conexão gerada para exatamente uma campanha, com permissões fechadas (read_snapshot, request_roll) e revogável a qualquer momento pelo administrador da campanha. Nunca use a anon key do Supabase, a service_role, um JWT de usuário fixo ou uma senha como valor desta chave; o servidor armazena somente o hash da chave."
   responses:
-    CampaignStateSuccess:
-      description: Estado atual da campanha.
-      content: { application/json: { schema: { $ref: '#/components/schemas/CampaignStateResponse' } } }
-    TableStateSuccess:
-      description: Estado atual da Mesa.
-      content: { application/json: { schema: { $ref: '#/components/schemas/TableStateResponse' } } }
-    WorldStateSuccess:
-      description: Estado persistido e revelado do mundo.
-      content: { application/json: { schema: { $ref: '#/components/schemas/WorldStateResponse' } } }
-    ActionSuccess:
-      description: Resultado persistido da ação.
-      content: { application/json: { schema: { $ref: '#/components/schemas/ActionResponse' } } }
+    CampaignSnapshotSuccess:
+      description: Snapshot atual e completo da campanha vinculada à chave.
+      content: { application/json: { schema: { $ref: '#/components/schemas/CampaignSnapshotResponse' } } }
+    RequestDiceRollSuccess:
+      description: Solicitação de rolagem registrada; aguarda o jogador rolar no site.
+      content: { application/json: { schema: { $ref: '#/components/schemas/RequestDiceRollResponse' } } }
     ApiError:
       description: Erro estável da API.
       content: { application/json: { schema: { $ref: '#/components/schemas/ApiFailure' } } }
@@ -88,12 +56,9 @@ components:
     Uuid:
       type: string
       format: uuid
-    CampaignRequest:
+    EmptyRequest:
       type: object
       additionalProperties: false
-      required: [campaign_id]
-      properties:
-        campaign_id: { $ref: '#/components/schemas/Uuid' }
     ApiFailure:
       type: object
       additionalProperties: false
@@ -105,272 +70,137 @@ components:
           enum: [UNAUTHENTICATED, FORBIDDEN, CAMPAIGN_NOT_FOUND, INVALID_ACTION, INVALID_TARGET, LIMIT_EXCEEDED, CONFLICT, MIGRATION_REQUIRED]
         message: { type: string }
         details: { type: object, additionalProperties: true }
-    Campaign:
-      type: object
-      additionalProperties: false
-      required: [id, name, created_at]
-      properties:
-        id: { $ref: '#/components/schemas/Uuid' }
-        name: { type: string }
-        created_at: { type: string, format: date-time }
-    CampaignMember:
-      type: object
-      additionalProperties: false
-      required: [role, seat, joined_at]
-      properties:
-        role: { type: string, enum: [player, table_admin] }
-        seat: { type: integer }
-        joined_at: { type: string, format: date-time }
-    CharacterState:
-      type: object
-      additionalProperties: false
-      required: [vitality_current, vitality_max, resource_current, resource_max]
-      properties:
-        vitality_current: { type: integer, minimum: 0 }
-        vitality_max: { type: integer, minimum: 0 }
-        resource_current: { type: integer, minimum: 0 }
-        resource_max: { type: integer, minimum: 0 }
-    NamedItem:
+    AttributeName:
+      type: string
+      enum: [strength, agility, intellect, presence, instinct]
+    SpecialtyName:
+      type: string
+      enum: [Atletismo, Acrobacia, Furtividade, Investigação, Percepção, Sobrevivência, Medicina, Persuasão, Intimidação, História, Arcanismo, Performance, Rastreamento, Alquimia]
+    CampaignContext:
       type: object
       additionalProperties: true
-      required: [name]
+      required: [id, name, status, current_region_id]
       properties:
         id: { $ref: '#/components/schemas/Uuid' }
         name: { type: string }
-    CharacterSummary:
+        status: { type: string }
+        premise: { type: string }
+        current_summary: { type: string }
+        current_region_id: { oneOf: [{ type: string }, { type: 'null' }] }
+        last_session_summary: { type: string }
+        active_objectives: { type: array, items: { type: string } }
+        important_notes: { type: string }
+    ActiveSession:
+      oneOf:
+        - type: object
+          additionalProperties: true
+          required: [id, number, status]
+          properties:
+            id: { $ref: '#/components/schemas/Uuid' }
+            number: { type: integer }
+            title: { type: string }
+            status: { type: string }
+        - { type: 'null' }
+    RevealedLocation:
       type: object
-      additionalProperties: false
+      additionalProperties: true
+      required: [id, name, region_id, revealed]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        name: { type: string }
+        region_id: { type: string }
+        revealed: { type: boolean }
+    CharacterSnapshot:
+      type: object
+      additionalProperties: true
       required: [id, name, class_key]
       properties:
         id: { $ref: '#/components/schemas/Uuid' }
         name: { type: string }
         class_key: { type: string }
-        level: { type: integer }
-        defense: { type: integer }
-        inventory_capacity: { type: integer }
-        character_states: { oneOf: [{ $ref: '#/components/schemas/CharacterState' }, { type: 'null' }] }
-        character_conditions: { type: array, items: { $ref: '#/components/schemas/NamedItem' } }
-        character_specialties: { type: array, items: { $ref: '#/components/schemas/NamedItem' } }
-    CampaignState:
-      type: object
-      additionalProperties: false
-      required: [campaign, current_role, members, characters, current_region]
-      properties:
-        campaign: { $ref: '#/components/schemas/Campaign' }
-        current_role: { type: string, enum: [player, table_admin] }
-        members: { type: array, items: { $ref: '#/components/schemas/CampaignMember' } }
-        characters: { type: array, items: { $ref: '#/components/schemas/CharacterSummary' } }
-        current_region: { oneOf: [{ $ref: '#/components/schemas/Region' }, { type: 'null' }] }
-    ConditionName:
-      type: string
-      enum: [Ferido, Exausto, Amedrontado, Envenenado, Imobilizado, Desorientado, Corrompido, Caído]
-    TableCharacter:
-      type: object
-      additionalProperties: false
-      required: [id, name, class_key, character_states, character_conditions]
-      properties:
-        id: { $ref: '#/components/schemas/Uuid' }
-        name: { type: string }
-        class_key: { type: string }
-        character_states: { oneOf: [{ $ref: '#/components/schemas/CharacterState' }, { type: 'null' }] }
-        character_conditions: { type: array, items: { $ref: '#/components/schemas/NamedItem' } }
-    CombatSession:
-      type: object
-      additionalProperties: false
-      required: [id, status, round, turn_index, started_at, updated_at]
-      properties:
-        id: { $ref: '#/components/schemas/Uuid' }
-        status: { type: string }
-        round: { type: integer, minimum: 1 }
-        turn_index: { type: integer, minimum: 0 }
-        started_at: { type: string, format: date-time }
-        updated_at: { type: string, format: date-time }
-    Participant:
-      type: object
-      additionalProperties: false
-      required: [id, display_name, initiative, position, zone, conditions, fallen, stable]
-      properties:
-        id: { $ref: '#/components/schemas/Uuid' }
-        character_id: { oneOf: [{ $ref: '#/components/schemas/Uuid' }, { type: 'null' }] }
-        enemy_instance_id: { oneOf: [{ $ref: '#/components/schemas/Uuid' }, { type: 'null' }] }
-        display_name: { type: string }
-        initiative: { type: integer }
-        position: { type: integer, minimum: 0 }
-        zone: { $ref: '#/components/schemas/Zone' }
-        conditions: { type: array, items: { type: string } }
-        fallen: { type: boolean }
-        stable: { type: boolean }
-    Zone:
-      type: string
-      enum: [corpo a corpo, perto, distante, fora de alcance]
-    Enemy:
-      type: object
-      additionalProperties: false
-      required: [id, name, level, category, archetype, vitality, vitality_max, defense, attack_bonus, damage_expression, effect_difficulty, zone, status, conditions]
-      properties:
-        id: { $ref: '#/components/schemas/Uuid' }
-        name: { type: string }
-        level: { type: integer, minimum: 1, maximum: 5 }
-        category: { type: string, enum: [lacaio, comum, elite, chefe] }
-        archetype: { type: string }
-        vitality: { type: integer, minimum: 0 }
-        vitality_max: { type: integer, minimum: 0 }
-        defense: { type: integer }
-        attack_bonus: { type: integer }
-        damage_expression: { type: string }
-        effect_difficulty: { type: integer }
-        zone: { $ref: '#/components/schemas/Zone' }
-        status: { type: string }
-        conditions: { type: array, items: { type: string } }
-    Combat:
-      type: object
-      additionalProperties: false
-      required: [session, participants, enemies]
-      properties:
-        session: { oneOf: [{ $ref: '#/components/schemas/CombatSession' }, { type: 'null' }] }
-        participants: { type: array, items: { $ref: '#/components/schemas/Participant' } }
-        enemies: { type: array, items: { $ref: '#/components/schemas/Enemy' } }
-    TableState:
-      type: object
-      additionalProperties: false
-      required: [characters, combat]
-      properties:
-        characters: { type: array, items: { $ref: '#/components/schemas/TableCharacter' } }
-        combat: { $ref: '#/components/schemas/Combat' }
-    Region:
-      type: object
-      additionalProperties: true
-      required: [id, name]
-      properties:
-        id: { $ref: '#/components/schemas/Uuid' }
-        name: { type: string }
-    RevealedLocation:
-      type: object
-      additionalProperties: true
-      required: [id, name, region_id]
-      properties:
-        id: { $ref: '#/components/schemas/Uuid' }
-        name: { type: string }
-        region_id: { $ref: '#/components/schemas/Uuid' }
-    WorldState:
-      type: object
-      additionalProperties: false
-      required: [regions, revealed_locations]
-      properties:
-        regions: { type: array, items: { $ref: '#/components/schemas/Region' } }
-        revealed_locations: { type: array, items: { $ref: '#/components/schemas/RevealedLocation' } }
-    CampaignStateResponse:
-      type: object
-      additionalProperties: false
-      required: [ok, data]
-      properties: { ok: { const: true }, data: { $ref: '#/components/schemas/CampaignState' }, summary: { type: string } }
-    TableStateResponse:
-      type: object
-      additionalProperties: false
-      required: [ok, data]
-      properties: { ok: { const: true }, data: { $ref: '#/components/schemas/TableState' }, summary: { type: string } }
-    WorldStateResponse:
-      type: object
-      additionalProperties: false
-      required: [ok, data]
-      properties: { ok: { const: true }, data: { $ref: '#/components/schemas/WorldState' }, summary: { type: string } }
-    PositiveAmount: { type: integer, minimum: 1, maximum: 100000 }
-    ApplyDamageAction:
-      type: object
-      additionalProperties: false
-      required: [type, target_kind, target_id, amount]
-      properties: { type: { const: apply_damage }, target_kind: { type: string, enum: [character, enemy] }, target_id: { $ref: '#/components/schemas/Uuid' }, amount: { $ref: '#/components/schemas/PositiveAmount' } }
-    ApplyHealingAction:
-      type: object
-      additionalProperties: false
-      required: [type, target_kind, character_id, amount]
-      properties: { type: { const: apply_healing }, target_kind: { const: character }, character_id: { $ref: '#/components/schemas/Uuid' }, amount: { $ref: '#/components/schemas/PositiveAmount' } }
-    SpendResourceAction:
-      type: object
-      additionalProperties: false
-      required: [type, character_id, resource, amount]
-      properties: { type: { const: spend_resource }, character_id: { $ref: '#/components/schemas/Uuid' }, resource: { type: string, maxLength: 30 }, amount: { $ref: '#/components/schemas/PositiveAmount' } }
-    RestoreResourceAction:
-      type: object
-      additionalProperties: false
-      required: [type, character_id, resource, amount]
-      properties: { type: { const: restore_resource }, character_id: { $ref: '#/components/schemas/Uuid' }, resource: { type: string, maxLength: 30 }, amount: { $ref: '#/components/schemas/PositiveAmount' } }
-    AddConditionAction:
-      type: object
-      additionalProperties: false
-      required: [type, character_id, condition]
-      properties: { type: { const: add_condition }, character_id: { $ref: '#/components/schemas/Uuid' }, condition: { $ref: '#/components/schemas/ConditionName' } }
-    RemoveConditionAction:
-      type: object
-      additionalProperties: false
-      required: [type, character_id, condition]
-      properties: { type: { const: remove_condition }, character_id: { $ref: '#/components/schemas/Uuid' }, condition: { $ref: '#/components/schemas/ConditionName' } }
-    StartCombatAction: { $ref: '#/components/schemas/StartCombatActionObject' }
-    StartCombatActionObject: { type: object, additionalProperties: false, required: [type], properties: { type: { const: start_combat } } }
-    EndCombatAction: { type: object, additionalProperties: false, required: [type], properties: { type: { const: end_combat } } }
-    AdvanceTurnAction: { type: object, additionalProperties: false, required: [type], properties: { type: { const: advance_turn } } }
-    AdvanceRoundAction: { type: object, additionalProperties: false, required: [type], properties: { type: { const: advance_round } } }
-    CreateEnemyAction:
-      type: object
-      additionalProperties: false
-      required: [type, name, level, category, archetype, zone]
-      properties: { type: { const: create_enemy }, name: { type: string, minLength: 1, maxLength: 60 }, level: { type: integer, minimum: 1, maximum: 5 }, category: { type: string, enum: [lacaio, comum, elite, chefe] }, archetype: { type: string, minLength: 1, maxLength: 40 }, zone: { $ref: '#/components/schemas/Zone' } }
-    UpdateEnemyAction:
-      type: object
-      additionalProperties: false
-      required: [type, enemy_id]
-      minProperties: 3
-      properties: { type: { const: update_enemy }, enemy_id: { $ref: '#/components/schemas/Uuid' }, name: { type: string, minLength: 1, maxLength: 60 }, zone: { $ref: '#/components/schemas/Zone' }, status: { type: string, enum: [ativo, fugiu, aliado] } }
-    DefeatEnemyAction: { type: object, additionalProperties: false, required: [type, enemy_id], properties: { type: { const: defeat_enemy }, enemy_id: { $ref: '#/components/schemas/Uuid' } } }
-    GameAction:
+        character_states: { oneOf: [{ type: object, additionalProperties: true }, { type: 'null' }] }
+        character_conditions: { type: array, items: { type: object, additionalProperties: true } }
+        character_specialties: { type: array, items: { type: object, additionalProperties: true } }
+    ActiveCombat:
       oneOf:
-        - { $ref: '#/components/schemas/ApplyDamageAction' }
-        - { $ref: '#/components/schemas/ApplyHealingAction' }
-        - { $ref: '#/components/schemas/SpendResourceAction' }
-        - { $ref: '#/components/schemas/RestoreResourceAction' }
-        - { $ref: '#/components/schemas/AddConditionAction' }
-        - { $ref: '#/components/schemas/RemoveConditionAction' }
-        - { $ref: '#/components/schemas/StartCombatAction' }
-        - { $ref: '#/components/schemas/EndCombatAction' }
-        - { $ref: '#/components/schemas/AdvanceTurnAction' }
-        - { $ref: '#/components/schemas/AdvanceRoundAction' }
-        - { $ref: '#/components/schemas/CreateEnemyAction' }
-        - { $ref: '#/components/schemas/UpdateEnemyAction' }
-        - { $ref: '#/components/schemas/DefeatEnemyAction' }
-      discriminator:
-        propertyName: type
-        mapping:
-          apply_damage: '#/components/schemas/ApplyDamageAction'
-          apply_healing: '#/components/schemas/ApplyHealingAction'
-          spend_resource: '#/components/schemas/SpendResourceAction'
-          restore_resource: '#/components/schemas/RestoreResourceAction'
-          add_condition: '#/components/schemas/AddConditionAction'
-          remove_condition: '#/components/schemas/RemoveConditionAction'
-          start_combat: '#/components/schemas/StartCombatAction'
-          end_combat: '#/components/schemas/EndCombatAction'
-          advance_turn: '#/components/schemas/AdvanceTurnAction'
-          advance_round: '#/components/schemas/AdvanceRoundAction'
-          create_enemy: '#/components/schemas/CreateEnemyAction'
-          update_enemy: '#/components/schemas/UpdateEnemyAction'
-          defeat_enemy: '#/components/schemas/DefeatEnemyAction'
-    ApplyGameActionRequest:
+        - type: object
+          additionalProperties: true
+          properties:
+            session: { type: object, additionalProperties: true }
+            participants: { type: array, items: { type: object, additionalProperties: true } }
+            enemies: { type: array, items: { type: object, additionalProperties: true } }
+        - { type: 'null' }
+    RollRequestSnapshot:
+      type: object
+      additionalProperties: true
+      required: [id, requested_character_id, status]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        requested_character_id: { $ref: '#/components/schemas/Uuid' }
+        status: { type: string }
+    DiceRollSnapshot:
+      type: object
+      additionalProperties: true
+      required: [id, character_id, total]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        character_id: { $ref: '#/components/schemas/Uuid' }
+        total: { type: integer }
+    CampaignEventSnapshot:
+      type: object
+      additionalProperties: true
+      required: [id, sequence, event_type, summary]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        sequence: { type: integer }
+        event_type: { type: string }
+        summary: { type: string }
+    CampaignSnapshot:
       type: object
       additionalProperties: false
-      required: [campaign_id, request_id, action]
+      required: [campaign, active_session, characters, locations, active_combat, pending_roll_requests, recent_dice_rolls, recent_events, last_sequence]
+      properties:
+        campaign: { $ref: '#/components/schemas/CampaignContext' }
+        active_session: { $ref: '#/components/schemas/ActiveSession' }
+        characters: { type: array, items: { $ref: '#/components/schemas/CharacterSnapshot' } }
+        locations: { type: array, items: { $ref: '#/components/schemas/RevealedLocation' } }
+        active_combat: { $ref: '#/components/schemas/ActiveCombat' }
+        pending_roll_requests: { type: array, items: { $ref: '#/components/schemas/RollRequestSnapshot' } }
+        recent_dice_rolls: { type: array, items: { $ref: '#/components/schemas/DiceRollSnapshot' } }
+        recent_events: { type: array, items: { $ref: '#/components/schemas/CampaignEventSnapshot' } }
+        last_sequence: { oneOf: [{ type: integer }, { type: 'null' }] }
+    CampaignSnapshotResponse:
+      type: object
+      additionalProperties: false
+      required: [ok, data]
+      properties: { ok: { const: true }, data: { $ref: '#/components/schemas/CampaignSnapshot' }, summary: { type: string } }
+    RequestDiceRollRequest:
+      type: object
+      additionalProperties: false
+      required: [character_id]
+      description: Informe attribute ou specialty (ou os dois). campaign_id é opcional e, se enviado, precisa corresponder à campanha vinculada à chave.
       properties:
         campaign_id: { $ref: '#/components/schemas/Uuid' }
-        request_id: { $ref: '#/components/schemas/Uuid' }
-        action: { $ref: '#/components/schemas/GameAction' }
-    ActionResult:
+        character_id: { $ref: '#/components/schemas/Uuid' }
+        attribute: { $ref: '#/components/schemas/AttributeName' }
+        specialty: { $ref: '#/components/schemas/SpecialtyName' }
+        modifier: { type: integer, minimum: -10, maximum: 10 }
+        reason: { type: string, maxLength: 240 }
+        difficulty: { type: integer, minimum: 1, maximum: 30 }
+    RollRequestResult:
       type: object
-      description: Resultado específico da ação, sempre devolvido pela API após persistência.
       additionalProperties: true
-    ActionResponse:
+      required: [id, campaign_id, requested_character_id, status]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        campaign_id: { $ref: '#/components/schemas/Uuid' }
+        requested_character_id: { $ref: '#/components/schemas/Uuid' }
+        attribute: { oneOf: [{ $ref: '#/components/schemas/AttributeName' }, { type: 'null' }] }
+        specialty: { oneOf: [{ $ref: '#/components/schemas/SpecialtyName' }, { type: 'null' }] }
+        difficulty: { oneOf: [{ type: integer }, { type: 'null' }] }
+        status: { type: string }
+    RequestDiceRollResponse:
       type: object
       additionalProperties: false
-      required: [ok, data, action_id, summary]
-      properties:
-        ok: { const: true }
-        data: { $ref: '#/components/schemas/ActionResult' }
-        action_id: { $ref: '#/components/schemas/Uuid' }
-        summary: { type: string }
+      required: [ok, data]
+      properties: { ok: { const: true }, data: { $ref: '#/components/schemas/RollRequestResult' }, summary: { type: string } }

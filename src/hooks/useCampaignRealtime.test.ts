@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 const on = vi.fn().mockReturnThis()
 const subscribe = vi.fn().mockReturnThis()
-const channel = vi.fn((_name: string) => ({ on, subscribe }))
-const removeChannel = vi.fn((_channel: unknown) => undefined)
+const channel = vi.fn(() => ({ on, subscribe }))
+const removeChannel = vi.fn(() => undefined)
 vi.mock('../lib/supabase', () => ({ supabase: { channel, removeChannel } }))
 
 const { useCampaignRealtime } = await import('./useCampaignRealtime')
