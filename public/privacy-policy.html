@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="theme-color" content="#11110f" />
+<meta name="description" content="Política de Privacidade das GPT Actions do Relicário." />
+<title>Política de Privacidade — Relicário GPT Actions</title>
+<style>
+  :root {
+    --bg-deep: #080a09;
+    --bg-panel: #151512;
+    --bg-panel-raised: #1b1915;
+    --border-dark: #393328;
+    --border-gold: #9f7734;
+    --border-gold-bright: #c99a47;
+    --text-primary: #eee8da;
+    --text-secondary: #c4baa7;
+    --text-muted: #918777;
+    --text-gold: #d6aa5b;
+    --font-display: Georgia, "Times New Roman", serif;
+    --font-ui: -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg-deep); color-scheme: dark; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    line-height: 1.6;
+  }
+  main {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+  header.page-head {
+    border-bottom: 1px solid var(--border-dark);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .sigil {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--border-gold);
+    border-radius: 50%;
+    font-family: var(--font-display);
+    color: var(--text-gold);
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-family: var(--font-display);
+    color: var(--text-gold);
+    font-size: 1.75rem;
+    margin: 0 0 0.5rem;
+  }
+  .meta {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
+  }
+  h2 {
+    font-family: var(--font-display);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-dark);
+    padding-bottom: 0.4rem;
+    margin-top: 2.25rem;
+    font-size: 1.25rem;
+  }
+  p, li { color: var(--text-secondary); }
+  ul { padding-left: 1.25rem; }
+  li { margin-bottom: 0.35rem; }
+  a { color: var(--text-gold); text-decoration: underline; }
+  a:hover { color: var(--border-gold-bright); }
+  section.panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-dark);
+    border-radius: 5px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1rem;
+  }
+  footer.page-foot {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-dark);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  footer.page-foot a { color: var(--text-secondary); }
+  @media (max-width: 30rem) {
+    main { padding: 1.5rem 1rem 3rem; }
+    h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="page-head">
+    <div class="sigil" aria-hidden="true">R</div>
+    <h1>Política de Privacidade — Relicário GPT Actions</h1>
+    <p class="meta">Data de vigência: 16 de julho de 2026</p>
+    <p class="meta">Responsável: Relicário</p>
+  </header>
+
+  <section>
+    <h2>Finalidade</h2>
+    <p>As GPT Actions conectam um GPT autorizado à campanha escolhida pelo administrador para consultar o estado da campanha e solicitar rolagens de dados.</p>
+  </section>
+
+  <section>
+    <h2>Dados que podem ser consultados</h2>
+    <ul>
+      <li>nome e contexto narrativo da campanha;</li>
+      <li>região atual e locais revelados;</li>
+      <li>sessão ativa;</li>
+      <li>personagens e estados mecânicos;</li>
+      <li>combate e inimigos;</li>
+      <li>solicitações e resultados recentes de rolagens;</li>
+      <li>eventos recentes da campanha.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Dados que podem ser enviados</h2>
+    <ul>
+      <li>campanha autorizada;</li>
+      <li>personagem;</li>
+      <li>atributo e especialidade;</li>
+      <li>dificuldade;</li>
+      <li>motivo da solicitação de rolagem.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Autenticação</h2>
+    <ul>
+      <li>a conexão utiliza uma chave exclusiva criada pelo administrador;</li>
+      <li>a chave bruta é exibida somente uma vez;</li>
+      <li>somente o hash SHA-256 é armazenado;</li>
+      <li>a conexão pode ser revogada pelo administrador;</li>
+      <li>nunca são utilizadas senhas dos usuários ou service_role no GPT.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Uso dos dados</h2>
+    <ul>
+      <li>fornecer o contexto da campanha ao GPT Mestre;</li>
+      <li>criar solicitações de rolagem;</li>
+      <li>proteger e auditar o acesso autorizado;</li>
+      <li>manter o funcionamento e a segurança do serviço.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Limitações atuais</h2>
+    <ul>
+      <li>nesta fase, o GPT não pode aplicar dano, cura, condições, alterações de recursos ou ações de combate;</li>
+      <li>o GPT não realiza a rolagem, apenas solicita que o jogador role no Relicário.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Armazenamento</h2>
+    <ul>
+      <li>os dados da campanha permanecem no Supabase enquanto existirem no Relicário;</li>
+      <li>a conexão registra dados técnicos mínimos, como criação, último uso, permissões e revogação;</li>
+      <li>a chave bruta não é persistida.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Compartilhamento</h2>
+    <ul>
+      <li>os dados são processados somente pelos serviços necessários ao funcionamento da integração, incluindo OpenAI, GitHub Pages e Supabase;</li>
+      <li>o Relicário não vende os dados da campanha.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Controle do usuário</h2>
+    <ul>
+      <li>o administrador pode revogar a conexão do GPT;</li>
+      <li>pode excluir ou editar os dados da campanha usando os recursos disponíveis no Relicário;</li>
+      <li>ao revogar uma conexão, novas chamadas com aquela chave devem ser recusadas.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Segurança</h2>
+    <ul>
+      <li>acesso limitado à campanha vinculada à chave;</li>
+      <li>permissões fechadas em read_snapshot e request_roll;</li>
+      <li>comunicação por HTTPS;</li>
+      <li>políticas de acesso e validações no servidor.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Contato</h2>
+    <p>Não há um canal de e-mail público dedicado. Dúvidas ou solicitações relacionadas a esta política podem ser enviadas através do repositório público do projeto no GitHub:</p>
+    <p><a href="https://github.com/apenaslucasguedes/nossa-campanha" target="_blank" rel="noopener noreferrer">github.com/apenaslucasguedes/nossa-campanha</a></p>
+  </section>
+
+  <section>
+    <h2>Links relacionados</h2>
+    <ul>
+      <li><a href="https://apenaslucasguedes.github.io/nossa-campanha/" target="_blank" rel="noopener noreferrer">Site público do Relicário</a></li>
+      <li><a href="https://openai.com/policies/privacy-policy/" target="_blank" rel="noopener noreferrer">Política de Privacidade da OpenAI</a></li>
+      <li><a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer">Política de Privacidade do Supabase</a></li>
+    </ul>
+  </section>
+
+  <footer class="page-foot">
+    <p><a href="https://apenaslucasguedes.github.io/nossa-campanha/">&larr; Voltar ao Relicário</a></p>
+  </footer>
+</main>
+</body>
+</html>
