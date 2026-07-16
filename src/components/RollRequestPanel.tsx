@@ -20,7 +20,7 @@ export function RollRequestPanel({ campaignId, characters, onError }: { campaign
   const refresh = useCallback(() => void listPendingRollRequests(campaignId).then(setRequests), [campaignId])
   useEffect(() => { refresh() }, [refresh])
   useEffect(() => {
-    const channel = subscribeToRollRequests(campaignId, refresh)
+    const channel = subscribeToRollRequests(campaignId, refresh, 'admin')
     return () => { void supabase.removeChannel(channel) }
   }, [campaignId, refresh])
 

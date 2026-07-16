@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext'
 import type { IconName } from '../assets/iconRegistry'
 import { BrandLogo } from './BrandLogo'
 import { CampaignSwitcher } from './CampaignSwitcher'
+import { ErrorBoundary } from './ErrorBoundary'
 import { Icon } from './Icon'
 import { OrnateFrame } from './RelicarioUI'
 
@@ -46,7 +47,7 @@ export function RelicarioShell() {
         </button>
       </aside>
       <main className="main-content">
-        <OrnateFrame className="main-frame"><Outlet /></OrnateFrame>
+        <OrnateFrame className="main-frame"><ErrorBoundary><Outlet /></ErrorBoundary></OrnateFrame>
       </main>
       <nav className="bottom-nav" aria-label="Navegação móvel">
         {navLinks.map((link) => <SidebarNavItem key={link.to} {...link} />)}

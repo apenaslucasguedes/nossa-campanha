@@ -41,8 +41,13 @@ export async function listPendingRollRequests(campaignId: string): Promise<RollR
   return (data ?? []) as RollRequest[]
 }
 
-export function subscribeToRollRequests(campaignId: string, onChange: () => void): RealtimeChannel {
-  return supabase.channel(`roll-requests:${campaignId}`)
+/**
+ * `subscriberId` must be unique per concurrent subscriber on the same campaign (e.g. DiceRollWidget vs
+ * RollRequestPanel, both mounted at once on the Mesa). Supabase reuses the channel object for a repeated
+ * topic name, and calling `.on()` on a channel that already had `.subscribe()` called throws synchronously.
+ */
+export function subscribeToRollRequests(campaignId: string, onChange: () => void, subscriberId = 'default'): RealtimeChannel {
+  return supabase.channel(`roll-requests:${campaignId}:${subscriberId}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'roll_requests', filter: `campaign_id=eq.${campaignId}` }, onChange)
     .subscribe()
 }

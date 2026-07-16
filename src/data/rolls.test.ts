@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 
 const rpc = vi.fn()
-vi.mock('../lib/supabase', () => ({ supabase: { rpc: (...args: unknown[]) => rpc(...args) } }))
+const on = vi.fn().mockReturnThis()
+const subscribe = vi.fn().mockReturnThis()
+const channel = vi.fn((_topic: string) => ({ on, subscribe }))
+vi.mock('../lib/supabase', () => ({ supabase: { rpc: (...args: unknown[]) => rpc(...args), channel } }))
 
-const { performDiceRoll, requestRoll } = await import('./rolls')
+const { performDiceRoll, requestRoll, subscribeToRollRequests } = await import('./rolls')
 
 describe('performDiceRoll', () => {
   it('traduz NOT_YOUR_CHARACTER em mensagem legível', async () => {
@@ -27,5 +30,19 @@ describe('requestRoll', () => {
   it('traduz erro de permissão para não-administrador', async () => {
     rpc.mockResolvedValueOnce({ data: null, error: { message: 'FORBIDDEN', code: '42501' } })
     await expect(requestRoll({ campaign_id: 'c1', character_id: 'ch1', attribute: 'strength' })).rejects.toThrow('Apenas o administrador da campanha pode solicitar rolagens.')
+  })
+})
+
+describe('subscribeToRollRequests', () => {
+  it('usa tópicos distintos por assinante para não colidir quando dois componentes assinam a mesma campanha', () => {
+    // Regressão: DiceRollWidget e RollRequestPanel assinam roll_requests da mesma campanha ao mesmo tempo
+    // na Mesa (visão de admin). Se ambos usassem o mesmo tópico de canal, o Supabase reaproveitaria o
+    // canal já inscrito e o segundo `.on()` lançaria "cannot add postgres_changes callbacks ... after
+    // subscribe()" de forma síncrona e não tratada, derrubando a árvore React inteira (tela preta).
+    subscribeToRollRequests('camp-1', () => {}, 'player')
+    subscribeToRollRequests('camp-1', () => {}, 'admin')
+    const topics = channel.mock.calls.map((call) => call[0])
+    expect(new Set(topics).size).toBe(topics.length)
+    expect(topics).toEqual(['roll-requests:camp-1:player', 'roll-requests:camp-1:admin'])
   })
 })

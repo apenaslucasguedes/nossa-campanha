@@ -18,7 +18,7 @@ export function DiceRollWidget({ campaignId, ownCharacter, onResult, onError }: 
   useEffect(() => {
     const refresh = () => void listPendingRollRequests(campaignId).then(setPending)
     refresh()
-    const channel = subscribeToRollRequests(campaignId, refresh)
+    const channel = subscribeToRollRequests(campaignId, refresh, 'player')
     return () => { void supabase.removeChannel(channel) }
   }, [campaignId])
 
