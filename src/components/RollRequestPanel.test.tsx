@@ -60,7 +60,7 @@ describe('RollRequestPanel', () => {
     fireEvent.change(screen.getByRole('combobox', { name: 'Especialidade' }), { target: { value: 'Investigação' } })
     fireEvent.change(screen.getByLabelText('Dificuldade'), { target: { value: '14' } })
     fireEvent.change(screen.getByLabelText('Motivo'), { target: { value: 'Examinar os símbolos' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Solicitar' }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Solicitar teste' }).at(-1)!)
     await waitFor(() => expect(requestRoll).toHaveBeenCalledWith(expect.objectContaining({ campaign_id: 'camp-1', character_id: 'char-1', attribute: 'intellect', specialty: 'Investigação', difficulty: 14, reason: 'Examinar os símbolos' })))
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(onRequested).toHaveBeenCalledWith('Teste solicitado a Aldra.')

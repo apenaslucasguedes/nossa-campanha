@@ -31,9 +31,9 @@ describe('HistoryPanel', () => {
       payload: { character_name: 'Aldra', attribute: 'intellect', specialty: 'Investigação', difficulty: 14, reason: 'Examinar os símbolos às margens do riacho', total: 17, test_label: 'Intelecto + Investigação' },
     })])
     render(<HistoryPanel campaignId="camp-1" sessionId="s1" userId="u1" isAdmin={false} />)
-    expect(await screen.findByText('Aldra — Intelecto + Investigação, dificuldade 14')).toBeInTheDocument()
-    expect(screen.getByText('Examinar os símbolos às margens do riacho')).toBeInTheDocument()
-    expect(screen.getByText('Resultado: 17')).toBeInTheDocument()
+    expect((await screen.findAllByText('Intelecto + Investigação · Dificuldade 14'))[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Examinar os símbolos às margens do riacho')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Aguardando')[0]).toBeInTheDocument()
   })
 
   it('mantém filtros e arquivamento em uma seção recolhível', async () => {

@@ -55,6 +55,7 @@ export const GPT_KEY_HEADER = 'x-relicario-key'
 
 export const ATTRIBUTE_NAMES:readonly string[] = ['strength','agility','intellect','presence','instinct']
 export const SPECIALTY_NAMES:readonly string[] = ['Atletismo','Acrobacia','Furtividade','Investigação','Percepção','Sobrevivência','Medicina','Persuasão','Intimidação','História','Arcanismo','Performance','Rastreamento','Alquimia']
+export const DICE_SIDES = [4,6,8,10,12,20,100] as const
 
 export function extractGptKey(request:Request):string|null{
   const value = request.headers.get(GPT_KEY_HEADER)
@@ -77,12 +78,31 @@ export function validateGptRollRequest(value:unknown):value is GptRollRequestInp
   const specialty = input.specialty
   if(attribute!==undefined && (typeof attribute!=='string' || !ATTRIBUTE_NAMES.includes(attribute))) return false
   if(specialty!==undefined && (typeof specialty!=='string' || !SPECIALTY_NAMES.includes(specialty))) return false
-  if(attribute===undefined && specialty===undefined) return false
   if(input.modifier!==undefined && (!Number.isInteger(input.modifier) || Number(input.modifier)< -10 || Number(input.modifier)>10)) return false
   if(input.difficulty!==undefined && (!Number.isInteger(input.difficulty) || Number(input.difficulty)<1 || Number(input.difficulty)>30)) return false
   if(input.reason!==undefined && (typeof input.reason!=='string' || input.reason.length>240)) return false
   const allowedKeys = new Set(['campaign_id','character_id','attribute','specialty','modifier','reason','difficulty'])
   return Object.keys(input).every(key=>allowedKeys.has(key))
+}
+
+export type GptDicePoolInput = { campaign_id?:string; character_id?:string; dice:Array<{sides:number;quantity:number}>; modifier?:number; reason?:string }
+export function validateGptDicePool(value:unknown):value is GptDicePoolInput{
+  if(!value || typeof value!=='object') return false
+  const input=value as Record<string,unknown>
+  if(input.campaign_id!==undefined&&!isUuid(input.campaign_id)) return false
+  if(input.character_id!==undefined&&!isUuid(input.character_id)) return false
+  if(!Array.isArray(input.dice)||input.dice.length<1||input.dice.length>7) return false
+  let total=0
+  for(const item of input.dice){
+    if(!item||typeof item!=='object') return false
+    const die=item as Record<string,unknown>
+    if(Object.keys(die).some(key=>!['sides','quantity'].includes(key))||!DICE_SIDES.includes(die.sides as typeof DICE_SIDES[number])||!Number.isInteger(die.quantity)||Number(die.quantity)<1) return false
+    total+=Number(die.quantity)
+  }
+  if(total>20) return false
+  if(input.modifier!==undefined&&(!Number.isInteger(input.modifier)||Number(input.modifier)<-20||Number(input.modifier)>20)) return false
+  if(input.reason!==undefined&&(typeof input.reason!=='string'||input.reason.length>240)) return false
+  return Object.keys(input).every(key=>['campaign_id','character_id','dice','modifier','reason'].includes(key))
 }
 
 export function gptDatabaseErrorCode(message:string,code?:string):ApiErrorCode{

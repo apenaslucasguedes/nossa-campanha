@@ -48,3 +48,4 @@ Antes do uso real, valide uma configuração compatível. Se o editor não supor
 - A API expõe estado mecânico, não memória narrativa completa.
 - A integração real depende de autenticação dinâmica segura ainda não resolvida no editor de GPTs.
 - Configuração, implantação, migração e publicação permanecem manuais e fora desta entrega.
+O schema também expõe `requestDicePool`, autenticada pela mesma `X-Relicario-Key` e pela permissão `request_roll`.

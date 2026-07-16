@@ -43,10 +43,10 @@ describe('chave de conexão do GPT Mestre (fase 1)',()=>{
     expect(first).toMatch(/^[0-9a-f]{64}$/)
   })
 
-  it('valida a solicitação de rolagem exigindo atributo ou especialidade',()=>{
+  it('valida teste completo, parcial e simples',()=>{
     expect(validateGptRollRequest({character_id,attribute:'strength'})).toBe(true)
     expect(validateGptRollRequest({character_id,specialty:'Furtividade'})).toBe(true)
-    expect(validateGptRollRequest({character_id})).toBe(false)
+    expect(validateGptRollRequest({character_id})).toBe(true)
     expect(validateGptRollRequest({character_id,attribute:'invalida'})).toBe(false)
     expect(validateGptRollRequest({character_id:'nao-e-uuid',attribute:'strength'})).toBe(false)
     expect(validateGptRollRequest({character_id,attribute:'strength',difficulty:31})).toBe(false)

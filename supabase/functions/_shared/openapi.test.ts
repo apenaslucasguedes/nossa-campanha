@@ -18,11 +18,11 @@ describe('OpenAPI das GPT Actions (fase 1)', () => {
     expect(source).not.toMatch(/^\s*[^#\s][^:]*\s+[^:]+$/m)
   })
 
-  it('expõe exatamente os dois endpoints da fase 1, com operationIds únicos', () => {
+  it('expõe os três endpoints fechados, com operationIds únicos', () => {
     const paths = [...source.matchAll(/^ {2}\/([^:]+):$/gm)].map(match => match[1])
-    expect(paths).toEqual(['campaign-snapshot', 'request-dice-roll'])
+    expect(paths).toEqual(['campaign-snapshot', 'request-dice-roll', 'request-dice-pool'])
     const ids = [...source.matchAll(/^ {6}operationId: (\S+)$/gm)].map(match => match[1])
-    expect(ids).toEqual(['getCampaignSnapshot', 'requestDiceRoll'])
+    expect(ids).toEqual(['getCampaignSnapshot', 'requestDiceRoll', 'requestDicePool'])
     expect(new Set(ids).size).toBe(ids.length)
   })
 
@@ -87,14 +87,15 @@ describe('OpenAPI das GPT Actions (fase 1)', () => {
     expect(source).not.toMatch(/EmptyRequest/)
   })
 
-  it('marca as duas operações como não consequenciais e não introduz nenhuma operação consequencial', () => {
+  it('marca as três operações como não consequenciais', () => {
     const doc = yaml.load(source) as {
       paths: Record<string, { post: Record<string, unknown> }>
     }
     expect(doc.paths['/campaign-snapshot'].post['x-openai-isConsequential']).toBe(false)
     expect(doc.paths['/request-dice-roll'].post['x-openai-isConsequential']).toBe(false)
+    expect(doc.paths['/request-dice-pool'].post['x-openai-isConsequential']).toBe(false)
     const flags = [...source.matchAll(/^\s*x-openai-isConsequential:\s*(\S+)/gm)].map(match => match[1])
-    expect(flags).toEqual(['false', 'false'])
+    expect(flags).toEqual(['false', 'false', 'false'])
   })
 
   it('campaign-snapshot não tem requestBody e request-dice-roll tem requestBody do tipo object', () => {

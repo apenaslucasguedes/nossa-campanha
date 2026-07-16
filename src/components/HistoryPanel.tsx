@@ -1,150 +1,22 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { archiveEvent, getEventPrefs, loadEventsPage, resetHiddenBefore, setHiddenBefore, subscribeToEvents, type EventFilter } from '../data/events'
+import { useCallback,useEffect,useMemo,useState } from 'react'
+import { archiveEvent,getEventPrefs,loadEventsPage,resetHiddenBefore,setHiddenBefore,subscribeToEvents,type EventFilter } from '../data/events'
 import { supabase } from '../lib/supabase'
 import type { CampaignEvent } from '../types/database'
-import { MechanicalButton, SectionTitle } from './RelicarioUI'
-
-type ScopeFilter = 'session' | 'all'
-type TypeFilter = 'all' | 'rolls' | 'combat' | 'system'
-
-const TYPE_GROUPS: Record<Exclude<TypeFilter, 'all'>, string[]> = {
-  rolls: ['dice_roll', 'roll_requested'],
-  combat: ['combat_started', 'combat_ended', 'enemy_created', 'enemy_changed', 'character_fallen', 'character_stable', 'turn_advanced', 'turn_selected', 'initiative_reordered', 'enemy_attack', 'enemy_attack_miss', 'condition_added'],
-  system: ['session_started', 'campaign_created'],
-}
-
-const EVENT_ICONS: Record<string, string> = { dice_roll: '🎲', roll_requested: '⏳', combat_started: '⚔️', combat_ended: '🏳️', session_started: '📖' }
-
-const ATTRIBUTE_LABELS: Record<string, string> = { strength: 'Força', agility: 'Agilidade', intellect: 'Intelecto', presence: 'Presença', instinct: 'Instinto' }
-
-function eventIcon(type: string) { return EVENT_ICONS[type] ?? '•' }
-
-function str(payload: Record<string, unknown>, key: string): string | null {
-  const value = payload[key]
-  return typeof value === 'string' && value.trim() ? value : null
-}
-
-function num(payload: Record<string, unknown>, key: string): number | null {
-  const value = payload[key]
-  return typeof value === 'number' ? value : null
-}
-
-/**
- * Resumo útil do evento a partir de dados que já existem no payload
- * (personagem, teste, dificuldade, motivo, resultado). Cai para o summary
- * gravado quando o evento é antigo ou não é uma rolagem.
- */
-function eventLines(event: CampaignEvent): { headline: string; detail: string | null; result: string | null } {
-  const payload = event.payload ?? {}
-  if (event.event_type === 'dice_roll' || event.event_type === 'roll_requested') {
-    const name = str(payload, 'character_name')
-    const attribute = str(payload, 'attribute')
-    const specialty = str(payload, 'specialty')
-    const test = str(payload, 'test_label') ?? [attribute ? (ATTRIBUTE_LABELS[attribute] ?? attribute) : null, specialty].filter(Boolean).join(' + ')
-    const difficulty = num(payload, 'difficulty')
-    if (name && (test || difficulty != null)) {
-      const headline = `${name}${test ? ` — ${test}` : ''}${difficulty != null ? `, dificuldade ${difficulty}` : ''}`
-      const reason = str(payload, 'reason')
-      const total = event.event_type === 'dice_roll' ? num(payload, 'total') : null
-      return { headline, detail: reason, result: total != null ? `Resultado: ${total}` : null }
-    }
-  }
-  return { headline: event.summary, detail: null, result: null }
-}
-
-export function HistoryPanel({ campaignId, sessionId, userId, isAdmin }: { campaignId: string; sessionId: string | null; userId: string; isAdmin: boolean }) {
-  const [events, setEvents] = useState<CampaignEvent[]>([])
-  const [scope, setScope] = useState<ScopeFilter>('session')
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
-  const [hideTests, setHideTests] = useState(true)
-  const [showArchived, setShowArchived] = useState(false)
-  const [hiddenBefore, setHiddenBefore_] = useState(0)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
-
-  const filter: EventFilter = useMemo(() => ({
-    sessionId: scope === 'session' ? sessionId : undefined,
-    includeTests: !hideTests,
-    includeArchived: showArchived,
-    onlyTypes: typeFilter === 'all' ? undefined : TYPE_GROUPS[typeFilter],
-  }), [scope, sessionId, hideTests, showArchived, typeFilter])
-
-  const load = useCallback(async () => {
-    const page = await loadEventsPage(campaignId, filter)
-    setEvents(page)
-    setHasMore(page.length > 0)
-  }, [campaignId, filter])
-
-  useEffect(() => { void load() }, [load])
-  useEffect(() => { void getEventPrefs(campaignId, userId).then(setHiddenBefore_) }, [campaignId, userId])
-
-  useEffect(() => {
-    const channel = subscribeToEvents(campaignId, (event) => {
-      setEvents((current) => {
-        if (current.some((item) => item.id === event.id)) return current
-        if (filter.sessionId && event.session_id !== filter.sessionId) return current
-        if (!filter.includeTests && event.is_test) return current
-        return [event, ...current]
-      })
-    })
-    return () => { void supabase.removeChannel(channel) }
-  }, [campaignId, filter.sessionId, filter.includeTests])
-
-  async function loadMore() {
-    if (!events.length) return
-    setLoadingMore(true)
-    try {
-      const page = await loadEventsPage(campaignId, filter, events[events.length - 1].sequence)
-      setEvents((current) => [...current, ...page])
-      setHasMore(page.length > 0)
-    } finally { setLoadingMore(false) }
-  }
-
-  const visibleEvents = events.filter((event) => event.sequence > hiddenBefore)
-
-  return (
-    <section className="history-panel" aria-label="Histórico da Mesa">
-      <SectionTitle icon="diario" title="Histórico" description="Rolagens, combate e eventos da campanha, sincronizados em tempo real." />
-      <details className="history-filters-wrap">
-        <summary>Filtros e arquivamento</summary>
-      <div className="history-filters" role="group" aria-label="Filtros do histórico">
-        <select value={scope} onChange={(event) => setScope(event.target.value as ScopeFilter)} aria-label="Escopo">
-          <option value="session">Sessão atual</option>
-          <option value="all">Todas as sessões</option>
-        </select>
-        <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as TypeFilter)} aria-label="Tipo">
-          <option value="all">Todos os tipos</option>
-          <option value="rolls">Só rolagens</option>
-          <option value="combat">Combate</option>
-          <option value="system">Sistema</option>
-        </select>
-        <label><input type="checkbox" checked={hideTests} onChange={(event) => setHideTests(event.target.checked)} /> Ocultar testes</label>
-        {isAdmin ? <label><input type="checkbox" checked={showArchived} onChange={(event) => setShowArchived(event.target.checked)} /> Mostrar arquivados</label> : null}
-        {hiddenBefore > 0
-          ? <MechanicalButton onClick={() => void resetHiddenBefore(campaignId, userId).then(() => setHiddenBefore_(0))}>Mostrar tudo novamente</MechanicalButton>
-          : <MechanicalButton onClick={() => { const latest = events[0]?.sequence ?? 0; void setHiddenBefore(campaignId, userId, latest).then(() => setHiddenBefore_(latest)) }}>Limpar visualização</MechanicalButton>}
-      </div>
-      </details>
-      {visibleEvents.length ? (
-        <ol className="history-list">
-          {visibleEvents.map((event) => {
-            const lines = eventLines(event)
-            return (
-            <li key={event.id} className={event.is_test ? 'history-item history-item--test' : 'history-item'}>
-              <span className="history-item__icon" aria-hidden="true">{eventIcon(event.event_type)}</span>
-              <div className="history-item__body">
-                <p className="history-item__headline">{lines.headline}{event.is_test ? <span className="history-item__badge"> teste</span> : null}</p>
-                {lines.detail ? <p className="history-item__detail">{lines.detail}</p> : null}
-                {lines.result ? <p className="history-item__result">{lines.result}</p> : null}
-                <time dateTime={event.created_at}>{new Date(event.created_at).toLocaleString('pt-BR')}</time>
-              </div>
-              {isAdmin && !event.is_archived ? <details className="history-item__menu"><summary aria-label={`Ações para ${lines.headline}`}>•••</summary><button type="button" onClick={() => void archiveEvent(event.id).then(load)}>Arquivar</button></details> : null}
-            </li>
-            )
-          })}
-        </ol>
-      ) : <p className="compact-empty">Nenhum evento registrado ainda.</p>}
-      {hasMore && events.length >= 30 ? <MechanicalButton onClick={() => void loadMore()} disabled={loadingMore}>{loadingMore ? 'Carregando…' : 'Carregar mais'}</MechanicalButton> : null}
-    </section>
-  )
+import { MechanicalButton,SectionTitle } from './RelicarioUI'
+type Scope='session'|'all';type Kind='all'|'pending'|'completed'|'tests'|'pools'|'combat'
+const COMBAT=['combat_started','combat_ended','enemy_created','enemy_changed','character_fallen','character_stable','turn_advanced','turn_selected','initiative_reordered','enemy_attack','enemy_attack_miss','condition_added']
+const attr:Record<string,string>={strength:'Força',agility:'Agilidade',intellect:'Intelecto',presence:'Presença',instinct:'Instinto'}
+const text=(p:Record<string,unknown>,k:string)=>typeof p[k]==='string'?p[k] as string:null
+const number=(p:Record<string,unknown>,k:string)=>typeof p[k]==='number'?p[k] as number:null
+type Entry={key:string;request?:CampaignEvent;result?:CampaignEvent;event:CampaignEvent}
+function group(events:CampaignEvent[]):Entry[]{const map=new Map<string,Entry>();for(const event of events){const id=text(event.payload??{},'roll_request_id');if(!id){map.set(event.id,{key:event.id,event});continue}const found=map.get(id)??{key:id,event};if(event.event_type==='roll_requested')found.request=event;else if(event.event_type==='dice_roll')found.result=event;if(event.sequence>found.event.sequence)found.event=event;map.set(id,found)}return [...map.values()].sort((a,b)=>b.event.sequence-a.event.sequence)}
+function view(entry:Entry){const event=entry.result??entry.request??entry.event,p=event.payload??{},kind=text(p,'request_kind')??'character_test',name=text(p,'character_name')??(kind==='dice_pool'?'Dados livres':event.summary),facets=[text(p,'attribute')?attr[text(p,'attribute')!]:null,text(p,'specialty')].filter(Boolean).join(' + '),label=text(p,'test_label')??(facets||(kind==='character_test'?'Teste simples':'Dados livres')),difficulty=number(p,'difficulty'),total=number(p,'total'),outcome=text(p,'outcome'),results=Array.isArray(p.results)?p.results.join(' + '):null;return{event,p,kind,name,title:`${label}${difficulty!=null?` · Dificuldade ${difficulty}`:''}`,reason:text(p,'reason'),result:entry.result?(kind==='dice_pool'?`Resultados ${results??'—'} · Total ${total??'—'}`:`Resultado ${total??'—'}${outcome?` · ${outcome.includes('success')?'Sucesso':'Falha'}`:''}`):'Aguardando'}}
+export function HistoryPanel({campaignId,sessionId,userId,isAdmin}:{campaignId:string;sessionId:string|null;userId:string;isAdmin:boolean}){
+ const[events,setEvents]=useState<CampaignEvent[]>([]),[scope,setScope]=useState<Scope>('session'),[kind,setKind]=useState<Kind>('all'),[archived,setArchived]=useState(false),[hidden,setHidden]=useState(0),[more,setMore]=useState(true),[loading,setLoading]=useState(false)
+ const filter:EventFilter=useMemo(()=>({sessionId:scope==='session'?sessionId:undefined,includeTests:true,includeArchived:archived}),[scope,sessionId,archived])
+ const load=useCallback(async()=>{const page=await loadEventsPage(campaignId,filter);setEvents(page);setMore(page.length>0)},[campaignId,filter])
+ useEffect(()=>{void load()},[load]);useEffect(()=>{void getEventPrefs(campaignId,userId).then(setHidden)},[campaignId,userId]);useEffect(()=>{const channel=subscribeToEvents(campaignId,event=>setEvents(current=>current.some(x=>x.id===event.id)?current:[event,...current]));return()=>{void supabase.removeChannel(channel)}},[campaignId])
+ let entries=group(events.filter(e=>e.sequence>hidden));entries=entries.filter(entry=>{const v=view(entry);if(kind==='all')return true;if(kind==='pending')return Boolean(entry.request&&!entry.result);if(kind==='completed')return Boolean(entry.result);if(kind==='tests')return v.kind==='character_test'&&(entry.request||entry.result);if(kind==='pools')return v.kind==='dice_pool';return COMBAT.includes(entry.event.event_type)})
+ async function loadMore(){if(!events.length)return;setLoading(true);try{const page=await loadEventsPage(campaignId,filter,events.at(-1)?.sequence);setEvents(current=>[...current,...page]);setMore(page.length>0)}finally{setLoading(false)}}
+ return <section className="history-panel" aria-label="Histórico da Mesa"><SectionTitle icon="diario" title="Histórico" description="Solicitações e resultados reunidos em um único registro."/><details className="history-filters-wrap"><summary>Filtros e arquivamento</summary><div className="history-filters"><select aria-label="Escopo" value={scope} onChange={e=>setScope(e.target.value as Scope)}><option value="session">Sessão atual</option><option value="all">Todas as sessões</option></select><div className="history-filter-chips" role="group" aria-label="Tipo">{([['all','Todos'],['pending','Pendentes'],['completed','Concluídos'],['tests','Testes'],['pools','Dados livres'],['combat','Combate']] as const).map(([value,label])=><button type="button" aria-pressed={kind===value} key={value} onClick={()=>setKind(value)}>{label}</button>)}</div>{isAdmin?<label><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/> Mostrar arquivados</label>:null}{hidden?<MechanicalButton onClick={()=>void resetHiddenBefore(campaignId,userId).then(()=>setHidden(0))}>Mostrar tudo novamente</MechanicalButton>:<MechanicalButton onClick={()=>{const latest=events[0]?.sequence??0;void setHiddenBefore(campaignId,userId,latest).then(()=>setHidden(latest))}}>Limpar visualização</MechanicalButton>}</div></details>{entries.length?<ol className="history-list">{entries.map(entry=>{const v=view(entry);return <li key={entry.key} className="history-item"><span className="history-item__icon" aria-hidden="true">{entry.result?'◆':entry.request?'◷':'•'}</span><div className="history-item__body"><strong className="history-item__character">{v.name}</strong><p className="history-item__headline">{v.title}</p>{v.reason?<p className="history-item__detail">{v.reason}</p>:null}<p className="history-item__result">{v.result}</p><time dateTime={v.event.created_at}>{new Date(v.event.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</time></div><details className="history-item__menu"><summary aria-label={`Ações para ${v.name}`}>•••</summary><div>{isAdmin&&!v.event.is_archived?<button type="button" onClick={()=>void archiveEvent(v.event.id).then(load)}>Arquivar</button>:null}<details className="history-item__details"><summary>Ver detalhes</summary><dl>{v.reason?<div><dt>Motivo</dt><dd>{v.reason}</dd></div>:null}<div><dt>Dados</dt><dd>{v.title}</dd></div><div><dt>Modificador</dt><dd>{number(v.p,'modifier')??0}</dd></div><div><dt>Resultado</dt><dd>{v.result}</dd></div><div><dt>Data</dt><dd>{new Date(v.event.created_at).toLocaleString('pt-BR')}</dd></div></dl></details></div></details></li>})}</ol>:<p className="compact-empty">Nenhum evento neste filtro.</p>}{more&&events.length>=30?<MechanicalButton disabled={loading} onClick={()=>void loadMore()}>{loading?'Carregando…':'Carregar mais'}</MechanicalButton>:null}</section>
 }

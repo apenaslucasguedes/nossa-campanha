@@ -17,11 +17,14 @@ export type CampaignEvent = { id: string; sequence: number; campaign_id: string;
 export type CampaignEventPrefs = { campaign_id: string; user_id: string; hidden_before_sequence: number; updated_at: string }
 
 export type RollRequestStatus = 'pending' | 'completed' | 'cancelled'
-export type RollRequest = { id: string; campaign_id: string; session_id: string | null; requested_character_id: string; requested_by: string; attribute: keyof Attributes | null; specialty: Specialty | null; modifier: number; reason: string; difficulty: number | null; status: RollRequestStatus; source: 'admin' | 'gpt' | 'system'; requested_at: string; completed_at: string | null; resulting_roll_id: string | null }
+export type DiceSpecItem = { sides: 4 | 6 | 8 | 10 | 12 | 20 | 100; quantity: number }
+export type RollRequestKind = 'character_test' | 'dice_pool'
+export type RollRequest = { id: string; campaign_id: string; session_id: string | null; requested_character_id: string | null; requested_by: string; request_kind?: RollRequestKind; dice_spec?: DiceSpecItem[] | null; attribute: keyof Attributes | null; specialty: Specialty | null; modifier: number; reason: string; difficulty: number | null; status: RollRequestStatus; source: 'admin' | 'gpt' | 'system'; requested_at: string; completed_at: string | null; resulting_roll_id: string | null }
 
 export type DiceKind = 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20' | 'd100'
 export type RollOutcome = 'success' | 'failure' | 'critical_success' | 'critical_failure'
-export type DiceRoll = { id: string; campaign_id: string; session_id: string | null; character_id: string; rolled_by: string; roll_request_id: string | null; dice: DiceKind; count: number; modifier: number; attribute: keyof Attributes | null; specialty: Specialty | null; difficulty: number | null; results: number[]; total: number; outcome: RollOutcome | null; label: string; is_test: boolean; created_at: string; event_id: string | null }
+export type DiceResultGroup = { sides: DiceSpecItem['sides']; results: number[] }
+export type DiceRoll = { id: string; campaign_id: string; session_id: string | null; character_id: string; rolled_by: string; roll_request_id: string | null; request_kind: RollRequestKind; dice_spec: DiceSpecItem[] | null; dice_results: DiceResultGroup[] | null; subtotal: number; dice: DiceKind; count: number; modifier: number; attribute: keyof Attributes | null; specialty: Specialty | null; difficulty: number | null; results: number[]; total: number; outcome: RollOutcome | null; label: string; is_test: boolean; created_at: string; event_id: string | null }
 export type RegionId = 'vale-de-ardan'|'floresta-de-nhalor'|'costa-quebrada'|'cordilheira-de-ferro'|'pantanos-de-varg'|'deserto-de-sal'|'mar-de-cinzas'|'peninsula-da-aurora'|'estepes-do-norte'|'arquipelago-de-vesper'|'ilhas-cinzentas'|'ormara'
 export type Campaign = { id: string; name: string; status: string; premise: string; current_summary: string; current_region_id: RegionId | null; last_session_summary: string; active_objectives: string[]; important_notes: string; created_at: string; created_by: string; updated_at: string }
 export type CampaignMember = { campaign_id: string; user_id: string; role: Role; seat: number; joined_at: string; profile?: Profile | null }
@@ -54,6 +57,7 @@ export type Database = { public: { Tables: {
   archive_campaign:{Args:{target_campaign:string};Returns:void}
   start_campaign_session:{Args:{target_campaign:string;session_title:string};Returns:CampaignSession}
   request_dice_roll:{Args:{payload:unknown};Returns:RollRequest}
+  request_dice_pool:{Args:{payload:unknown};Returns:RollRequest}
   cancel_roll_request:{Args:{target_request:string};Returns:void}
   perform_dice_roll:{Args:{payload:unknown};Returns:unknown}
   get_campaign_snapshot:{Args:{target_campaign:string};Returns:unknown}

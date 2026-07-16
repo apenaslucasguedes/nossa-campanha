@@ -1,6 +1,6 @@
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
-import type { Attributes, DiceKind, RollRequest, Specialty } from '../types/database'
+import type { Attributes, DiceKind, DiceResultGroup, DiceSpecItem, RollRequest, Specialty } from '../types/database'
 
 export type RequestRollInput = { campaign_id: string; character_id: string; attribute?: keyof Attributes; specialty?: Specialty; modifier?: number; reason?: string; difficulty?: number }
 
@@ -15,13 +15,25 @@ export async function requestRoll(input: RequestRollInput): Promise<RollRequest>
   return data as RollRequest
 }
 
+export type RequestDicePoolInput = { campaign_id: string; character_id?: string; dice: DiceSpecItem[]; modifier?: number; reason?: string }
+export async function requestDicePool(input: RequestDicePoolInput): Promise<RollRequest> {
+  const { data, error } = await supabase.rpc('request_dice_pool', { payload: input })
+  if (error) {
+    if (error.code === '42501') throw new Error('Apenas o administrador da campanha pode solicitar dados.')
+    if (error.message.includes('SESSION_INACTIVE')) throw new Error('Nenhuma sessão ativa nesta campanha.')
+    if (error.message.includes('INVALID_DICE')) throw new Error('Conjunto de dados inválido.')
+    throw new Error('Não foi possível solicitar os dados.')
+  }
+  return data as RollRequest
+}
+
 export async function cancelRollRequest(requestId: string) {
   const { error } = await supabase.rpc('cancel_roll_request', { target_request: requestId })
   if (error) throw new Error('Não foi possível cancelar a solicitação.')
 }
 
 export type PerformRollInput = { campaign_id: string; dice: DiceKind; count?: number; modifier?: number; roll_request_id?: string; attribute?: keyof Attributes; specialty?: Specialty; difficulty?: number; is_test?: boolean; label?: string }
-export type PerformRollResult = { roll_id: string; event_id: string; character_id: string; character_name: string; dice: DiceKind; count: number; modifier: number; results: number[]; total: number; outcome: string | null; is_test: boolean }
+export type PerformRollResult = { roll_id: string; event_id: string; character_id: string; character_name: string; request_kind: 'character_test' | 'dice_pool'; dice: DiceKind; count: number; dice_results?: DiceResultGroup[]; subtotal?: number; modifier: number; results: number[]; total: number; outcome: string | null; is_test: boolean }
 
 export async function performDiceRoll(input: PerformRollInput): Promise<PerformRollResult> {
   const { data, error } = await supabase.rpc('perform_dice_roll', { payload: input })
