@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 const rpc = vi.fn()
 const on = vi.fn().mockReturnThis()
 const subscribe = vi.fn().mockReturnThis()
-const channel = vi.fn((_topic: string) => ({ on, subscribe }))
+const channel = vi.fn((topic: string) => { void topic; return { on, subscribe } })
 vi.mock('../lib/supabase', () => ({ supabase: { rpc: (...args: unknown[]) => rpc(...args), channel } }))
 
 const { performDiceRoll, requestRoll, subscribeToRollRequests } = await import('./rolls')
