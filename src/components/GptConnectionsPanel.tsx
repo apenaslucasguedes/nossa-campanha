@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createGptConnection, listGptConnections, revokeGptConnection } from '../data/gptConnections'
 import type { GptCampaignConnection, GptCampaignConnectionCreated } from '../types/database'
+import { buildGptActionUrl } from '../lib/gptActionUrls'
 import { Icon } from './Icon'
-
-const SNAPSHOT_ACTION_URL = 'https://SEU_PROJECT_REF.supabase.co/functions/v1/campaign-snapshot'
-const ROLL_ACTION_URL = 'https://SEU_PROJECT_REF.supabase.co/functions/v1/request-dice-roll'
 
 function formatDate(value: string | null) {
   return value ? new Date(value).toLocaleString('pt-BR') : 'Nunca'
@@ -19,6 +17,8 @@ export function GptConnectionsPanel({ campaignId }: { campaignId: string }) {
   const [createdConnection, setCreatedConnection] = useState<GptCampaignConnectionCreated | null>(null)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
   const [revokingId, setRevokingId] = useState<string | null>(null)
+  const snapshotActionUrl = buildGptActionUrl('campaign-snapshot', import.meta.env.VITE_SUPABASE_URL)
+  const rollActionUrl = buildGptActionUrl('request-dice-roll', import.meta.env.VITE_SUPABASE_URL)
 
   async function load() {
     setLoading(true); setError(null)
@@ -142,11 +142,17 @@ export function GptConnectionsPanel({ campaignId }: { campaignId: string }) {
       ) : null}
 
       <div className="gpt-connection-urls">
-        <p className="form-note">Cole a chave criada acima na configuração do GPT, usando estas URLs de Action:</p>
-        <dl>
-          <div><dt>getCampaignSnapshot</dt><dd>{SNAPSHOT_ACTION_URL}</dd></div>
-          <div><dt>requestDiceRoll</dt><dd>{ROLL_ACTION_URL}</dd></div>
-        </dl>
+        {snapshotActionUrl && rollActionUrl ? (
+          <>
+            <p className="form-note">Cole a chave criada acima na configuração do GPT, usando estas URLs de Action:</p>
+            <dl>
+              <div><dt>getCampaignSnapshot</dt><dd>{snapshotActionUrl}</dd></div>
+              <div><dt>requestDiceRoll</dt><dd>{rollActionUrl}</dd></div>
+            </dl>
+          </>
+        ) : (
+          <p className="form-error">Configuração ausente: defina VITE_SUPABASE_URL para gerar as URLs de Action.</p>
+        )}
       </div>
     </section>
   )

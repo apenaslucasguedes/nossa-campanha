@@ -15,12 +15,20 @@ vi.mock('../data/gptConnections', () => ({
   GPT_CONNECTION_PERMISSIONS: ['read_snapshot', 'request_roll'],
 }))
 
+let mockSupabaseUrl: string | undefined = 'https://abcdefgh.supabase.co'
+vi.mock('../lib/gptActionUrls', async () => {
+  const actual = await vi.importActual<typeof import('../lib/gptActionUrls')>('../lib/gptActionUrls')
+  return {
+    buildGptActionUrl: (functionName: string) => actual.buildGptActionUrl(functionName, mockSupabaseUrl),
+  }
+})
+
 const { GptConnectionsPanel } = await import('./GptConnectionsPanel')
 
 const activeConnection: GptCampaignConnection = { id: 'conn-1', campaign_id: 'camp-1', label: 'GPT principal', permissions: ['read_snapshot', 'request_roll'], created_at: '2026-07-16T00:00:00.000Z', last_used_at: null, revoked_at: null }
 const createdConnection: GptCampaignConnectionCreated = { id: 'conn-2', raw_key: 'rlk_raw_secret_value', label: 'Nova conexao', permissions: ['read_snapshot', 'request_roll'], created_at: '2026-07-16T00:00:00.000Z' }
 
-afterEach(() => { cleanup(); vi.clearAllMocks() })
+afterEach(() => { cleanup(); vi.clearAllMocks(); mockSupabaseUrl = 'https://abcdefgh.supabase.co' })
 
 describe('GptConnectionsPanel', () => {
   it('lista conexoes existentes ao montar', async () => {
@@ -153,7 +161,23 @@ describe('GptConnectionsPanel', () => {
     listGptConnections.mockResolvedValue([])
     render(<GptConnectionsPanel campaignId="camp-1" />)
     await waitFor(() => expect(listGptConnections).toHaveBeenCalled())
-    expect(screen.getByText(/campaign-snapshot/)).toBeInTheDocument()
-    expect(screen.getByText(/request-dice-roll/)).toBeInTheDocument()
+    expect(screen.getByText('https://abcdefgh.supabase.co/functions/v1/campaign-snapshot')).toBeInTheDocument()
+    expect(screen.getByText('https://abcdefgh.supabase.co/functions/v1/request-dice-roll')).toBeInTheDocument()
+  })
+
+  it('nunca exibe o placeholder SEU_PROJECT_REF', async () => {
+    listGptConnections.mockResolvedValue([])
+    render(<GptConnectionsPanel campaignId="camp-1" />)
+    await waitFor(() => expect(listGptConnections).toHaveBeenCalled())
+    expect(screen.queryByText(/SEU_PROJECT_REF/)).not.toBeInTheDocument()
+  })
+
+  it('mostra mensagem de configuracao ausente quando VITE_SUPABASE_URL nao esta definida', async () => {
+    mockSupabaseUrl = undefined
+    listGptConnections.mockResolvedValue([])
+    render(<GptConnectionsPanel campaignId="camp-1" />)
+    await waitFor(() => expect(listGptConnections).toHaveBeenCalled())
+    expect(screen.getByText(/Configuração ausente/)).toBeInTheDocument()
+    expect(screen.queryByText(/campaign-snapshot/)).not.toBeInTheDocument()
   })
 })
