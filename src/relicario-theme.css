@@ -2385,3 +2385,189 @@ body,
   }
 
 }
+
+/* ---------------------------------------------------------------------------
+   Refino da Mesa multicampanha: solicitação de teste, rolagem vinculada e
+   histórico incorporados discretamente ao layout do Relicário.
+   --------------------------------------------------------------------------- */
+
+.table-dice-admin {
+  margin-bottom: var(--space-4);
+}
+
+.roll-request {
+  display: flex;
+}
+
+/* Teste pendente vinculado — ação principal do rolador do jogador. */
+.dice-roll-widget__pending {
+  margin: var(--space-4) 0 var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--border-gold);
+  border-top-width: 3px;
+  background: linear-gradient(145deg, rgb(38 29 20 / 92%), rgb(20 18 14 / 96%));
+  box-shadow: var(--shadow-inset);
+}
+
+.dice-roll-widget__pending-test {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.dice-roll-widget__pending-reason {
+  margin: 0 0 var(--space-2);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.dice-roll-widget__pending-meta {
+  margin: 0 0 var(--space-3);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dice-roll-widget__waiting {
+  margin: var(--space-2) 0;
+  padding: var(--space-2) var(--space-3);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  border-left: 2px solid var(--border-muted);
+}
+
+.dice-roll-widget__free-details,
+.table-quick-roll {
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--border-dark);
+  padding-top: var(--space-3);
+}
+
+.dice-roll-widget__free-details > summary,
+.table-quick-roll > summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  list-style: none;
+}
+
+.dice-roll-widget__free-details > summary::-webkit-details-marker,
+.table-quick-roll > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dice-roll-widget__free-details > summary::before,
+.table-quick-roll > summary::before {
+  content: "▸ ";
+  color: var(--text-gold);
+}
+
+.dice-roll-widget__free-details[open] > summary::before,
+.table-quick-roll[open] > summary::before {
+  content: "▾ ";
+}
+
+.dice-roll-widget__free {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+/* Modal compacto de solicitação de teste (administrador). */
+.roll-request__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgb(6 7 6 / 68%);
+}
+
+.roll-request__panel {
+  width: min(100%, 420px);
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: 1px solid var(--border-gold);
+  border-top-width: 3px;
+  background: linear-gradient(145deg, rgb(24 24 20 / 99%), rgb(16 17 15 / 99%));
+  box-shadow: var(--shadow-panel), var(--shadow-inset);
+}
+
+.roll-request__panel h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--text-gold);
+}
+
+.roll-request__panel label {
+  display: grid;
+  gap: var(--space-2);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.roll-request__actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* Histórico com resumo útil e filtros recolhíveis. */
+.history-filters-wrap {
+  margin-bottom: var(--space-3);
+}
+
+.history-filters-wrap > summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.history-item__headline {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.history-item__detail {
+  margin: var(--space-1) 0 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.history-item__result {
+  margin: var(--space-1) 0 0;
+  color: var(--text-gold);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.campaign-settings-hint {
+  margin-top: var(--space-4);
+}
+
+.sidebar__footer {
+  margin-top: auto;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.sidebar__footer .text-button {
+  margin-top: 0;
+}
+
+.sidebar__settings {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+}
+

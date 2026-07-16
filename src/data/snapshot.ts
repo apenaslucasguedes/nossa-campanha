@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { CampaignEvent, RollRequest } from '../types/database'
+import type { CampaignEvent, DiceRoll, RollRequest } from '../types/database'
 import { getActiveSession } from './sessions'
 import { combatRepository } from './combat'
 
@@ -10,6 +10,7 @@ export type CampaignSnapshot = {
   locations: unknown[]
   active_combat: unknown
   pending_roll_requests: RollRequest[]
+  recent_dice_rolls: DiceRoll[]
   recent_events: CampaignEvent[]
   last_sequence: number | null
 }

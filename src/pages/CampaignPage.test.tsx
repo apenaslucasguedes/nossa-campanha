@@ -83,14 +83,22 @@ describe('CampaignPage', () => {
     expect(screen.queryByRole('button', { name: 'Editar identidade' })).not.toBeInTheDocument()
   })
 
-  it('esconde o painel de conexoes do GPT para jogador comum', () => {
-    renderPage(dashboard({ currentRole: 'player' }))
+  it('nao expoe nenhuma informacao tecnica de GPT na entrada principal da campanha', () => {
+    renderPage(dashboard({ currentRole: 'table_admin' }))
     expect(screen.queryByTestId('gpt-connections-panel')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'GPT Mestre' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Conectar GPT Mestre' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Baixar pacote da campanha' })).not.toBeInTheDocument()
   })
 
-  it('mostra o painel de conexoes do GPT para o administrador da mesa', () => {
+  it('leva o administrador as configuracoes da campanha pela engrenagem', () => {
     renderPage(dashboard({ currentRole: 'table_admin' }))
-    expect(screen.getByTestId('gpt-connections-panel')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Configurações da campanha e GPT Mestre/ })).toHaveAttribute('href', '/campanhas/camp-1/configuracoes')
+  })
+
+  it('nao mostra o atalho de configuracoes para jogador comum', () => {
+    renderPage(dashboard({ currentRole: 'player' }))
+    expect(screen.queryByRole('link', { name: /Configurações da campanha/ })).not.toBeInTheDocument()
   })
 
   it('salva identidade e estado narrativo com validacao simples', async () => {
@@ -102,16 +110,10 @@ describe('CampaignPage', () => {
     expect(updateCampaignContext).toHaveBeenCalledWith('camp-1', expect.objectContaining({ last_session_summary: 'Resumo colado do GPT.' }))
   })
 
-  it('lista locais revelados e abre GPT quando URL existe', () => {
+  it('lista locais revelados com link para o mapa', () => {
     renderPage(dashboard({ campaign: { ...dashboard().campaign, current_region_id: 'vale-de-ardan' } }))
     expect(screen.getByText('Portao Velado')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Abrir no mapa' })).toHaveAttribute('href', '/campanhas/camp-1/mapa?region=vale-de-ardan')
-    expect(screen.getByRole('link', { name: 'Abrir GPT Mestre' })).toHaveAttribute('href', 'https://chatgpt.com/g/teste')
-  })
-
-  it('orienta configuracao quando a URL do GPT esta ausente', () => {
-    renderPage(dashboard({ currentProfile: { id: 'u1', display_name: 'Lucas', gpt_master_url: null, created_at: '', updated_at: '' } }))
-    expect(screen.getByRole('link', { name: 'Configurar URL' })).toHaveAttribute('href', '/configuracoes')
   })
 
   it('copia o mesmo contexto Markdown e nao inclui dados privados', async () => {

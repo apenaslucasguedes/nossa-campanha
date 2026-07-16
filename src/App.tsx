@@ -4,6 +4,7 @@ import { AppShell } from './components/AppShell'
 import { LoadingState } from './components/States'
 import { CampaignListPage } from './pages/CampaignListPage'
 import { CampaignPage } from './pages/CampaignPage'
+import { CampaignSettingsPage } from './pages/CampaignSettingsPage'
 import { CharacterPage } from './pages/CharacterPage'
 import { LegacyCampaignRedirect } from './pages/LegacyCampaignRedirect'
 import { LoginPage } from './pages/LoginPage'
@@ -19,6 +20,7 @@ export function App(){return <HashRouter><AuthProvider><Routes>
   <Route element={<Protected/>}>
     <Route path="/campanhas" element={<CampaignListPage/>}/>
     <Route path="/campanhas/:campaignId" element={<CampaignPage/>}/>
+    <Route path="/campanhas/:campaignId/configuracoes" element={<CampaignSettingsPage/>}/>
     <Route path="/campanhas/:campaignId/mesa" element={<TablePage/>}/>
     <Route path="/campanhas/:campaignId/mapa" element={<MapPage/>}/>
     <Route path="/campanhas/:campaignId/personagens" element={<CharacterPage/>}/>

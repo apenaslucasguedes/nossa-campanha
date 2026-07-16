@@ -2,12 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { CampaignCard, PlayerSeat } from '../components/CampaignCard'
-import { GptConnectionsPanel } from '../components/GptConnectionsPanel'
 import { Icon } from '../components/Icon'
 import { RegionArtwork } from '../components/RegionArtwork'
 import { readPlayerName } from '../components/playerName'
 import { EmptyState, ErrorBanner, LoadingState, PageHeader } from '../components/States'
-import { copyCampaignMarkdown, downloadCampaignMarkdown } from '../data/campaignContext'
 import { updateCampaignContext, updateCampaignRegion, type CampaignContextInput } from '../data/campaigns'
 import { rememberLastCampaign } from '../data/lastCampaign'
 import { regionIds, regions, type RegionId } from '../game-data/regions'
@@ -56,7 +54,6 @@ export function CampaignPage() {
   const [form, setForm] = useState<CampaignContextInput | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
 
   useEffect(() => { if (data?.campaign) setForm(campaignForm(data.campaign)) }, [data?.campaign])
 
@@ -78,7 +75,6 @@ export function CampaignPage() {
   const region = data.campaign.current_region_id ? regions[data.campaign.current_region_id] : null
   const revealedLocations = data.locations.filter((location) => location.revealed)
   const validation = fieldError(currentForm)
-  const gptUrl = session?.user.id ? data.currentProfile?.gpt_master_url : null
 
   async function saveContext() {
     if (validation) return
@@ -103,11 +99,6 @@ export function CampaignPage() {
     } finally {
       setBusy(false)
     }
-  }
-
-  async function copyContext() {
-    setCopyState('idle')
-    try { await copyCampaignMarkdown(dashboard); setCopyState('copied') } catch { setCopyState('error') }
   }
 
   return (
@@ -162,21 +153,11 @@ export function CampaignPage() {
         {revealedLocations.length ? <ul className="revealed-location-list">{revealedLocations.map((location) => <li key={location.id}><div><strong>{location.name}</strong><span>{regions[location.region_id].name}{location.kind ? ` - ${location.kind}` : ''}</span></div><Link className="card-action card-action--quiet" to={`/campanhas/${campaignId}/mapa?region=${location.region_id}`}>Abrir no mapa</Link></li>)}</ul> : <p className="compact-empty">Nenhum local revelado nesta campanha.</p>}
       </section>
 
-      <section className="campaign-panel campaign-gpt-panel" aria-labelledby="campaign-gpt-title">
-        <div className="section-heading">
-          <Icon name="compendio" size={24} decorative />
-          <div><h2 id="campaign-gpt-title">GPT Mestre</h2><p>Exportacao manual, sem Actions, API ou envio automatico.</p></div>
-        </div>
-        <div className="campaign-inline-actions">
-          <button className="card-action" type="button" onClick={() => downloadCampaignMarkdown(data)}>Baixar pacote da campanha</button>
-          <button className="card-action card-action--quiet" type="button" onClick={() => void copyContext()}>Copiar contexto</button>
-          {gptUrl ? <a className="card-action card-action--quiet" href={gptUrl} target="_blank" rel="noreferrer">Abrir GPT Mestre</a> : <Link className="card-action card-action--quiet" to="/configuracoes">Configurar URL</Link>}
-        </div>
-        {copyState === 'copied' ? <p className="form-note">Contexto copiado.</p> : null}
-        {copyState === 'error' ? <p className="form-error">Nao foi possivel copiar neste navegador.</p> : null}
-      </section>
-
-      {canEdit ? <GptConnectionsPanel campaignId={dashboard.campaign.id} /> : null}
+      {canEdit ? (
+        <p className="campaign-inline-actions campaign-settings-hint">
+          <Link className="card-action card-action--quiet" to={`/campanhas/${campaignId}/configuracoes`}><Icon name="configuracoes" size={18} decorative /> Configurações da campanha e GPT Mestre</Link>
+        </p>
+      ) : null}
 
       <div className="seat-grid" aria-label="Assentos da campanha">
         {[1, 2].map((seat) => {
