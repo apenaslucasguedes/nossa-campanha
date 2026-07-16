@@ -87,6 +87,16 @@ describe('OpenAPI das GPT Actions (fase 1)', () => {
     expect(source).not.toMatch(/EmptyRequest/)
   })
 
+  it('marca as duas operações como não consequenciais e não introduz nenhuma operação consequencial', () => {
+    const doc = yaml.load(source) as {
+      paths: Record<string, { post: Record<string, unknown> }>
+    }
+    expect(doc.paths['/campaign-snapshot'].post['x-openai-isConsequential']).toBe(false)
+    expect(doc.paths['/request-dice-roll'].post['x-openai-isConsequential']).toBe(false)
+    const flags = [...source.matchAll(/^\s*x-openai-isConsequential:\s*(\S+)/gm)].map(match => match[1])
+    expect(flags).toEqual(['false', 'false'])
+  })
+
   it('campaign-snapshot não tem requestBody e request-dice-roll tem requestBody do tipo object', () => {
     const doc = yaml.load(source) as {
       paths: Record<string, { post: { requestBody?: { content: Record<string, { schema: unknown }> } } }>

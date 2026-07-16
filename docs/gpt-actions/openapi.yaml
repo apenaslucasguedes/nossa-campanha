@@ -12,6 +12,7 @@ paths:
   /campaign-snapshot:
     post:
       operationId: getCampaignSnapshot
+      x-openai-isConsequential: false
       summary: Consultar o snapshot completo da campanha vinculada à chave
       description: Obtém o estado atual da campanha vinculada à chave, incluindo contexto narrativo, região, sessão, personagens, combate, rolagens e eventos recentes. Use antes de narrar ou verificar mudanças.
       responses:
@@ -20,6 +21,7 @@ paths:
   /request-dice-roll:
     post:
       operationId: requestDiceRoll
+      x-openai-isConsequential: false
       summary: Solicitar que um jogador role um teste no site
       description: Cria uma solicitação de rolagem para um personagem da campanha. O GPT apenas solicita o teste; o jogador deve realizar a rolagem no Relicário antes que o resultado seja consultado.
       requestBody:
