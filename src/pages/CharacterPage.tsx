@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { AbilityCard, AttributeItem, CharacterHeader, CharacterSummary, NarrativeSection, SpecialtyCard } from '../components/CharacterSections'
 import { Icon } from '../components/Icon'
@@ -7,12 +7,13 @@ import { readPlayerName } from '../components/playerName'
 import { EmptyState, ErrorBanner, LoadingState, PageHeader } from '../components/States'
 import { deleteMyCharacter, updateMyCharacter } from '../data/campaigns'
 import { ATTRIBUTE_KEYS, getClassDefinition } from '../game-data/classes'
-import { useCampaign } from '../hooks/useCampaign'
+import { useCampaignParam } from '../hooks/useCampaignParam'
 import type { Character } from '../types/database'
 
 export function CharacterPage() {
   const { session } = useAuth()
-  const { data, loading, error, refresh } = useCampaign(session?.user.id)
+  const { campaignId } = useParams()
+  const { data, loading, error, refresh } = useCampaignParam(campaignId, session?.user.id)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')

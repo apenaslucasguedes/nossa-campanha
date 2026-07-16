@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { CharacterPortrait } from '../components/CharacterPortrait'
 import { AttributeItem, CharacterReview, CreationStepHeader, SpecialtyCard } from '../components/CharacterSections'
 import { EditableCharacterArtwork } from '../components/EditableCharacterArtwork'
 import { Icon } from '../components/Icon'
-import { ErrorBanner, LoadingState, PageHeader } from '../components/States'
+import { ErrorBanner, PageHeader } from '../components/States'
 import { createMyCharacter, type CreateCharacterInput } from '../data/campaigns'
 import { characterColorSchemas, type ColorLayer } from '../game-data/characterColorSchemas'
 import { getCharacterNameGender, getRandomCharacterName } from '../game-data/characterNames'
 import { ATTRIBUTE_KEYS, ATTRIBUTE_NAMES, CLASSES, getClassDefinition, SPECIALTIES } from '../game-data/classes'
 import { calculateDerived, isValidAttributeDistribution, isValidSpecialties } from '../game-data/rules'
-import { useCampaign } from '../hooks/useCampaign'
 import type { Attributes, AvatarOptions, ClassKey, Specialty } from '../types/database'
 
 const STEPS = ['Classe', 'Atributos', 'Identidade', 'Vínculo', 'Especialidades', 'Visual', 'Revisão']
@@ -60,7 +59,7 @@ type IdentityForm = {
 
 export function CreateCharacterPage() {
   const { session } = useAuth()
-  const { data, loading } = useCampaign(session?.user.id)
+  const { campaignId } = useParams()
   const navigate = useNavigate()
   const draft = useMemo(() => loadDraft(), [])
   const [step, setStep] = useState(draft?.step ?? 0)
@@ -106,10 +105,6 @@ export function CreateCharacterPage() {
   function recordDefaults(classForDefaults: ClassKey, values: Record<string, string>) {
     setDefaultsByClass((current) => ({ ...current, [classForDefaults]: values }))
   }
-
-  if (loading) return <LoadingState />
-  if (data?.characters.some((character) => character.owner_id === session?.user.id)) return <Navigate to="/personagem" replace />
-  if (!data) return <><PageHeader eyebrow="Criação" title="Campanha necessária" /><ErrorBanner>Seu usuário precisa estar vinculado a uma campanha antes de criar a ficha.</ErrorBanner></>
 
   const bond = form.bond === 'Personalizado' ? form.customBond.trim() : form.bond
   const valid = [
@@ -159,12 +154,13 @@ export function CreateCharacterPage() {
       attributes,
       specialties,
       avatar,
+      campaign_id: campaignId ?? null,
     }
 
     try {
       await createMyCharacter(payload)
       clearDraft()
-      navigate('/personagem', { replace: true })
+      navigate(campaignId ? `/campanhas/${campaignId}/personagens` : '/campanhas', { replace: true })
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Não foi possível criar a ficha.')
     } finally {

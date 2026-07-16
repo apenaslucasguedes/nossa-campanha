@@ -4,7 +4,7 @@ import type { Character } from '../types/database'
 import { CharacterCard } from './CharacterCard'
 import { Icon } from './Icon'
 
-export function PlayerSeat({ seat, playerName, character, canCreate = false }: { seat: number; playerName?: string; character?: Character; canCreate?: boolean }) {
+export function PlayerSeat({ seat, playerName, character, canCreate = false, campaignId }: { seat: number; playerName?: string; character?: Character; canCreate?: boolean; campaignId: string }) {
   return (
     <section className="player-seat" aria-labelledby={`seat-${seat}-title`}>
       <header className="player-seat__header">
@@ -14,14 +14,14 @@ export function PlayerSeat({ seat, playerName, character, canCreate = false }: {
       {character ? (
         <>
           <p className="player-seat__bond-state">Estado de vinculo: personagem vinculado.</p>
-          <CharacterCard character={character} playerName={playerName} action={<Link className="card-action" to="/personagem">Abrir ficha</Link>} headingId={`seat-${seat}-title`} />
+          <CharacterCard character={character} playerName={playerName} action={<Link className="card-action" to={`/campanhas/${campaignId}/personagens`}>Abrir ficha</Link>} headingId={`seat-${seat}-title`} />
         </>
-      ) : <EmptySeat seat={seat} playerName={playerName} canCreate={canCreate} />}
+      ) : <EmptySeat seat={seat} playerName={playerName} canCreate={canCreate} campaignId={campaignId} />}
     </section>
   )
 }
 
-export function EmptySeat({ seat, playerName, canCreate = false }: { seat: number; playerName?: string; canCreate?: boolean }) {
+export function EmptySeat({ seat, playerName, canCreate = false, campaignId }: { seat: number; playerName?: string; canCreate?: boolean; campaignId: string }) {
   return (
     <div className="empty-seat">
       <Icon name="assento-vazio" size={48} decorative />
@@ -30,7 +30,7 @@ export function EmptySeat({ seat, playerName, canCreate = false }: { seat: numbe
         <p>{playerName ? `${playerName} ocupa este assento, mas ainda nao possui ficha.` : 'Este assento ainda nao possui personagem.'}</p>
       </div>
       {canCreate ? (
-        <Link className="card-action" to="/criar-personagem">Criar personagem</Link>
+        <Link className="card-action" to={`/campanhas/${campaignId}/criar-personagem`}>Criar personagem</Link>
       ) : (
         <small className="empty-seat__note">Aguardando o outro jogador criar a ficha.</small>
       )}

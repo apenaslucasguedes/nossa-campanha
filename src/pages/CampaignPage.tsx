@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { CampaignCard, PlayerSeat } from '../components/CampaignCard'
 import { Icon } from '../components/Icon'
@@ -8,8 +8,9 @@ import { readPlayerName } from '../components/playerName'
 import { EmptyState, ErrorBanner, LoadingState, PageHeader } from '../components/States'
 import { copyCampaignMarkdown, downloadCampaignMarkdown } from '../data/campaignContext'
 import { updateCampaignContext, updateCampaignRegion, type CampaignContextInput } from '../data/campaigns'
+import { rememberLastCampaign } from '../data/lastCampaign'
 import { regionIds, regions, type RegionId } from '../game-data/regions'
-import { useCampaign } from '../hooks/useCampaign'
+import { useCampaignParam } from '../hooks/useCampaignParam'
 import type { Campaign } from '../types/database'
 
 const limits = { name: 120, status: 40, premise: 1200, current_summary: 2400, last_session_summary: 3200, important_notes: 3200 }
@@ -46,7 +47,9 @@ function fieldError(form: CampaignContextInput) {
 
 export function CampaignPage() {
   const { session } = useAuth()
-  const { data, loading, error, refresh } = useCampaign(session?.user.id)
+  const { campaignId } = useParams()
+  const { data, loading, error, refresh } = useCampaignParam(campaignId, session?.user.id)
+  useEffect(() => { if (session?.user.id && campaignId) rememberLastCampaign(session.user.id, campaignId) }, [session?.user.id, campaignId])
   const [editing, setEditing] = useState(false)
   const [selectingRegion, setSelectingRegion] = useState(false)
   const [form, setForm] = useState<CampaignContextInput | null>(null)
@@ -121,7 +124,7 @@ export function CampaignPage() {
               <h2>{region?.name ?? 'Ainda nao registrada'}</h2>
               <p>{region ? shortDescription(region.description) : 'Defina a regiao principal da campanha para orientar a leitura do mapa e o pacote de contexto.'}</p>
               <div className="campaign-inline-actions">
-                {region ? <Link className="card-action" to={`/mapa?region=${data.campaign.current_region_id}`}>Ver no mapa</Link> : null}
+                {region ? <Link className="card-action" to={`/campanhas/${campaignId}/mapa?region=${data.campaign.current_region_id}`}>Ver no mapa</Link> : null}
                 {canEdit ? <button className="card-action card-action--quiet" type="button" onClick={() => setSelectingRegion((value) => !value)}>{region ? 'Alterar regiao' : 'Definir regiao atual'}</button> : null}
               </div>
             </div>
@@ -155,7 +158,7 @@ export function CampaignPage() {
           <Icon name="mapa" size={24} decorative />
           <div><h2 id="campaign-locations-title">Locais revelados</h2><p>Dados persistidos do mapa, sem lista paralela.</p></div>
         </div>
-        {revealedLocations.length ? <ul className="revealed-location-list">{revealedLocations.map((location) => <li key={location.id}><div><strong>{location.name}</strong><span>{regions[location.region_id].name}{location.kind ? ` - ${location.kind}` : ''}</span></div><Link className="card-action card-action--quiet" to={`/mapa?region=${location.region_id}`}>Abrir no mapa</Link></li>)}</ul> : <p className="compact-empty">Nenhum local revelado nesta campanha.</p>}
+        {revealedLocations.length ? <ul className="revealed-location-list">{revealedLocations.map((location) => <li key={location.id}><div><strong>{location.name}</strong><span>{regions[location.region_id].name}{location.kind ? ` - ${location.kind}` : ''}</span></div><Link className="card-action card-action--quiet" to={`/campanhas/${campaignId}/mapa?region=${location.region_id}`}>Abrir no mapa</Link></li>)}</ul> : <p className="compact-empty">Nenhum local revelado nesta campanha.</p>}
       </section>
 
       <section className="campaign-panel campaign-gpt-panel" aria-labelledby="campaign-gpt-title">
@@ -176,7 +179,7 @@ export function CampaignPage() {
         {[1, 2].map((seat) => {
           const member = data.members.find((item) => item.seat === seat)
           const character = data.characters.find((item) => item.owner_id === member?.user_id)
-          return <PlayerSeat key={seat} seat={seat} playerName={readPlayerName(member)} character={character} canCreate={member?.user_id === session?.user.id} />
+          return <PlayerSeat key={seat} seat={seat} playerName={readPlayerName(member)} character={character} canCreate={member?.user_id === session?.user.id} campaignId={campaignId!} />
         })}
       </div>
     </div>

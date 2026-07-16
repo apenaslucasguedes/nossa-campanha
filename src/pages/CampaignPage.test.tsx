@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { buildCampaignMarkdown, copyCampaignMarkdown } from '../data/campaignContext'
 import { updateCampaignContext, updateCampaignRegion } from '../data/campaigns'
@@ -10,13 +10,13 @@ import type { Character } from '../types/database'
 import { CampaignPage } from './CampaignPage'
 
 vi.mock('../auth/AuthContext', () => ({ useAuth: () => ({ session: { user: { id: 'u1' } } }) }))
-vi.mock('../hooks/useCampaign', () => ({ useCampaign: vi.fn() }))
+vi.mock('../hooks/useCampaignParam', () => ({ useCampaignParam: vi.fn() }))
 vi.mock('../data/campaigns', async () => {
   const actual = await vi.importActual<typeof import('../data/campaigns')>('../data/campaigns')
   return { ...actual, updateCampaignContext: vi.fn(), updateCampaignRegion: vi.fn() }
 })
 
-const useCampaign = (await import('../hooks/useCampaign')).useCampaign as unknown as ReturnType<typeof vi.fn>
+const useCampaignParam = (await import('../hooks/useCampaignParam')).useCampaignParam as unknown as ReturnType<typeof vi.fn>
 const baseCharacter: Character = {
   id: 'char-1', campaign_id: 'camp-1', owner_id: 'u1', name: 'Ayla', class_key: 'warrior', level: 2,
   presentation: 'mulher', origin: 'Fronteira', appearance: 'Cabelos curtos.', personality: 'Leal.', objective: 'Proteger.', fear: 'Falhar.',
@@ -49,8 +49,8 @@ function dashboard(overrides: Partial<CampaignDashboard> = {}): CampaignDashboar
 }
 
 function renderPage(data = dashboard()) {
-  useCampaign.mockReturnValue({ data, loading: false, error: null, refresh: vi.fn() })
-  return render(<MemoryRouter><CampaignPage /></MemoryRouter>)
+  useCampaignParam.mockReturnValue({ data, loading: false, error: null, refresh: vi.fn() })
+  return render(<MemoryRouter initialEntries={['/campanhas/camp-1']}><Routes><Route path="/campanhas/:campaignId" element={<CampaignPage />} /></Routes></MemoryRouter>)
 }
 
 afterEach(() => { cleanup(); vi.clearAllMocks() })
@@ -94,7 +94,7 @@ describe('CampaignPage', () => {
   it('lista locais revelados e abre GPT quando URL existe', () => {
     renderPage(dashboard({ campaign: { ...dashboard().campaign, current_region_id: 'vale-de-ardan' } }))
     expect(screen.getByText('Portao Velado')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Abrir no mapa' })).toHaveAttribute('href', '/mapa?region=vale-de-ardan')
+    expect(screen.getByRole('link', { name: 'Abrir no mapa' })).toHaveAttribute('href', '/campanhas/camp-1/mapa?region=vale-de-ardan')
     expect(screen.getByRole('link', { name: 'Abrir GPT Mestre' })).toHaveAttribute('href', 'https://chatgpt.com/g/teste')
   })
 
