@@ -28,7 +28,7 @@ describe('coleta oficial do Vitest', () => {
 
   it('coleta todos os testes oficiais e preserva a quantidade anterior mais esta guarda', () => {
     const files = [...officialTests('src'), ...officialTests('supabase')]
-    expect(files).toHaveLength(37)
+    expect(files).toHaveLength(38)
     expect(files.every(isCollected)).toBe(true)
   })
 

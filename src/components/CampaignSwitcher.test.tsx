@@ -8,7 +8,7 @@ import { CampaignSwitcher } from './CampaignSwitcher'
 vi.mock('../auth/AuthContext', () => ({ useAuth: () => ({ session: { user: { id: 'u1' } } }) }))
 vi.mock('../data/campaignsList', () => ({ listMyCampaigns: () => Promise.resolve([
   { campaign: { id: 'camp-1', name: 'O Relicário de Ardan com um nome muito longo' }, role: 'table_admin', seat: 1 },
-  { campaign: { id: 'camp-2', name: 'Segunda campanha' }, role: 'player', seat: 2 },
+  { campaign: { id: 'camp-2', name: 'Segunda campanha', status: 'arquivada' }, role: 'player', seat: 2 },
 ]) }))
 vi.mock('../data/lastCampaign', () => ({ rememberLastCampaign: vi.fn() }))
 
@@ -21,6 +21,7 @@ describe('CampaignSwitcher', () => {
     expect(trigger).toHaveAttribute('title', 'O Relicário de Ardan com um nome muito longo')
     fireEvent.click(trigger)
     expect(screen.getByRole('listbox', { name: 'Trocar de campanha' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Segunda campanha' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /Segunda campanha/ })).toBeInTheDocument()
+    expect(screen.getByText('Arquivada')).toBeInTheDocument()
   })
 })
