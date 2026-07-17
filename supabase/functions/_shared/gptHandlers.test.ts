@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { GPT_KEY_HEADER } from './contracts'
-import { resolveCampaignSnapshot, resolveDiceRollRequest, type RpcCaller } from './gptHandlers'
+import { resolveCampaignSnapshot, resolveDicePoolRequest, resolveDiceRollRequest, type RpcCaller } from './gptHandlers'
 
 const character_id = '33333333-3333-4333-8333-333333333333'
 const campaign_id = '11111111-1111-4111-8111-111111111111'
@@ -131,5 +131,52 @@ describe('resolveDiceRollRequest', () => {
     const [fnName] = (rpc as ReturnType<typeof vi.fn>).mock.calls[0]
     expect(fnName).toBe('request_dice_roll_for_gpt')
     expect(rpc).not.toHaveBeenCalledWith('perform_dice_roll', expect.anything())
+  })
+})
+
+describe('resolveDicePoolRequest', () => {
+  const validBody = {
+    dice: [{ sides: 6, quantity: 1 }, { sides: 20, quantity: 1 }],
+    modifier: 2,
+    reason: 'Determinar a intensidade e a duração do efeito mágico',
+  }
+
+  it('aceita uma chave com request_roll e envia a assinatura exata da RPC', async () => {
+    const pending = { id: 'rr-pool', request_kind: 'dice_pool', dice_spec: validBody.dice, modifier: 2, status: 'pending' }
+    const rpc: RpcCaller = vi.fn().mockResolvedValue({ data: pending, error: null })
+
+    const result = await resolveDicePoolRequest(requestWithKey('rlk_valida'), validBody, rpc)
+
+    expect(result.ok).toBe(true)
+    expect(rpc).toHaveBeenCalledTimes(1)
+    const [fnName, args] = (rpc as ReturnType<typeof vi.fn>).mock.calls[0]
+    expect(fnName).toBe('request_dice_pool_for_gpt')
+    expect(Object.keys(args).sort()).toEqual(['lookup_key_hash', 'payload'])
+    expect(args.payload).toEqual(validBody)
+    expect(args.lookup_key_hash).not.toBe('rlk_valida')
+    expect(args.lookup_key_hash).toMatch(/^[0-9a-f]{64}$/)
+    expect(rpc).not.toHaveBeenCalledWith('perform_dice_roll', expect.anything())
+  })
+
+  it('mapeia chave sem request_roll como FORBIDDEN', async () => {
+    const rpc: RpcCaller = vi.fn().mockResolvedValue({ data: null, error: { message: 'GPT_KEY_FORBIDDEN', code: '42501' } })
+    const result = await resolveDicePoolRequest(requestWithKey('rlk_somente_leitura'), validBody, rpc)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('FORBIDDEN')
+  })
+
+  it('rejeita payload inválido como INVALID_ACTION antes da RPC', async () => {
+    const rpc: RpcCaller = vi.fn()
+    const result = await resolveDicePoolRequest(requestWithKey('rlk_valida'), { ...validBody, dice: [{ sides: 3, quantity: 1 }] }, rpc)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('INVALID_ACTION')
+    expect(rpc).not.toHaveBeenCalled()
+  })
+
+  it.each(['PGRST202', 'PGRST203'])('não mascara erro de assinatura %s como autorização', async rpcCode => {
+    const rpc: RpcCaller = vi.fn().mockResolvedValue({ data: null, error: { message: 'RPC signature mismatch', code: rpcCode } })
+    const result = await resolveDicePoolRequest(requestWithKey('rlk_valida'), validBody, rpc)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(['UNAUTHENTICATED', 'FORBIDDEN']).not.toContain(result.error.code)
   })
 })

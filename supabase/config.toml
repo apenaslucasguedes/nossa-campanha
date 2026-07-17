@@ -1,0 +1,2 @@
+[functions.request-dice-pool]
+verify_jwt = false
