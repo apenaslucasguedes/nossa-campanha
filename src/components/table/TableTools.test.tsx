@@ -1,9 +1,13 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ConditionEditor, DiceRoller, PlayerCombatCard, ResourceControl } from './TableTools'
 import type { Character } from '../../types/database'
+
+const responsiveCss=readFileSync(join(process.cwd(),'src','relicario-theme.css'),'utf8')
 
 afterEach(()=>cleanup())
 
@@ -77,8 +81,17 @@ const character={id:'character-1',campaign_id:'campaign-1',owner_id:'user-1',nam
 const cardProps={character,currentRegion:'vale-auren',refreshing:false,onRefresh:vi.fn(),onDamage:vi.fn(),onHeal:vi.fn(),onResource:vi.fn(),onAddCondition:vi.fn(),onRemoveCondition:vi.fn(),onFallen:vi.fn(),onStabilize:vi.fn()}
 
 describe('experiência individual dos personagens',()=>{
+  it('mantém a grade responsiva vinculada à largura da área de jogadores',()=>{
+    expect(responsiveCss).toContain('.table-players {\n  container-type: inline-size;')
+    expect(responsiveCss).toContain('@container (max-width: 919px)')
+    expect(responsiveCss).toContain('@container (max-width: 619px)')
+  })
+
   it('mostra o próprio card completo com ajustes mecânicos',()=>{
-    render(<PlayerCombatCard {...cardProps} mode="primary" canEdit playerName="Você"/>)
+    const{container}=render(<PlayerCombatCard {...cardProps} mode="primary" canEdit playerName="Você"/>)
+    expect(container.querySelector('.player-combat-card--primary .player-combat-card__aside')).toBeInTheDocument()
+    expect(container.querySelector('.player-combat-card--primary .player-combat-card__body')).toBeInTheDocument()
+    expect(container.querySelectorAll('.player-vitals .resource-bar')).toHaveLength(2)
     expect(screen.getByRole('heading',{name:'Aldra'})).toBeInTheDocument()
     expect(screen.getByRole('region',{name:'Ajustes rápidos'})).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button',{name:'Dano'}));fireEvent.click(screen.getByRole('button',{name:'Confirmar'}))
@@ -86,7 +99,9 @@ describe('experiência individual dos personagens',()=>{
   })
 
   it('mostra o outro card compacto sem controles de edição',()=>{
-    render(<PlayerCombatCard {...cardProps} mode="secondary" canEdit={false}/>)
+    const{container}=render(<PlayerCombatCard {...cardProps} mode="secondary" canEdit={false}/>)
+    expect(container.querySelector('.player-summary-card .player-summary-card__body')).toBeInTheDocument()
+    expect(container.querySelectorAll('.player-summary-card__meters .resource-bar')).toHaveLength(2)
     expect(screen.getByRole('heading',{name:'Aldra'})).toBeInTheDocument()
     expect(screen.getByText('9 / 11')).toBeInTheDocument()
     expect(screen.queryByRole('region',{name:'Ajustes rápidos'})).not.toBeInTheDocument()

@@ -2539,6 +2539,129 @@ body,
   color: var(--text-gold);
 }
 
+/* Mesa: os cards respondem à largura real da área de jogadores. */
+.table-players {
+  container-type: inline-size;
+  grid-template-columns: minmax(600px, 1fr) minmax(260px, 340px);
+}
+
+.player-combat-card,
+.player-combat-card__body,
+.player-combat-card__body > *,
+.player-combat-card .card-heading > div:first-child,
+.player-vitals,
+.resource-control,
+.condition-editor,
+.player-summary-card,
+.player-summary-card__body,
+.player-summary-card__meters {
+  min-width: 0;
+}
+
+.resource-bar__label {
+  min-width: 0;
+  gap: 8px;
+}
+
+.resource-bar__label > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.resource-bar__label > strong {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.resource-bar__track {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+@container (max-width: 919px) {
+  .table-players {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .player-combat-card--primary,
+  .player-summary-card {
+    grid-column: 1;
+  }
+
+  .player-combat-card__aside {
+    width: 208px;
+  }
+}
+
+@container (max-width: 619px) {
+  .player-combat-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .player-combat-card__aside {
+    width: 100%;
+    min-height: 0;
+    background: transparent;
+  }
+
+  .player-combat-scene {
+    width: 100%;
+    margin: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .player-combat-card__aside .fall-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    margin: 0;
+    padding: 14px;
+  }
+
+  .player-vitals {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .resource-actions {
+    grid-template-columns: repeat(2, minmax(44px, 48px)) !important;
+  }
+
+  .condition-add {
+    grid-template-columns: minmax(0, 1fr) minmax(112px, 0.65fr);
+  }
+
+  .condition-add button {
+    grid-column: 1 / -1;
+  }
+}
+
+@container (max-width: 419px) {
+  .player-combat-card__body {
+    padding: 18px 16px;
+  }
+
+  .player-combat-card__aside .fall-actions,
+  .condition-add {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .resource-control__heading {
+    align-items: flex-start;
+  }
+
+  .resource-control__heading label {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .condition-add button {
+    grid-column: auto;
+  }
+}
+
 .roll-request__modes{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:3px;background:var(--bg-deep)}
 .roll-request__modes button{display:flex;align-items:center;justify-content:center;gap:7px;min-height:38px;border:1px solid transparent;background:transparent;color:var(--text-muted)}
 .roll-request__modes button[aria-selected=true]{border-color:var(--border-gold);background:var(--bg-elevated);color:var(--text-primary)}
