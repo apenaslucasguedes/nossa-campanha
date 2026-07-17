@@ -2,7 +2,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ConditionEditor, DiceRoller, ResourceControl } from './TableTools'
+import { ConditionEditor, DiceRoller, PlayerCombatCard, ResourceControl } from './TableTools'
+import type { Character } from '../../types/database'
 
 afterEach(()=>cleanup())
 
@@ -69,5 +70,37 @@ describe('controle de recursos',()=>{
     fireEvent.click(screen.getByRole('button',{name:'Gastar recurso'}))
     fireEvent.click(screen.getByRole('button',{name:'Confirmar'}))
     expect(onResource).toHaveBeenCalledWith(-1)
+  })
+})
+
+const character={id:'character-1',campaign_id:'campaign-1',owner_id:'user-1',name:'Aldra',class_key:'warrior',level:1,presentation:'',origin:'',appearance:'',personality:'',objective:'',fear:'',initial_bond:'',current_bond:'',attributes:{strength:1,agility:1,intellect:1,presence:1,instinct:1},defense:10,inventory_capacity:7,avatar:{presentation:'masculino',skinTone:'medium',hair:'short',primaryColor:'#000',secondaryColor:'#fff',accessory:'none'},created_at:'',updated_at:'',character_states:{character_id:'character-1',vitality_current:9,vitality_max:11,resource_current:3,resource_max:5,updated_at:'',updated_by:'user-1'},character_conditions:[{id:'condition-1',character_id:'character-1',name:'Ferido',created_by:'user-1',created_at:''}],character_specialties:[]} as Character
+const cardProps={character,currentRegion:'vale-auren',refreshing:false,onRefresh:vi.fn(),onDamage:vi.fn(),onHeal:vi.fn(),onResource:vi.fn(),onAddCondition:vi.fn(),onRemoveCondition:vi.fn(),onFallen:vi.fn(),onStabilize:vi.fn()}
+
+describe('experiência individual dos personagens',()=>{
+  it('mostra o próprio card completo com ajustes mecânicos',()=>{
+    render(<PlayerCombatCard {...cardProps} mode="primary" canEdit playerName="Você"/>)
+    expect(screen.getByRole('heading',{name:'Aldra'})).toBeInTheDocument()
+    expect(screen.getByRole('region',{name:'Ajustes rápidos'})).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button',{name:'Dano'}));fireEvent.click(screen.getByRole('button',{name:'Confirmar'}))
+    expect(cardProps.onDamage).toHaveBeenCalledWith(1)
+  })
+
+  it('mostra o outro card compacto sem controles de edição',()=>{
+    render(<PlayerCombatCard {...cardProps} mode="secondary" canEdit={false}/>)
+    expect(screen.getByRole('heading',{name:'Aldra'})).toBeInTheDocument()
+    expect(screen.getByText('9 / 11')).toBeInTheDocument()
+    expect(screen.queryByRole('region',{name:'Ajustes rápidos'})).not.toBeInTheDocument()
+    expect(screen.queryByRole('button',{name:'Dano'})).not.toBeInTheDocument()
+    expect(screen.queryByRole('button',{name:'Remover Ferido'})).not.toBeInTheDocument()
+    expect(screen.queryByRole('button',{name:'Marcar Caído'})).not.toBeInTheDocument()
+  })
+
+  it('atualiza manualmente e expõe o ajuste administrativo só no menu',()=>{
+    const onRefresh=vi.fn()
+    render(<PlayerCombatCard {...cardProps} onRefresh={onRefresh} mode="secondary" canEdit={false} canAdminAdjust/>)
+    fireEvent.click(screen.getByRole('button',{name:'Atualizar estado'}))
+    expect(onRefresh).toHaveBeenCalledOnce()
+    expect(screen.getByTitle('Ajustar como mestre')).toBeInTheDocument()
+    expect(screen.queryByRole('button',{name:'Dano'})).not.toBeInTheDocument()
   })
 })

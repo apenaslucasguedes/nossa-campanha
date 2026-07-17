@@ -2,9 +2,11 @@
 import { renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-const on = vi.fn().mockReturnThis()
+const handlers:Record<string,()=>void>={}
+let channelObject:unknown
+const on = vi.fn(function(_event:string,config:{table:string},callback:()=>void){handlers[config.table]=callback;return channelObject})
 const subscribe = vi.fn().mockReturnThis()
-const channel = vi.fn((topic: string) => { void topic; return { on, subscribe } })
+const channel = vi.fn((topic: string) => { void topic; channelObject={on,subscribe};return channelObject })
 const removeChannel = vi.fn(() => undefined)
 vi.mock('../lib/supabase', () => ({ supabase: { channel, removeChannel } }))
 
@@ -30,5 +32,13 @@ describe('useCampaignRealtime', () => {
     const topics = channel.mock.calls.slice(-2).map(([topic]) => topic)
     expect(topics[0]).not.toBe(topics[1])
     first.unmount(); second.unmount()
+  })
+
+  it.each(['character_states','character_conditions'])('refaz a consulta ao receber evento de %s', (table) => {
+    const refresh=vi.fn()
+    const view=renderHook(()=>useCampaignRealtime('camp-live',refresh))
+    handlers[table]()
+    expect(refresh).toHaveBeenCalledOnce()
+    view.unmount()
   })
 })
