@@ -1153,3 +1153,7 @@ input[type="checkbox"],input[type="radio"]{color-scheme:dark;accent-color:var(--
   .characters-page .protagonist-grid .character-portrait{height:240px}
   .characters-page .protagonist-grid .character-card__body h2{font-size:2.15rem}
 }
+
+.dice-button:disabled{cursor:not-allowed}
+.dice-button[aria-busy=true]{cursor:wait}
+.dice-roll-widget__confirmation{margin:12px 0 0;color:#b8c69d;text-align:center;font-weight:700}

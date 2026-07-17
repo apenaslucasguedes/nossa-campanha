@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Character, RollRequest } from '../types/database'
@@ -7,10 +7,11 @@ import { DiceRollWidget } from './DiceRollWidget'
 
 const listPendingRollRequests = vi.fn()
 const performDiceRoll = vi.fn()
+let realtimeChange: (() => void) | undefined
 vi.mock('../data/rolls', () => ({
   listPendingRollRequests: (...a: unknown[]) => listPendingRollRequests(...a),
   performDiceRoll: (...a: unknown[]) => performDiceRoll(...a),
-  subscribeToRollRequests: () => ({ topic: 'x' }),
+  subscribeToRollRequests: (_campaignId: string, onChange: () => void) => { realtimeChange = onChange; return { topic: 'x' } },
 }))
 vi.mock('../lib/supabase', () => ({ supabase: { removeChannel: vi.fn() } }))
 
@@ -35,12 +36,16 @@ function request(overrides: Partial<RollRequest> = {}): RollRequest {
   }
 }
 
-beforeEach(() => { vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true })) })
-afterEach(() => { cleanup(); vi.clearAllMocks(); vi.unstubAllGlobals() })
+beforeEach(() => { realtimeChange = undefined; vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true })) })
+afterEach(() => { cleanup(); vi.clearAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers() })
+
+function pendingThenCompleted(pendingRequest: RollRequest) {
+  listPendingRollRequests.mockResolvedValueOnce([pendingRequest]).mockResolvedValue([])
+}
 
 describe('DiceRollWidget', () => {
   it('executa teste simples pendente com ambos os campos nulos e modificador zero', async () => {
-    listPendingRollRequests.mockResolvedValue([request({ attribute: null, specialty: null, modifier: 0, difficulty: 10, reason: 'Perceber se há algo estranho no ambiente' })])
+    pendingThenCompleted(request({ attribute: null, specialty: null, modifier: 0, difficulty: 10, reason: 'Perceber se há algo estranho no ambiente' }))
     performDiceRoll.mockResolvedValue({ character_name: 'Aldra', request_kind: 'character_test', count: 1, dice: 'd20', modifier: 0, results: [12], total: 12, outcome: 'success' })
     render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra]} onResult={vi.fn()} onError={vi.fn()} />)
     const pending = await screen.findByLabelText('Teste pendente')
@@ -53,7 +58,7 @@ describe('DiceRollWidget', () => {
   })
 
   it('exibe a solicitação completa, preserva roll_request_id e mostra o resultado oficial', async () => {
-    listPendingRollRequests.mockResolvedValue([request()])
+    pendingThenCompleted(request())
     performDiceRoll.mockResolvedValue({ character_name: 'Aldra', count: 1, dice: 'd20', modifier: 3, results: [17], total: 20, outcome: 'success' })
     render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra, aelira]} onResult={vi.fn()} onError={vi.fn()} />)
     const pending = await screen.findByLabelText('Teste pendente')
@@ -90,7 +95,7 @@ describe('DiceRollWidget', () => {
   })
 
   it('encerra a animação após erro e mantém a solicitação', async () => {
-    listPendingRollRequests.mockResolvedValue([request()])
+    pendingThenCompleted(request())
     performDiceRoll.mockRejectedValue(new Error('Falha preservada'))
     const onError = vi.fn()
     render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra]} onResult={vi.fn()} onError={onError} />)
@@ -101,7 +106,7 @@ describe('DiceRollWidget', () => {
   })
 
   it('respeita movimento reduzido', async () => {
-    listPendingRollRequests.mockResolvedValue([request()])
+    pendingThenCompleted(request())
     performDiceRoll.mockResolvedValue({ character_name: 'Aldra', count: 1, dice: 'd20', modifier: 3, results: [17], total: 20, outcome: 'success' })
     render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra]} onResult={vi.fn()} onError={vi.fn()} />)
     expect((await screen.findByText('Monte o conjunto e faça sua rolagem.')).closest('.dice-tray')).toHaveAttribute('data-reduced-motion', 'true')
@@ -114,5 +119,68 @@ describe('DiceRollWidget', () => {
     render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra, aelira]} onResult={vi.fn()} onError={vi.fn()} />)
     expect(await screen.findByText('Aguardando a rolagem de Aelira.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Rolar teste' })).not.toBeInTheDocument()
+  })
+
+  it('inicia loading, bloqueia clique duplo e limpa loading e aria-busy no resultado oficial', async () => {
+    pendingThenCompleted(request())
+    let resolveRoll!: (value: unknown) => void
+    performDiceRoll.mockReturnValue(new Promise(resolve => { resolveRoll = resolve }))
+    render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra]} onResult={vi.fn()} onError={vi.fn()} />)
+    const button = await screen.findByRole('button', { name: 'Rolar teste' })
+    fireEvent.click(button); fireEvent.click(button)
+    expect(performDiceRoll).toHaveBeenCalledTimes(1)
+    expect(button).toBeDisabled()
+    expect(button).toHaveAttribute('aria-busy', 'true')
+    resolveRoll({ character_name: 'Aldra', count: 1, dice: 'd20', modifier: 3, results: [17], total: 20, outcome: 'success' })
+    expect(await screen.findByText('Resultado registrado')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Rolando/ })).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Resultado registrado').querySelector('[aria-busy="true"]')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Resultado registrado')).not.toHaveClass('is-rolling')
+  })
+
+  it('remove o card após 1,25 s e não deixa completed reaparecer por Realtime ou remontagem', async () => {
+    pendingThenCompleted(request())
+    performDiceRoll.mockResolvedValue({ character_name: 'Aldra', count: 1, dice: 'd20', modifier: 3, results: [17], total: 20, outcome: 'success' })
+    const view = render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra]} onResult={vi.fn()} onError={vi.fn()} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Rolar teste' }))
+    expect(await screen.findByText('Resultado registrado')).toBeInTheDocument()
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 1300)) })
+    expect(screen.queryByLabelText('Resultado registrado')).not.toBeInTheDocument()
+    listPendingRollRequests.mockResolvedValue([request({ status: 'completed', completed_at: '2026-07-17T12:00:00Z', resulting_roll_id: 'roll-1' })])
+    act(() => { realtimeChange?.() })
+    await act(async () => { await Promise.resolve() })
+    expect(screen.queryByLabelText('Teste pendente')).not.toBeInTheDocument()
+    view.unmount()
+    render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra]} onResult={vi.fn()} onError={vi.fn()} />)
+    await waitFor(() => expect(listPendingRollRequests).toHaveBeenCalled())
+    expect(screen.queryByLabelText('Teste pendente')).not.toBeInTheDocument()
+  })
+
+  it('mostra a próxima solicitação com bandeja limpa depois da confirmação', async () => {
+    const next = request({ id: 'req-2', reason: 'Segundo pedido', modifier: 0 })
+    listPendingRollRequests.mockResolvedValueOnce([request()]).mockResolvedValue([next])
+    performDiceRoll.mockResolvedValue({ character_name: 'Aldra', count: 1, dice: 'd20', modifier: 3, results: [17], total: 20, outcome: 'success' })
+    render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra]} onResult={vi.fn()} onError={vi.fn()} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Rolar teste' }))
+    await screen.findByText('Resultado registrado')
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 1300)) })
+    expect(screen.getByLabelText('Teste pendente')).toHaveTextContent('Segundo pedido')
+    expect(screen.getByLabelText('Teste pendente')).toHaveTextContent('Monte o conjunto e faça sua rolagem.')
+    expect(screen.queryByText('Total 20')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Rolar teste' })).toBeEnabled()
+  })
+
+  it('conclui dice_pool, preserva o resultado para histórico/snapshot via callback e remove o card', async () => {
+    const pool = request({ request_kind: 'dice_pool', dice_spec: [{ sides:6, quantity:2 }, { sides:8, quantity:1 }], modifier: 2 })
+    pendingThenCompleted(pool)
+    const official = { character_name: 'Aldra', request_kind: 'dice_pool', count: 3, dice: 'd20', dice_results: [{ sides:6, results:[3,5] }, { sides:8, results:[7] }], modifier: 2, results: [3,5,7], total: 17, outcome: null }
+    performDiceRoll.mockResolvedValue(official)
+    const onResult = vi.fn()
+    render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra]} onResult={onResult} onError={vi.fn()} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Rolar 3 dados' }))
+    expect((await screen.findAllByText('Total 17')).length).toBeGreaterThan(0)
+    expect(onResult).toHaveBeenCalledWith(official)
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 1300)) })
+    expect(screen.queryByLabelText('Resultado registrado')).not.toBeInTheDocument()
   })
 })
