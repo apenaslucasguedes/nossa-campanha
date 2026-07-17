@@ -2540,8 +2540,11 @@ body,
 }
 
 /* Mesa: os cards respondem à largura real da área de jogadores. */
-.table-players {
+.table-panel--players {
   container-type: inline-size;
+}
+
+.table-players {
   grid-template-columns: minmax(600px, 1fr) minmax(260px, 340px);
 }
 

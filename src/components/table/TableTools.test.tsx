@@ -82,7 +82,7 @@ const cardProps={character,currentRegion:'vale-auren',refreshing:false,onRefresh
 
 describe('experiência individual dos personagens',()=>{
   it('mantém a grade responsiva vinculada à largura da área de jogadores',()=>{
-    expect(responsiveCss).toContain('.table-players {\n  container-type: inline-size;')
+    expect(responsiveCss).toContain('.table-panel--players {\n  container-type: inline-size;')
     expect(responsiveCss).toContain('@container (max-width: 919px)')
     expect(responsiveCss).toContain('@container (max-width: 619px)')
   })
