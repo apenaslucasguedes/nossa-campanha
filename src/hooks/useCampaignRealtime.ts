@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 export type RealtimeStatus = 'connecting' | 'connected' | 'reconnecting'
 
 const TABLES_WITH_CAMPAIGN_FILTER = [
-  'campaigns', 'campaign_locations', 'combat_sessions', 'game_actions',
+  'campaign_locations', 'combat_sessions', 'game_actions',
   'campaign_events', 'roll_requests', 'dice_rolls', 'campaign_sessions',
 ] as const
 
@@ -29,6 +29,7 @@ export function useCampaignRealtime(campaignId: string | undefined, onChange: ()
     // mounted together, so each hook instance needs its own topic before adding
     // postgres_changes callbacks.
     const channel = supabase.channel(`campaign-live:${campaignId}:${instanceRef.current}`)
+    channel.on('postgres_changes', { event: '*', schema: 'public', table: 'campaigns', filter: `id=eq.${campaignId}` }, () => onChangeRef.current())
     for (const table of TABLES_WITH_CAMPAIGN_FILTER) {
       channel.on('postgres_changes', { event: '*', schema: 'public', table, filter: `campaign_id=eq.${campaignId}` }, () => onChangeRef.current())
     }

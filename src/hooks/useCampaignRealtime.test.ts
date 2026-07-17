@@ -3,8 +3,9 @@ import { renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 const handlers:Record<string,()=>void>={}
+const subscriptions:Array<{table:string;filter?:string}>=[]
 let channelObject:unknown
-const on = vi.fn(function(_event:string,config:{table:string},callback:()=>void){handlers[config.table]=callback;return channelObject})
+const on = vi.fn(function(_event:string,config:{table:string;filter?:string},callback:()=>void){handlers[config.table]=callback;subscriptions.push(config);return channelObject})
 const subscribe = vi.fn().mockReturnThis()
 const channel = vi.fn((topic: string) => { void topic; channelObject={on,subscribe};return channelObject })
 const removeChannel = vi.fn(() => undefined)
@@ -32,6 +33,13 @@ describe('useCampaignRealtime', () => {
     const topics = channel.mock.calls.slice(-2).map(([topic]) => topic)
     expect(topics[0]).not.toBe(topics[1])
     first.unmount(); second.unmount()
+  })
+
+  it('usa a coluna id no filtro de campaigns sem invalidar o canal', () => {
+    const view=renderHook(()=>useCampaignRealtime('camp-filter',()=>{}))
+    expect([...subscriptions].reverse().find(item=>item.table==='campaigns')).toMatchObject({filter:'id=eq.camp-filter'})
+    expect([...subscriptions].reverse().find(item=>item.table==='campaign_locations')).toMatchObject({filter:'campaign_id=eq.camp-filter'})
+    view.unmount()
   })
 
   it.each(['character_states','character_conditions'])('refaz a consulta ao receber evento de %s', (table) => {
