@@ -87,6 +87,16 @@ describe('OpenAPI das GPT Actions (fase 1)', () => {
     expect(source).not.toMatch(/EmptyRequest/)
   })
 
+  it('publica atributo e especialidade como opcionais no teste simples', () => {
+    const doc = yaml.load(source) as {
+      components: { schemas: { RequestDiceRollRequest: { required: string[]; properties: Record<string, unknown> } } }
+    }
+    const request = doc.components.schemas.RequestDiceRollRequest
+    expect(request.required).toEqual(['character_id'])
+    expect(request.properties).toHaveProperty('attribute')
+    expect(request.properties).toHaveProperty('specialty')
+  })
+
   it('marca as três operações como não consequenciais', () => {
     const doc = yaml.load(source) as {
       paths: Record<string, { post: Record<string, unknown> }>

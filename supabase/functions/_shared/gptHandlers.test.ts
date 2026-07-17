@@ -100,6 +100,28 @@ describe('resolveDiceRollRequest', () => {
     if (!result.ok) expect(result.error.code).toBe('FORBIDDEN')
   })
 
+  it('aceita teste simples sem atributo nem especialidade e envia a assinatura correta da RPC', async () => {
+    const simpleBody = { character_id, difficulty: 10, reason: 'Perceber se há algo estranho no ambiente' }
+    const rollRequest = { id: 'rr-simple', requested_character_id: character_id, modifier: 0, status: 'pending' }
+    const rpc: RpcCaller = vi.fn().mockResolvedValue({ data: rollRequest, error: null })
+    const result = await resolveDiceRollRequest(requestWithKey('rlk_valida'), simpleBody, rpc)
+    expect(result.ok).toBe(true)
+    expect(rpc).toHaveBeenCalledTimes(1)
+    const [fnName, args] = (rpc as ReturnType<typeof vi.fn>).mock.calls[0]
+    expect(fnName).toBe('request_dice_roll_for_gpt')
+    expect(Object.keys(args).sort()).toEqual(['lookup_key_hash', 'payload'])
+    expect(args.payload).toEqual(simpleBody)
+    expect(args.lookup_key_hash).toMatch(/^[0-9a-f]{64}$/)
+    expect(rpc).not.toHaveBeenCalledWith('perform_dice_roll', expect.anything())
+  })
+
+  it.each(['PGRST202', 'PGRST203'])('não mascara erro de assinatura %s como autorização', async rpcCode => {
+    const rpc: RpcCaller = vi.fn().mockResolvedValue({ data: null, error: { message: 'RPC signature mismatch', code: rpcCode } })
+    const result = await resolveDiceRollRequest(requestWithKey('rlk_valida'), validBody, rpc)
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(['UNAUTHENTICATED', 'FORBIDDEN']).not.toContain(result.error.code)
+  })
+
   it('registra a solicitação de rolagem com chave válida e nunca chama perform_dice_roll', async () => {
     const rollRequest = { id: 'rr1', campaign_id, session_id: 's1', requested_character_id: character_id, status: 'pending' }
     const rpc: RpcCaller = vi.fn().mockResolvedValue({ data: rollRequest, error: null })

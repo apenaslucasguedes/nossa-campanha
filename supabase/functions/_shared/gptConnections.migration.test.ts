@@ -1,8 +1,12 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const migration = readFileSync(resolve(process.cwd(), 'supabase/migrations/202607160003_gpt_campaign_connections.sql'), 'utf8')
+const allMigrations = readdirSync(resolve(process.cwd(), 'supabase/migrations'))
+  .filter(file => file.endsWith('.sql'))
+  .map(file => readFileSync(resolve(process.cwd(), 'supabase/migrations', file), 'utf8'))
+  .join('\n')
 
 describe('migração gpt_campaign_connections (fase 1 do GPT Mestre)', () => {
   it('armazena somente o hash da chave, nunca a chave bruta como coluna', () => {
@@ -49,6 +53,12 @@ describe('migração gpt_campaign_connections (fase 1 do GPT Mestre)', () => {
     expect(migration).toContain('grant execute on function public.create_gpt_campaign_connection(uuid, text, text[]) to authenticated')
     expect(migration).toContain('grant execute on function public.revoke_gpt_campaign_connection(uuid) to authenticated')
     expect(migration).not.toContain('grant execute on function public.create_gpt_campaign_connection(uuid, text, text[]) to anon')
+  })
+
+  it('mantém uma única assinatura não ambígua de request_dice_roll_for_gpt', () => {
+    const signatures = [...allMigrations.matchAll(/create(?: or replace)? function public\.request_dice_roll_for_gpt\(([^)]*)\)/gi)]
+      .map(match => match[1].replace(/\s+/g, ' ').trim())
+    expect(new Set(signatures)).toEqual(new Set(['lookup_key_hash text, payload jsonb']))
   })
 
   it('bloqueia consulta arbitrária: as funções internas não têm grant para nenhum papel de cliente', () => {

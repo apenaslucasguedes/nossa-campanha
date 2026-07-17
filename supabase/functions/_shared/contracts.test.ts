@@ -65,6 +65,8 @@ describe('chave de conexão do GPT Mestre (fase 1)',()=>{
     expect(gptDatabaseErrorCode('INVALID_TARGET','P0002')).toBe('INVALID_TARGET')
     expect(gptDatabaseErrorCode('INVALID_REQUEST','22023')).toBe('INVALID_ACTION')
     expect(gptDatabaseErrorCode('function does not exist','42883')).toBe('MIGRATION_REQUIRED')
+    expect(gptDatabaseErrorCode('RPC signature mismatch','PGRST202')).toBe('CONFLICT')
+    expect(gptDatabaseErrorCode('RPC overload ambiguity','PGRST203')).toBe('CONFLICT')
   })
 
   it('constrói um ApiError com status HTTP coerente a partir do erro da RPC',()=>{
