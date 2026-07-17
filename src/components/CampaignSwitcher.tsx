@@ -14,13 +14,7 @@ export function CampaignSwitcher() {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!userId) return
-    const refresh = () => void listMyCampaigns(userId).then(setCampaigns)
-    refresh()
-    window.addEventListener('relicario:campaigns-changed', refresh)
-    return () => window.removeEventListener('relicario:campaigns-changed', refresh)
-  }, [userId, campaignId])
+  useEffect(() => { if (userId) void listMyCampaigns(userId).then(setCampaigns) }, [userId, campaignId])
   useEffect(() => {
     function close(event: MouseEvent) { if (!rootRef.current?.contains(event.target as Node)) setOpen(false) }
     function escape(event: KeyboardEvent) { if (event.key === 'Escape') setOpen(false) }
@@ -43,7 +37,7 @@ export function CampaignSwitcher() {
     <div className="campaign-switcher" ref={rootRef}>
       <Icon name="campanhas" size={18} decorative />
       <button type="button" className="campaign-switcher__trigger" title={current.campaign.name} aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen((value) => !value)}><span>{current.campaign.name}</span><span aria-hidden="true">⌄</span></button>
-      {open ? <div className="campaign-switcher__popover" role="listbox" aria-label="Trocar de campanha">{campaigns.map((item) => <button key={item.campaign.id} type="button" role="option" aria-selected={item.campaign.id === campaignId} title={item.campaign.name} onClick={() => change(item.campaign.id)}><span>{item.campaign.name}</span>{item.campaign.status === 'arquivada' ? <small>Arquivada</small> : null}</button>)}</div> : null}
+      {open ? <div className="campaign-switcher__popover" role="listbox" aria-label="Trocar de campanha">{campaigns.map((item) => <button key={item.campaign.id} type="button" role="option" aria-selected={item.campaign.id === campaignId} title={item.campaign.name} onClick={() => change(item.campaign.id)}>{item.campaign.name}</button>)}</div> : null}
     </div>
   )
 }

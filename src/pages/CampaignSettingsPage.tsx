@@ -5,8 +5,6 @@ import { GptConnectionsPanel } from '../components/GptConnectionsPanel'
 import { Icon } from '../components/Icon'
 import { EmptyState, ErrorBanner, LoadingState } from '../components/States'
 import { copyCampaignMarkdown, downloadCampaignMarkdown } from '../data/campaignContext'
-import { prepareCleanCampaignCopy } from '../data/campaignPreparation'
-import { rememberLastCampaign } from '../data/lastCampaign'
 import { regions } from '../game-data/regions'
 import { useCampaignParam } from '../hooks/useCampaignParam'
 
@@ -16,9 +14,6 @@ export function CampaignSettingsPage() {
   const navigate = useNavigate()
   const { data, loading, error } = useCampaignParam(campaignId, session?.user.id)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
-  const [prepareOpen, setPrepareOpen] = useState(false)
-  const [preparing, setPreparing] = useState(false)
-  const [prepareError, setPrepareError] = useState<string | null>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
 
   const closeTo = campaignId ? `/campanhas/${campaignId}` : '/campanhas'
@@ -68,20 +63,6 @@ export function CampaignSettingsPage() {
     try { await copyCampaignMarkdown(data!); setCopyState('copied') } catch { setCopyState('error') }
   }
 
-  async function prepareCampaign() {
-    if (!campaignId || !session?.user.id || preparing) return
-    setPreparing(true); setPrepareError(null)
-    try {
-      const result = await prepareCleanCampaignCopy(campaignId, data!.campaign.name, crypto.randomUUID())
-      rememberLastCampaign(session.user.id, result.new_campaign_id)
-      window.dispatchEvent(new Event('relicario:campaigns-changed'))
-      navigate(`/campanhas/${result.new_campaign_id}`, { state: {
-        notice: 'Campanha limpa criada. A versão anterior foi preservada como Testes.',
-        warning: 'Crie uma nova conexão com o GPT Mestre para esta campanha.',
-      } })
-    } catch (cause) { setPrepareError(cause instanceof Error ? cause.message : 'Não foi possível preparar a campanha.'); setPreparing(false) }
-  }
-
   return (
     <div className="settings-overlay">
       <div ref={drawerRef} className="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settings-drawer-title">
@@ -119,27 +100,6 @@ export function CampaignSettingsPage() {
         {canEdit ? <GptConnectionsPanel campaignId={data.campaign.id} /> : (
           <p className="permission-note">A conexão do GPT Mestre e os endereços técnicos ficam disponíveis para o administrador da mesa.</p>
         )}
-
-        {canEdit ? <section className="settings-section settings-section--quiet" aria-labelledby="prepare-campaign-title">
-          <h2 id="prepare-campaign-title" className="settings-section__title">Preparação da campanha</h2>
-          <p className="form-note">Preserve esta campanha de testes e comece uma versão limpa para a partida real.</p>
-          <button className="card-action card-action--quiet" type="button" onClick={() => setPrepareOpen(true)}>Preparar campanha para jogar</button>
-        </section> : null}
-
-        {prepareOpen ? <div className="campaign-prepare-backdrop" role="presentation">
-          <section className="campaign-prepare-dialog" role="alertdialog" aria-modal="true" aria-labelledby="campaign-prepare-title" aria-describedby="campaign-prepare-description">
-            <header><div><span>Confirmação administrativa</span><h2 id="campaign-prepare-title">Preparar campanha para jogar</h2></div><button type="button" onClick={() => setPrepareOpen(false)} disabled={preparing} aria-label="Fechar confirmação">×</button></header>
-            <div className="campaign-prepare-dialog__body" id="campaign-prepare-description">
-              <p>A campanha atual será preservada como campanha de testes. Uma nova campanha limpa será criada com os mesmos personagens e contexto inicial.</p>
-              <h3>Será preservado na campanha de testes</h3><p>Sessões, histórico, rolagens, resultados, condições, combates, eventos, personagens e estados atuais.</p>
-              <h3>Será copiado para a campanha nova</h3><p>Nome base, premissa, região atual, objetivos ativos, anotações importantes, membros e papéis, além da identidade, classe, nível, avatar, biografia, vínculos, atributos e especialidades dos personagens.</p>
-              <h3>Será reiniciado na campanha nova</h3><p>Sessão 1; Vitalidade e recurso no máximo; nenhuma condição, combate, rolagem, histórico, evento, resumo anterior ou local revelado.</p>
-              <h3>Não será copiado</h3><p>Chaves GPT, conexões GPT, request_id antigos, logs técnicos, eventos, sessões, inimigos ou participantes de combate.</p>
-              {prepareError ? <p className="form-error">{prepareError}</p> : null}
-            </div>
-            <footer><button className="card-action card-action--quiet" type="button" onClick={() => setPrepareOpen(false)} disabled={preparing}>Cancelar</button><button className="card-action" type="button" onClick={() => void prepareCampaign()} disabled={preparing}>{preparing ? 'Preparando…' : 'Criar campanha limpa'}</button></footer>
-          </section>
-        </div> : null}
       </div>
     </div>
   )

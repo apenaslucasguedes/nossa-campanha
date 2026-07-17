@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { CampaignCard, PlayerSeat } from '../components/CampaignCard'
 import { Icon } from '../components/Icon'
@@ -45,8 +45,6 @@ function fieldError(form: CampaignContextInput) {
 }
 
 export function CampaignPage() {
-  const location = useLocation()
-  const navigationNotice = location.state as { notice?: string; warning?: string } | null
   const { session } = useAuth()
   const { campaignId } = useParams()
   const { data, loading, error, refresh } = useCampaignParam(campaignId, session?.user.id)
@@ -107,8 +105,6 @@ export function CampaignPage() {
     <div className="campaign-page">
       <PageHeader eyebrow="Painel de contexto" title={data.campaign.name}>Registro vivo da campanha, protagonistas, regiao atual e continuidade da mesa.</PageHeader>
       {error ? <ErrorBanner>{error}</ErrorBanner> : null}
-      {navigationNotice?.notice ? <div className="action-toast" role="status">{navigationNotice.notice}</div> : null}
-      {navigationNotice?.warning ? <div className="permission-note" role="note">{navigationNotice.warning}</div> : null}
       {message ? <div className="action-toast" role="status">{message}</div> : null}
 
       <section className="campaign-context-grid" aria-label="Contexto da campanha">

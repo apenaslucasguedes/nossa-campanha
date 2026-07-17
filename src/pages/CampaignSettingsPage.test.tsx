@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -9,11 +9,8 @@ import { CampaignSettingsPage } from './CampaignSettingsPage'
 vi.mock('../auth/AuthContext', () => ({ useAuth: () => ({ session: { user: { id: 'u1' } } }) }))
 vi.mock('../hooks/useCampaignParam', () => ({ useCampaignParam: vi.fn() }))
 vi.mock('../components/GptConnectionsPanel', () => ({ GptConnectionsPanel: ({ campaignId }: { campaignId: string }) => <div data-testid="gpt-connections-panel">{campaignId}</div> }))
-vi.mock('../data/campaignPreparation', () => ({ prepareCleanCampaignCopy: vi.fn() }))
-vi.mock('../data/lastCampaign', () => ({ rememberLastCampaign: vi.fn() }))
 
 const useCampaignParam = (await import('../hooks/useCampaignParam')).useCampaignParam as unknown as ReturnType<typeof vi.fn>
-const prepareCleanCampaignCopy = (await import('../data/campaignPreparation')).prepareCleanCampaignCopy as unknown as ReturnType<typeof vi.fn>
 
 function dashboard(role: CampaignDashboard['currentRole']): CampaignDashboard {
   return {
@@ -41,25 +38,6 @@ describe('CampaignSettingsPage', () => {
   it('esconde a conexão técnica do GPT para jogador comum', () => {
     renderPage('player')
     expect(screen.queryByTestId('gpt-connections-panel')).not.toBeInTheDocument()
-  })
-
-  it('explica a cópia limpa antes de executar e não mostra a ação a jogador comum', () => {
-    renderPage('table_admin')
-    fireEvent.click(screen.getByRole('button', { name: 'Preparar campanha para jogar' }))
-    expect(screen.getByRole('alertdialog')).toHaveTextContent('A campanha atual será preservada como campanha de testes')
-    expect(screen.getByRole('alertdialog')).toHaveTextContent('Chaves GPT')
-    expect(prepareCleanCampaignCopy).not.toHaveBeenCalled()
-    cleanup()
-    renderPage('player')
-    expect(screen.queryByRole('button', { name: 'Preparar campanha para jogar' })).not.toBeInTheDocument()
-  })
-
-  it('atualiza o seletor e navega para a nova campanha depois do sucesso', async () => {
-    prepareCleanCampaignCopy.mockResolvedValue({ archived_campaign_id: 'camp-1', new_campaign_id: 'camp-2', character_map: {} })
-    renderPage('table_admin')
-    fireEvent.click(screen.getByRole('button', { name: 'Preparar campanha para jogar' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Criar campanha limpa' }))
-    await waitFor(() => expect(prepareCleanCampaignCopy).toHaveBeenCalledWith('camp-1', 'Relicario', expect.any(String)))
   })
 
   it('fecha o drawer por Escape sem cair no ErrorBoundary', () => {
