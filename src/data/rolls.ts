@@ -42,7 +42,9 @@ export async function performDiceRoll(input: PerformRollInput): Promise<PerformR
     if (error.message.includes('NO_CHARACTER_SEATED')) throw new Error('Você não possui um personagem nesta campanha.')
     if (error.message.includes('SESSION_INACTIVE')) throw new Error('Nenhuma sessão ativa nesta campanha.')
     if (error.message.includes('INVALID_DICE')) throw new Error('Combinação de dados inválida.')
-    throw new Error('Não foi possível registrar a rolagem.')
+    const genericMessage = 'Não foi possível registrar a rolagem.'
+    const technicalDetails = [error.code, error.message, error.details].filter(Boolean).join(' — ')
+    throw new Error(import.meta.env.DEV && technicalDetails ? `${genericMessage} ${technicalDetails}` : genericMessage)
   }
   return data as unknown as PerformRollResult
 }

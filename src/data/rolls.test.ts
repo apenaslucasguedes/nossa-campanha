@@ -24,6 +24,12 @@ describe('performDiceRoll', () => {
     rpc.mockResolvedValueOnce({ data: result, error: null })
     await expect(performDiceRoll({ campaign_id: 'c1', dice: 'd20' })).resolves.toEqual(result)
   })
+
+  it('preserva o erro técnico da RPC durante desenvolvimento', async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: { message: 'column reference "value" is ambiguous', code: '42702', details: 'PL/pgSQL variable or table column' } })
+    await expect(performDiceRoll({ campaign_id: 'c1', dice: 'd20', modifier: 0, roll_request_id: 'req-1' }))
+      .rejects.toThrow('42702')
+  })
 })
 
 describe('requestRoll', () => {

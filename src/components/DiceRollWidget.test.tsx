@@ -39,6 +39,19 @@ beforeEach(() => { vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches
 afterEach(() => { cleanup(); vi.clearAllMocks(); vi.unstubAllGlobals() })
 
 describe('DiceRollWidget', () => {
+  it('executa teste simples pendente com ambos os campos nulos e modificador zero', async () => {
+    listPendingRollRequests.mockResolvedValue([request({ attribute: null, specialty: null, modifier: 0, difficulty: 10, reason: 'Perceber se há algo estranho no ambiente' })])
+    performDiceRoll.mockResolvedValue({ character_name: 'Aldra', request_kind: 'character_test', count: 1, dice: 'd20', modifier: 0, results: [12], total: 12, outcome: 'success' })
+    render(<DiceRollWidget campaignId="camp-1" ownCharacter={aldra} characters={[aldra]} onResult={vi.fn()} onError={vi.fn()} />)
+    const pending = await screen.findByLabelText('Teste pendente')
+    expect(pending).toHaveTextContent('Teste simples')
+    expect(pending).toHaveTextContent('Dificuldade10')
+    expect(pending).toHaveTextContent('Modificador+0')
+    fireEvent.click(screen.getByRole('button', { name: 'Rolar teste' }))
+    await waitFor(() => expect(performDiceRoll).toHaveBeenCalledWith(expect.objectContaining({ roll_request_id: 'req-1', dice: 'd20', count: 1, modifier: 0 })))
+    expect(await screen.findByText('Sucesso · Total 12')).toBeInTheDocument()
+  })
+
   it('exibe a solicitação completa, preserva roll_request_id e mostra o resultado oficial', async () => {
     listPendingRollRequests.mockResolvedValue([request()])
     performDiceRoll.mockResolvedValue({ character_name: 'Aldra', count: 1, dice: 'd20', modifier: 3, results: [17], total: 20, outcome: 'success' })
